@@ -1,0 +1,84 @@
+{
+	"common": {
+		"name": "lwd50a",
+		"version": "0.0.1",
+		"news": {
+			"0.0.1": {
+				"en": "initial release",
+				"de": "Erstveröffentlichung",
+				"ru": "Начальная версия",
+				"pt": "lançamento inicial",
+				"nl": "Eerste uitgave",
+				"fr": "Première version",
+				"it": "Versione iniziale",
+				"es": "Versión inicial",
+				"pl": "Pierwsze wydanie",
+				"uk": "Початкова версія",
+				"zh-cn": "首次出版"
+			}
+		},
+		"titleLang": {
+			"en": "LWD50A",
+			"de": "LWD50A",
+			"ru": "LWD50A",
+			"pt": "LWD50A",
+			"nl": "LWD50A",
+			"fr": "LWD50A",
+			"it": "LWD50A",
+			"es": "LWD50A",
+			"pl": "LWD50A",
+			"uk": "LWD50A",
+			"zh-cn": "LWD50A"
+		},
+		"desc": {
+			"en": "Zugriff und Steuerung einer LWD50A Heizung von Alpha Innotec",
+			"de": "Zugriff und Steuerung einer LWD50A Heizung von Alpha Innotec",
+			"ru": "Zugriff und Steuerung einer LWD50A Heizung от Alpha Innotec",
+			"pt": "Zugriff e Steuerung einer LWD50A Heizung von Alpha Innotec",
+			"nl": "Zugriff en besturing van een LWD50A Heizung van Alpha Innotec",
+			"fr": "Prise et commande d'un LWD50A Heizung d'Alpha Innotec",
+			"it": "Zugriff und Steuerung einer LWD50A Heizung von Alpha Innotec",
+			"es": "Grifo y soporte de un LWD50A Heizung de Alpha Innotec",
+			"pl": "Zugriff i Steuerung einer LWD50A Heizung von Alpha Innotec",
+			"uk": "Zugriff und Steuerung einer LWD50A Heizung von Alpha Innotec",
+			"zh-cn": "LWD50A 的 Zugriff und Steuerung einer LWD50A Heizung von Alpha Innotec"
+		},
+		"authors": ["Tbs <Tbs.Jah@gmail.com>"],
+		"keywords": ["LWD50A", "Alpha Innotec", "Heizung", "Steuerung"],
+		"licenseInformation": {
+			"type": "free",
+			"license": "MIT"
+		},
+		"platform": "Javascript/Node.js",
+		"icon": "lwd50a.png",
+		"enabled": true,
+		"extIcon": "https://raw.githubusercontent.com/Tbs/ioBroker.lwd50a/main/admin/lwd50a.png",
+		"readme": "https://github.com/Tbs/ioBroker.lwd50a/blob/main/README.md",
+		"loglevel": "info",
+		"tier": 3,
+		"mode": "daemon",
+		"type": "climate-control",
+		"compact": true,
+		"connectionType": "cloud",
+		"dataSource": "poll",
+		"adminUI": {
+			"config": "json"
+		},
+		"dependencies": [
+			{
+				"js-controller": ">=6.0.11"
+			}
+		],
+		"globalDependencies": [
+			{
+				"admin": ">=7.0.23"
+			}
+		]
+	},
+	"native": {
+		"option1": true,
+		"option2": "42"
+	},
+	"objects": [],
+	"instanceObjects": []
+}
