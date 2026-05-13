@@ -17,7 +17,7 @@
 				"zh-cn": "首次出版"
 			}
 		},
-		"main": "build/main.js",
+		"main": "src/main.js",
 		"titleLang": {
 			"en": "LWD50A",
 			"de": "LWD50A",
