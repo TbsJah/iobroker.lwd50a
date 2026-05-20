@@ -52,6 +52,9 @@ class Lwd50a extends utils.Adapter {
   /**
    * Holt die Daten von der Wärmepumpe und schreibt sie in ioBroker
    */
+  /**
+   * Holt die Daten von der Wärmepumpe und schreibt sie in ioBroker
+   */
   updateData() {
     if (!this.pump) {
       this.log.error("Abfrage abgebrochen: Keine aktive Verbindung zur W\xE4rmepumpe vorhanden.");
@@ -64,12 +67,15 @@ class Lwd50a extends utils.Adapter {
       }
       this.log.debug("Daten von der W\xE4rmepumpe erfolgreich empfangen.");
       try {
-        for (const [key, value] of Object.entries(data.values)) {
+        const allIncomingData = {
+          ...data.values,
+          ...data.parameters
+        };
+        for (const [key, value] of Object.entries(allIncomingData)) {
           const definition = import_stateMapping.STATE_MAPPING[key];
           if (definition) {
             const folderId = definition.folder;
             const stateId = `${folderId}.${key}`;
-            this.log.error(folderId);
             await this.setObjectNotExists(folderId, {
               type: "channel",
               common: {
@@ -87,7 +93,8 @@ class Lwd50a extends utils.Adapter {
                 read: true,
                 write: definition.write || false,
                 min: definition.min,
-                max: definition.max
+                max: definition.max,
+                states: definition.states
               },
               native: {}
             });

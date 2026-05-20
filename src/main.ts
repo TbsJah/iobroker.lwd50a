@@ -104,6 +104,9 @@ class Lwd50a extends utils.Adapter {
 	/**
 	 * Holt die Daten von der Wärmepumpe und schreibt sie in ioBroker
 	 */
+	/**
+	 * Holt die Daten von der Wärmepumpe und schreibt sie in ioBroker
+	 */
 	private updateData(): void {
 		if (!this.pump) {
 			this.log.error("Abfrage abgebrochen: Keine aktive Verbindung zur Wärmepumpe vorhanden.");
@@ -119,13 +122,19 @@ class Lwd50a extends utils.Adapter {
 			this.log.debug("Daten von der Wärmepumpe erfolgreich empfangen.");
 
 			try {
-				for (const [key, value] of Object.entries(data.values)) {
+				// Wir kombinieren values und parameters in ein einziges Objekt,
+				// damit wir beide Bereiche in einer einzigen Schleife durchlaufen können.
+				const allIncomingData = {
+					...data.values,
+					...data.parameters,
+				};
+
+				for (const [key, value] of Object.entries(allIncomingData)) {
 					const definition = STATE_MAPPING[key];
 
 					if (definition) {
 						const folderId = definition.folder;
 						const stateId = `${folderId}.${key}`;
-						this.log.error(folderId);
 
 						// 1. Zuerst den Ordner (Channel) anlegen
 						await this.setObjectNotExists(folderId, {
@@ -148,6 +157,7 @@ class Lwd50a extends utils.Adapter {
 								write: definition.write || false,
 								min: definition.min,
 								max: definition.max,
+								states: definition.states,
 							},
 							native: {},
 						});
