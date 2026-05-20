@@ -30,8 +30,8 @@ class Lwd50a extends utils.Adapter {
 
 		// The adapters config (in the instance object everything under the attribute "native") is accessible via
 		// this.config:
-		this.log.debug("config option1: ${this.config.option1}");
-		this.log.debug("config option2: ${this.config.option2}");
+		// this.log.debug("config option1: ${this.config.option1}");
+		// this.log.debug("config option2: ${this.config.option2}");
 
 		/*
 		For every state in the system there has to be also an object of type state
@@ -42,20 +42,20 @@ class Lwd50a extends utils.Adapter {
 		           Please refer to the state roles documentation for guidance:
 		           https://www.iobroker.net/#en/documentation/dev/stateroles.md
 		*/
-		await this.setObjectNotExistsAsync("testVariable", {
-			type: "state",
-			common: {
-				name: "testVariable",
-				type: "boolean",
-				role: "indicator",
-				read: true,
-				write: true,
-			},
-			native: {},
-		});
+		// await this.setObjectNotExistsAsync("testVariable", {
+		// 	type: "state",
+		// 	common: {
+		// 		name: "testVariable",
+		// 		type: "boolean",
+		// 		role: "indicator",
+		// 		read: true,
+		// 		write: true,
+		// 	},
+		// 	native: {},
+		// });
 
 		// In order to get state updates, you need to subscribe to them. The following line adds a subscription for our variable we have created above.
-		this.subscribeStates("testVariable");
+		// this.subscribeStates("testVariable");
 		// You can also add a subscription for multiple states. The following line watches all states starting with "lights."
 		// this.subscribeStates("lights.*");
 		// Or, if you really must, you can also watch all states. Don't do this if you don't need to. Otherwise this will cause a lot of unnecessary load on the system:
@@ -66,21 +66,21 @@ class Lwd50a extends utils.Adapter {
 			you will notice that each setState will cause the stateChange event to fire (because of above subscribeStates cmd)
 		*/
 		// the variable testVariable is set to true as command (ack=false)
-		await this.setState("testVariable", true);
+		// await this.setState("testVariable", true);
 
 		// same thing, but the value is flagged "ack"
 		// ack should be always set to true if the value is received from or acknowledged from the target system
-		await this.setState("testVariable", { val: true, ack: true });
+		// await this.setState("testVariable", { val: true, ack: true });
 
 		// same thing, but the state is deleted after 30s (getState will return null afterwards)
 		//await this.setState("testVariable", { val: true, ack: true, expire: 30 });
 
 		// examples for the checkPassword/checkGroup functions
-		const pwdResult = await this.checkPasswordAsync("admin", "iobroker");
-		this.log.info(`check user admin pw iobroker: ${JSON.stringify(pwdResult)}`);
+		// const pwdResult = await this.checkPasswordAsync("admin", "iobroker");
+		// this.log.info(`check user admin pw iobroker: ${JSON.stringify(pwdResult)}`);
 
-		const groupResult = await this.checkGroupAsync("admin", "admin");
-		this.log.info(`check group user admin group admin: ${JSON.stringify(groupResult)}`);
+		// const groupResult = await this.checkGroupAsync("admin", "admin");
+		// this.log.info(`check group user admin group admin: ${JSON.stringify(groupResult)}`);
 
 		const ip = "192.168.178.81";
 		const port = 8889;
@@ -89,7 +89,7 @@ class Lwd50a extends utils.Adapter {
 		const pump = new luxtronik.createConnection(ip, port);
 
 		// WICHTIG: Die Callback-Funktion muss async sein, damit wir await nutzen können
-		pump.read(async (err: Error | null, data: any) => {
+		await pump.read(async (err: Error | null, data: any) => {
 			if (err) {
 				this.log.error(`Verbindungsfehler: ${err.message}`);
 				return;
