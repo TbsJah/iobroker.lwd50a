@@ -6,18 +6,8 @@
 // you need to create an adapter
 import * as utils from "@iobroker/adapter-core";
 import * as luxtronik from "luxtronik2";
-
-// Load your modules here, e.g.:
-// import * as fs from "fs";
-interface LuxtronikData {
-	values: {
-		temperature_supply: number; // Vorlauf
-		temperature_return: number; // Rücklauf
-		temperature_outside: number; // Außentemperatur
-		// ... hier könnte man später noch mehr ergänzen
-	};
-	parameters: any;
-}
+// Importiere dein neues Mapping-Objekt
+import { STATE_MAPPING } from "./stateMapping";
 
 class Lwd50a extends utils.Adapter {
 	public constructor(options: Partial<utils.AdapterOptions> = {}) {
@@ -83,7 +73,7 @@ class Lwd50a extends utils.Adapter {
 		await this.setState("testVariable", { val: true, ack: true });
 
 		// same thing, but the state is deleted after 30s (getState will return null afterwards)
-		await this.setState("testVariable", { val: true, ack: true, expire: 30 });
+		//await this.setState("testVariable", { val: true, ack: true, expire: 30 });
 
 		// examples for the checkPassword/checkGroup functions
 		const pwdResult = await this.checkPasswordAsync("admin", "iobroker");
@@ -98,18 +88,39 @@ class Lwd50a extends utils.Adapter {
 		this.log.info(`Verbinde mit Wärmepumpe auf ${ip}:${port}...`);
 		const pump = new luxtronik.createConnection(ip, port);
 
-		// 2. DIE TYPISIERUNG BEIM AUSLESEN
-		// Wir sagen TypeScript: "err ist ein Error und data entspricht unserem Bauplan 'LuxtronikData'"
-		pump.read((err: Error | null, data: LuxtronikData) => {
+		// WICHTIG: Die Callback-Funktion muss async sein, damit wir await nutzen können
+		pump.read(async (err: Error | null, data: any) => {
 			if (err) {
 				this.log.error(`Verbindungsfehler: ${err.message}`);
 				return;
 			}
 
-			// 3. DIE MAGIE IM EDITOR
-			const vorlauf = data.values.temperature_supply;
+			for (const [key, value] of Object.entries(data.values)) {
+				// Greift auf die importierte Konstante STATE_MAPPING zu
+				const definition = STATE_MAPPING[key];
 
-			this.log.info(`Vorlauf: ${vorlauf}°C`);
+				if (definition) {
+					const stateId = `values.${key}`;
+
+					// Objekt im ioBroker anlegen (ohne "Async" am Ende)
+					await this.setObjectNotExists(stateId, {
+						type: "state",
+						common: {
+							name: definition.name,
+							type: definition.type,
+							role: definition.role,
+							unit: definition.unit,
+							read: true,
+							write: definition.write || false,
+						},
+						native: {},
+					});
+
+					// Den tatsächlichen Wert in den ioBroker schreiben (ohne "Async" am Ende)
+					// Parameter 1: Die ID | Parameter 2: Der Wert | Parameter 3: ack (true)
+					await this.setState(stateId, value as any, true);
+				}
+			}
 		});
 	}
 
