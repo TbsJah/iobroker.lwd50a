@@ -76,19 +76,16 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "°C",
 	},
-	temperature_hot_water: {
+	temperature_hot_water_target: {
 		folder: "Temperaturen",
 		name: "Warmwasser Soll-Temperatur",
 		role: "value.temperature",
 		type: "number",
 		unit: "°C",
-	},
-	temperature_hot_water_target: {
-		folder: "Temperaturen",
-		name: "Warmwassertemperatur",
-		role: "value.temperature",
-		type: "number",
-		unit: "°C",
+		write: true,
+		luxWriteId: "temperature_hot_water_target",
+		min: 40,
+		max: 65,
 	},
 	warmwater_temperature: {
 		folder: "Parameter",
