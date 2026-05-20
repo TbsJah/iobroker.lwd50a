@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "lwd50a",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "news": {
+      "0.1.2": {
+        "en": "WW Target Parameter schreiben",
+        "de": "WW-Zielparameter schreiben",
+        "ru": "Параметр цели WW Schreiben",
+        "pt": "Parâmetro alvo WW schreiben",
+        "nl": "WW doelparameter schreiben",
+        "fr": "Paramètre de cible WW schreiben",
+        "it": "WW Target Parameter schreiben",
+        "es": "WW Target Parameter schreiben",
+        "pl": "Parametr docelowy WW Schreiben",
+        "uk": "WW Цільовий параметр schreiben",
+        "zh-cn": "WW 目标参数schreiben"
+      },
       "0.1.1": {
         "en": "Erweiterung",
         "de": "Auf den Wunschzettel",
