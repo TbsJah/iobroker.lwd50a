@@ -140,8 +140,13 @@ For later updates:
 
 1. Push your changes to GitHub
 1. Repeat the installation steps above (via Admin UI or `iob url` command) to update the adapter
+   //### **WORK IN PROGRESS**
+   //- Test
 
 ## Changelog
+
+- WW Target
+
 ### 0.1.1 (2026-05-20)
 
 - Erweiterung
