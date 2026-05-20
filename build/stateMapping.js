@@ -51,7 +51,7 @@ const STATE_MAPPING = {
     unit: "\xB0C"
   },
   hot_water_target: {
-    folder: "parameters",
+    folder: "Parameter",
     name: "Warmwasser Soll-Temperatur",
     role: "level.temperature",
     type: "number",
