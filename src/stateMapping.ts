@@ -17,6 +17,8 @@ export interface StateDefinition {
 	write?: boolean;
 	/** Verzeichnis */
 	folder: string;
+	/** Die ID, die luxtronik2 zum Schreiben erwartet */
+	luxWriteId?: string;
 }
 
 /**
@@ -63,5 +65,14 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "Status Warmwasser",
 		role: "indicator",
 		type: "boolean",
+	},
+	hot_water_target: {
+		folder: "parameters",
+		name: "Warmwasser Soll-Temperatur",
+		role: "level.temperature",
+		type: "number",
+		unit: "°C",
+		write: true, // <-- WICHTIG: Erlaubt das Ändern im ioBroker
+		luxWriteId: "hot_water_target", // <-- Der Name für pump.write()
 	},
 };

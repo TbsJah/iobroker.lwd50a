@@ -157,11 +157,10 @@ class Lwd50a extends utils.Adapter {
 	 */
 	private onUnload(callback: () => void): void {
 		try {
-			// Here you must clear all timeouts or intervals that may still be active
-			// clearTimeout(timeout1);
-			// clearTimeout(timeout2);
-			// ...
-			// clearInterval(interval1);
+			// Timer stoppen, um Memory Leaks zu vermeiden
+			if (this.pollingInterval) {
+				clearInterval(this.pollingInterval);
+			}
 
 			callback();
 		} catch (error) {
