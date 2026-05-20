@@ -63,7 +63,7 @@ class Lwd50a extends utils.Adapter {
     this.pump.read(async (err, data) => {
       if (err) {
         if (err.message && err.message.toLowerCase().includes("busy")) {
-          this.log.info("W\xE4rmepumpe ist ausgelastet (busy). Erneuter Versuch in 15 Sekunden...");
+          this.log.warn("W\xE4rmepumpe ist ausgelastet (busy). Erneuter Versuch in 15 Sekunden...");
           setTimeout(() => {
             this.updateData();
           }, 15e3);
@@ -72,7 +72,7 @@ class Lwd50a extends utils.Adapter {
         this.log.error(`Verbindungsfehler beim Einlesen der Daten: ${err.message}`);
         return;
       }
-      this.log.debug("Daten von der W\xE4rmepumpe erfolgreich empfangen.");
+      this.log.info("Daten von der W\xE4rmepumpe erfolgreich empfangen.");
       try {
         const allIncomingData = {
           ...data.values,
@@ -170,7 +170,7 @@ class Lwd50a extends utils.Adapter {
     this.log.info(idParts[0]);
     const mappingKey = idParts[0];
     const definition = import_stateMapping.STATE_MAPPING[mappingKey];
-    if (!definition || !definition.luxWriteId) {
+    if (!definition || !definition.LuxID) {
       this.log.warn(`Kein Schreib-Mapping f\xFCr ${mappingKey} gefunden.`);
       return;
     }
@@ -192,10 +192,10 @@ class Lwd50a extends utils.Adapter {
       this.log.error("Schreiben abgebrochen: Keine aktive Verbindung zur W\xE4rmepumpe vorhanden.");
       return;
     }
-    this.log.info(`Sende an Luxtronik: ${definition.luxWriteId} = ${state.val}`);
-    this.pump.write(definition.luxWriteId, state.val, (err, _result) => {
+    this.log.info(`Sende an Luxtronik: ${definition.LuxID} = ${state.val}`);
+    this.pump.write(definition.LuxID, state.val, (err, _result) => {
       if (err) {
-        this.log.error(`Fehler beim Schreiben an Luxtronik (${definition.luxWriteId}): ${err.message}`);
+        this.log.error(`Fehler beim Schreiben an Luxtronik (${definition.LuxID}): ${err.message}`);
         return;
       }
       this.log.info(`Wert ${state.val} erfolgreich an W\xE4rmepumpe \xFCbertragen.`);

@@ -18,7 +18,7 @@ export interface StateDefinition {
 	/** Verzeichnis */
 	folder: string;
 	/** Die ID, die luxtronik2 zum Schreiben erwartet */
-	luxWriteId?: string;
+	LuxID?: string;
 	/** Optionaler Minimalwert */
 	min?: number;
 	/** Optionaler Maximalwert */
@@ -33,12 +33,27 @@ export interface StateDefinition {
  */
 export const STATE_MAPPING: Record<string, StateDefinition> = {
 	heating_operation_mode: {
-		folder: "Modus",
+		folder: "Einstellungen.Betriebsart",
 		name: "Betriebsart Heizung",
 		role: "value", // "level.mode" passt perfekt für Dropdowns
 		type: "number",
 		write: true,
-		luxWriteId: "heating_operation_mode",
+		LuxID: "heating_operation_mode",
+		states: {
+			0: "Automatik",
+			1: "Zusatzheizung",
+			2: "Party",
+			3: "Ferien",
+			4: "Aus",
+		},
+	},
+	warmwater_operation_mode: {
+		folder: "Einstellungen.Betriebsart",
+		name: "Betriebsart Warmwasser",
+		role: "value", // "level.mode" passt perfekt für Dropdowns
+		type: "number",
+		write: true,
+		LuxID: "warmwater_operation_mode",
 		states: {
 			0: "Automatik",
 			1: "Zusatzheizung",
@@ -49,8 +64,14 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 	},
 
 	heating_operation_mode_string: {
-		folder: "Modus",
-		name: "heating_operation_mode_string",
+		folder: "Informationen.Betriebsmodus",
+		name: "Betriebsart Heizung",
+		role: "text",
+		type: "string",
+	},
+	warmwater_operation_mode_string: {
+		folder: "Informationen.Betriebsmodus",
+		name: "Betriebsart Warmwasser",
 		role: "text",
 		type: "string",
 	},
@@ -83,7 +104,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "°C",
 		write: true,
-		luxWriteId: "temperature_hot_water_target",
+		LuxID: "temperature_hot_water_target",
 		min: 40,
 		max: 65,
 	},
@@ -94,7 +115,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "°C",
 		write: true,
-		luxWriteId: "temperature_hot_water_target",
+		LuxID: "temperature_hot_water_target",
 		min: 40,
 		max: 65,
 	},

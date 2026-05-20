@@ -23,13 +23,29 @@ __export(stateMapping_exports, {
 module.exports = __toCommonJS(stateMapping_exports);
 const STATE_MAPPING = {
   heating_operation_mode: {
-    folder: "Modus",
+    folder: "Einstellungen.Betriebsart",
     name: "Betriebsart Heizung",
     role: "value",
     // "level.mode" passt perfekt für Dropdowns
     type: "number",
     write: true,
-    luxWriteId: "heating_operation_mode",
+    LuxID: "heating_operation_mode",
+    states: {
+      0: "Automatik",
+      1: "Zusatzheizung",
+      2: "Party",
+      3: "Ferien",
+      4: "Aus"
+    }
+  },
+  warmwater_operation_mode: {
+    folder: "Einstellungen.Betriebsart",
+    name: "Betriebsart Warmwasser",
+    role: "value",
+    // "level.mode" passt perfekt für Dropdowns
+    type: "number",
+    write: true,
+    LuxID: "warmwater_operation_mode",
     states: {
       0: "Automatik",
       1: "Zusatzheizung",
@@ -39,8 +55,14 @@ const STATE_MAPPING = {
     }
   },
   heating_operation_mode_string: {
-    folder: "Modus",
-    name: "heating_operation_mode_string",
+    folder: "Informationen.Betriebsmodus",
+    name: "Betriebsart Heizung",
+    role: "text",
+    type: "string"
+  },
+  warmwater_operation_mode_string: {
+    folder: "Informationen.Betriebsmodus",
+    name: "Betriebsart Warmwasser",
     role: "text",
     type: "string"
   },
@@ -72,7 +94,7 @@ const STATE_MAPPING = {
     type: "number",
     unit: "\xB0C",
     write: true,
-    luxWriteId: "temperature_hot_water_target",
+    LuxID: "temperature_hot_water_target",
     min: 40,
     max: 65
   },
@@ -83,7 +105,7 @@ const STATE_MAPPING = {
     type: "number",
     unit: "\xB0C",
     write: true,
-    luxWriteId: "temperature_hot_water_target",
+    LuxID: "temperature_hot_water_target",
     min: 40,
     max: 65
   },

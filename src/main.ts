@@ -117,7 +117,7 @@ class Lwd50a extends utils.Adapter {
 			if (err) {
 				// NEU: Prüfen, ob die Wärmepumpe beschäftigt ("busy") ist
 				if (err.message && err.message.toLowerCase().includes("busy")) {
-					this.log.info("Wärmepumpe ist ausgelastet (busy). Erneuter Versuch in 15 Sekunden...");
+					this.log.warn("Wärmepumpe ist ausgelastet (busy). Erneuter Versuch in 15 Sekunden...");
 
 					setTimeout(() => {
 						this.updateData();
@@ -130,7 +130,7 @@ class Lwd50a extends utils.Adapter {
 				this.log.error(`Verbindungsfehler beim Einlesen der Daten: ${err.message}`);
 				return;
 			}
-			this.log.debug("Daten von der Wärmepumpe erfolgreich empfangen.");
+			this.log.info("Daten von der Wärmepumpe erfolgreich empfangen.");
 
 			try {
 				// Wir kombinieren values und parameters in ein einziges Objekt,
@@ -249,7 +249,7 @@ class Lwd50a extends utils.Adapter {
 		const mappingKey = idParts[0];
 		const definition = STATE_MAPPING[mappingKey];
 
-		if (!definition || !definition.luxWriteId) {
+		if (!definition || !definition.LuxID) {
 			this.log.warn(`Kein Schreib-Mapping für ${mappingKey} gefunden.`);
 			return;
 		}
@@ -275,11 +275,11 @@ class Lwd50a extends utils.Adapter {
 			return;
 		}
 
-		this.log.info(`Sende an Luxtronik: ${definition.luxWriteId} = ${state.val}`);
+		this.log.info(`Sende an Luxtronik: ${definition.LuxID} = ${state.val}`);
 		// Callback wird "async", damit wir darin await nutzen können
-		this.pump.write(definition.luxWriteId, state.val, (err: any, _result: any) => {
+		this.pump.write(definition.LuxID, state.val, (err: any, _result: any) => {
 			if (err) {
-				this.log.error(`Fehler beim Schreiben an Luxtronik (${definition.luxWriteId}): ${err.message}`);
+				this.log.error(`Fehler beim Schreiben an Luxtronik (${definition.LuxID}): ${err.message}`);
 				return;
 			}
 
