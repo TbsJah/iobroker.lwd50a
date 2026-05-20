@@ -19,6 +19,10 @@ export interface StateDefinition {
 	folder: string;
 	/** Die ID, die luxtronik2 zum Schreiben erwartet */
 	luxWriteId?: string;
+	/** Optionaler Minimalwert */
+	min?: number;
+	/** Optionaler Maximalwert */
+	max?: number;
 }
 
 /**
@@ -72,7 +76,9 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "level.temperature",
 		type: "number",
 		unit: "°C",
-		write: true, // <-- WICHTIG: Erlaubt das Ändern im ioBroker
-		luxWriteId: "hot_water_target", // <-- Der Name für pump.write()
+		write: true,
+		luxWriteId: "hot_water_target",
+		min: 40,
+		max: 65,
 	},
 };

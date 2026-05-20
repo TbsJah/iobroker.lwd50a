@@ -106,47 +106,64 @@ class Lwd50a extends utils.Adapter {
 	 */
 	private updateData(): void {
 		if (!this.pump) {
+			this.log.error("Abfrage abgebrochen: Keine aktive Verbindung zur Wärmepumpe vorhanden.");
 			return;
 		}
 
 		this.pump.read(async (err: Error | null, data: any) => {
 			if (err) {
-				this.log.error(`Verbindungsfehler: ${err.message}`);
+				this.log.error(`Verbindungsfehler beim Einlesen der Daten: ${err.message}`);
 				return;
 			}
 
-			// Auf debug geändert, damit dein Logbuch nicht alle 30 Sekunden vollgeschrieben wird
 			this.log.debug("Daten von der Wärmepumpe erfolgreich empfangen.");
 
-			for (const [key, value] of Object.entries(data.values)) {
-				const definition = STATE_MAPPING[key];
+			try {
+				for (const [key, value] of Object.entries(data.values)) {
+					const definition = STATE_MAPPING[key];
 
-				if (definition) {
-					const folderId = definition.folder;
-					const stateId = `${folderId}.${key}`;
-					await this.setObjectNotExists(folderId, {
-						type: "channel",
-						common: {
-							name: folderId.charAt(0).toUpperCase() + folderId.slice(1),
-						},
-						native: {},
-					});
+					if (definition) {
+						const folderId = definition.folder;
+						const stateId = `${folderId}.${key}`;
 
-					await this.setObjectNotExists(stateId, {
-						type: "state",
-						common: {
-							name: definition.name,
-							type: definition.type,
-							role: definition.role,
-							unit: definition.unit,
-							read: true,
-							write: definition.write || false,
-						},
-						native: {},
-					});
+						// 1. Zuerst den Ordner (Channel) anlegen
+						await this.setObjectNotExists(folderId, {
+							type: "channel",
+							common: {
+								name: folderId.charAt(0).toUpperCase() + folderId.slice(1),
+							},
+							native: {},
+						});
 
-					await this.setState(stateId, value as any, true);
+						// 2. Dann den eigentlichen Datenpunkt anlegen
+						await this.setObjectNotExists(stateId, {
+							type: "state",
+							common: {
+								name: definition.name,
+								type: definition.type,
+								role: definition.role,
+								unit: definition.unit,
+								read: true,
+								write: definition.write || false,
+								min: definition.min,
+								max: definition.max,
+							},
+							native: {},
+						});
+
+						// 3. Wenn das Objekt beschreibbar ist, abonnieren
+						if (definition.write) {
+							await this.subscribeStatesAsync(stateId);
+						}
+
+						// 4. Zuletzt den Wert in den Datenpunkt schreiben
+						await this.setState(stateId, value as any, true);
+					}
 				}
+			} catch (catchErr) {
+				this.log.error(
+					`Fehler beim Schreiben der Objekte in die ioBroker-Datenbank: ${(catchErr as Error).message}`,
+				);
 			}
 		});
 	}
@@ -191,21 +208,72 @@ class Lwd50a extends utils.Adapter {
 	 * @param state - State object
 	 */
 	private onStateChange(id: string, state: ioBroker.State | null | undefined): void {
-		if (state) {
-			// The state was changed
-			this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
-
-			if (state.ack === false) {
-				// This is a command from the user (e.g., from the UI or other adapter)
-				// and should be processed by the adapter
-				this.log.info(`User command received for ${id}: ${state.val}`);
-
-				// TODO: Add your control logic here
-			}
-		} else {
-			// The object was deleted or the state value has expired
-			this.log.info(`state ${id} deleted`);
+		if (!state) {
+			this.log.info(`State ${id} wurde gelöscht.`);
+			return;
 		}
+
+		if (state.ack) {
+			return;
+		}
+
+		this.log.info(`Nutzerbefehl empfangen für ${id}: ${state.val}`);
+
+		const idParts = id.split(".");
+		idParts.shift(); // lwd50a entfernen
+		idParts.shift(); // Instanz entfernen
+
+		const mappingKey = idParts[1];
+		const definition = STATE_MAPPING[mappingKey];
+
+		if (!definition || !definition.luxWriteId) {
+			this.log.warn(`Kein Schreib-Mapping für ${mappingKey} gefunden.`);
+			return;
+		}
+
+		// Zusätzlicher Schutz: Prüfen, ob der eingegebene Wert die Limits sprengt
+		if (typeof state.val === "number") {
+			if (definition.min !== undefined && state.val < definition.min) {
+				this.log.warn(
+					`Eingabewert ${state.val} unterschreitet Minimum von ${definition.min} für ${mappingKey}. Abgebrochen.`,
+				);
+				return;
+			}
+			if (definition.max !== undefined && state.val > definition.max) {
+				this.log.warn(
+					`Eingabewert ${state.val} überschreitet Maximum von ${definition.max} für ${mappingKey}. Abgebrochen.`,
+				);
+				return;
+			}
+		}
+
+		if (!this.pump) {
+			this.log.error("Schreiben abgebrochen: Keine aktive Verbindung zur Wärmepumpe vorhanden.");
+			return;
+		}
+
+		this.log.info(`Sende an Luxtronik: ${definition.luxWriteId} = ${state.val}`);
+		// Callback wird "async", damit wir darin await nutzen können
+		this.pump.write(definition.luxWriteId, state.val, async (err: Error | null, _result: any) => {
+			if (err) {
+				this.log.error(`Fehler beim Schreiben an Luxtronik (${definition.luxWriteId}): ${err.message}`);
+				return;
+			}
+
+			try {
+				this.log.info(`Wert ${state.val} erfolgreich an Wärmepumpe übertragen.`);
+
+				// Bestätigen wir den Wert im ioBroker (ack = true)
+				await this.setState(id, state.val, true);
+
+				// Sofort frische Daten holen
+				this.updateData();
+			} catch (catchErr) {
+				this.log.error(
+					`Fehler beim Aktualisieren des ioBroker-Status nach Schreibbefehl: ${(catchErr as Error).message}`,
+				);
+			}
+		});
 	}
 	// If you need to accept messages in your adapter, uncomment the following block and the corresponding line in the constructor.
 	// /**
