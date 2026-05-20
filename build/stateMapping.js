@@ -22,11 +22,46 @@ __export(stateMapping_exports, {
 });
 module.exports = __toCommonJS(stateMapping_exports);
 const STATE_MAPPING = {
-  temperature_supply: { name: "Vorlauftemperatur", role: "value.temperature", type: "number", unit: "\xB0C" },
-  temperature_return: { name: "R\xFCcklauftemperatur", role: "value.temperature", type: "number", unit: "\xB0C" },
-  temperature_outside: { name: "Au\xDFentemperatur", role: "value.temperature", type: "number", unit: "\xB0C" },
-  temperature_hot_water: { name: "Warmwassertemperatur", role: "value.temperature", type: "number", unit: "\xB0C" },
-  status_heating: { name: "Status Heizung", role: "indicator", type: "boolean" }
+  temperature_supply: {
+    folder: "temperatures",
+    name: "Vorlauftemperatur",
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C"
+  },
+  temperature_return: {
+    folder: "temperatures",
+    name: "R\xFCcklauftemperatur",
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C"
+  },
+  temperature_outside: {
+    folder: "temperatures",
+    name: "Au\xDFentemperatur",
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C"
+  },
+  temperature_hot_water: {
+    folder: "temperatures",
+    name: "Warmwassertemperatur",
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C"
+  },
+  status_heating: {
+    folder: "status",
+    name: "Status Heizung",
+    role: "indicator",
+    type: "boolean"
+  },
+  status_hot_water: {
+    folder: "status",
+    name: "Status Warmwasser",
+    role: "indicator",
+    type: "boolean"
+  }
 };
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {

@@ -15,6 +15,8 @@ export interface StateDefinition {
 	unit?: string;
 	/** Schreibzugriff erlaubt (optional) */
 	write?: boolean;
+	/** Verzeichnis */
+	folder: string;
 }
 
 /**
@@ -22,9 +24,44 @@ export interface StateDefinition {
  * Übersetzt die englischen API-Schlüssel in saubere ioBroker-Datenpunkte.
  */
 export const STATE_MAPPING: Record<string, StateDefinition> = {
-	temperature_supply: { name: "Vorlauftemperatur", role: "value.temperature", type: "number", unit: "°C" },
-	temperature_return: { name: "Rücklauftemperatur", role: "value.temperature", type: "number", unit: "°C" },
-	temperature_outside: { name: "Außentemperatur", role: "value.temperature", type: "number", unit: "°C" },
-	temperature_hot_water: { name: "Warmwassertemperatur", role: "value.temperature", type: "number", unit: "°C" },
-	status_heating: { name: "Status Heizung", role: "indicator", type: "boolean" },
+	temperature_supply: {
+		folder: "temperatures",
+		name: "Vorlauftemperatur",
+		role: "value.temperature",
+		type: "number",
+		unit: "°C",
+	},
+	temperature_return: {
+		folder: "temperatures",
+		name: "Rücklauftemperatur",
+		role: "value.temperature",
+		type: "number",
+		unit: "°C",
+	},
+	temperature_outside: {
+		folder: "temperatures",
+		name: "Außentemperatur",
+		role: "value.temperature",
+		type: "number",
+		unit: "°C",
+	},
+	temperature_hot_water: {
+		folder: "temperatures",
+		name: "Warmwassertemperatur",
+		role: "value.temperature",
+		type: "number",
+		unit: "°C",
+	},
+	status_heating: {
+		folder: "status",
+		name: "Status Heizung",
+		role: "indicator",
+		type: "boolean",
+	},
+	status_hot_water: {
+		folder: "status",
+		name: "Status Warmwasser",
+		role: "indicator",
+		type: "boolean",
+	},
 };
