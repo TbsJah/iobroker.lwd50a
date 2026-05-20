@@ -147,7 +147,7 @@ For later updates:
 
 ### **WORK IN PROGRESS**
 
-- WW Target
+- WW Target Parameter schreiben
 
 ### 0.1.1 (2026-05-20)
 
