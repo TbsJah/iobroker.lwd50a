@@ -25,6 +25,8 @@ var utils = __toESM(require("@iobroker/adapter-core"));
 var luxtronik = __toESM(require("luxtronik2"));
 var import_stateMapping = require("./stateMapping");
 class Lwd50a extends utils.Adapter {
+  pollingInterval;
+  pump;
   constructor(options = {}) {
     super({
       ...options,
@@ -37,20 +39,41 @@ class Lwd50a extends utils.Adapter {
   /**
    * Is called when databases are connected and adapter received configuration.
    */
-  async onReady() {
+  onReady() {
     const ip = "192.168.178.81";
     const port = 8889;
     this.log.info(`Verbinde mit W\xE4rmepumpe auf ${ip}:${port}...`);
-    const pump = new luxtronik.createConnection(ip, port);
-    await pump.read(async (err, data) => {
+    this.pump = new luxtronik.createConnection(ip, port);
+    this.updateData();
+    this.pollingInterval = setInterval(() => {
+      this.updateData();
+    }, 3e4);
+  }
+  /**
+   * Holt die Daten von der Wärmepumpe und schreibt sie in ioBroker
+   */
+  updateData() {
+    if (!this.pump) {
+      return;
+    }
+    this.pump.read(async (err, data) => {
       if (err) {
         this.log.error(`Verbindungsfehler: ${err.message}`);
         return;
       }
+      this.log.debug("Daten von der W\xE4rmepumpe erfolgreich empfangen.");
       for (const [key, value] of Object.entries(data.values)) {
         const definition = import_stateMapping.STATE_MAPPING[key];
         if (definition) {
-          const stateId = `values.${key}`;
+          const folderId = definition.folder;
+          const stateId = `${folderId}.${key}`;
+          await this.setObjectNotExists(folderId, {
+            type: "channel",
+            common: {
+              name: folderId.charAt(0).toUpperCase() + folderId.slice(1)
+            },
+            native: {}
+          });
           await this.setObjectNotExists(stateId, {
             type: "state",
             common: {

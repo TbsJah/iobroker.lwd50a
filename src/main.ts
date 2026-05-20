@@ -10,6 +10,8 @@ import * as luxtronik from "luxtronik2";
 import { STATE_MAPPING } from "./stateMapping";
 
 class Lwd50a extends utils.Adapter {
+	private pollingInterval?: NodeJS.Timeout;
+	private pump: any;
 	public constructor(options: Partial<utils.AdapterOptions> = {}) {
 		super({
 			...options,
@@ -25,8 +27,24 @@ class Lwd50a extends utils.Adapter {
 	/**
 	 * Is called when databases are connected and adapter received configuration.
 	 */
-	private async onReady(): Promise<void> {
+	private onReady(): void {
 		// Initialize your adapter here
+
+		const ip = "192.168.178.81";
+		const port = 8889;
+
+		this.log.info(`Verbinde mit Wärmepumpe auf ${ip}:${port}...`);
+
+		// Speichere die Verbindung in der Klassenvariable
+		this.pump = new luxtronik.createConnection(ip, port);
+
+		// Erste Abfrage sofort starten
+		this.updateData();
+
+		// Abfrage alle 30 Sekunden (30.000 Millisekunden) wiederholen
+		this.pollingInterval = setInterval(() => {
+			this.updateData();
+		}, 30000);
 
 		// The adapters config (in the instance object everything under the attribute "native") is accessible via
 		// this.config:
@@ -81,28 +99,39 @@ class Lwd50a extends utils.Adapter {
 
 		// const groupResult = await this.checkGroupAsync("admin", "admin");
 		// this.log.info(`check group user admin group admin: ${JSON.stringify(groupResult)}`);
+	}
 
-		const ip = "192.168.178.81";
-		const port = 8889;
+	/**
+	 * Holt die Daten von der Wärmepumpe und schreibt sie in ioBroker
+	 */
+	private updateData(): void {
+		if (!this.pump) {
+			return;
+		}
 
-		this.log.info(`Verbinde mit Wärmepumpe auf ${ip}:${port}...`);
-		const pump = new luxtronik.createConnection(ip, port);
-
-		// WICHTIG: Die Callback-Funktion muss async sein, damit wir await nutzen können
-		await pump.read(async (err: Error | null, data: any) => {
+		this.pump.read(async (err: Error | null, data: any) => {
 			if (err) {
 				this.log.error(`Verbindungsfehler: ${err.message}`);
 				return;
 			}
 
+			// Auf debug geändert, damit dein Logbuch nicht alle 30 Sekunden vollgeschrieben wird
+			this.log.debug("Daten von der Wärmepumpe erfolgreich empfangen.");
+
 			for (const [key, value] of Object.entries(data.values)) {
-				// Greift auf die importierte Konstante STATE_MAPPING zu
 				const definition = STATE_MAPPING[key];
 
 				if (definition) {
-					const stateId = `values.${key}`;
+					const folderId = definition.folder;
+					const stateId = `${folderId}.${key}`;
+					await this.setObjectNotExists(folderId, {
+						type: "channel",
+						common: {
+							name: folderId.charAt(0).toUpperCase() + folderId.slice(1),
+						},
+						native: {},
+					});
 
-					// Objekt im ioBroker anlegen (ohne "Async" am Ende)
 					await this.setObjectNotExists(stateId, {
 						type: "state",
 						common: {
@@ -116,14 +145,11 @@ class Lwd50a extends utils.Adapter {
 						native: {},
 					});
 
-					// Den tatsächlichen Wert in den ioBroker schreiben (ohne "Async" am Ende)
-					// Parameter 1: Die ID | Parameter 2: Der Wert | Parameter 3: ack (true)
 					await this.setState(stateId, value as any, true);
 				}
 			}
 		});
 	}
-
 	/**
 	 * Is called when adapter shuts down - callback has to be called under any circumstances!
 	 *
