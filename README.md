@@ -142,8 +142,7 @@ For later updates:
 1. Repeat the installation steps above (via Admin UI or `iob url` command) to update the adapter
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 0.1.1 (2026-05-20)
 
 - Erweiterung
 
