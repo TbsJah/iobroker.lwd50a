@@ -1,6 +1,6 @@
 {
   "name": "iobroker.lwd50a",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Zugriff und Steuerung einer LWD50A Heizung von Alpha Innotec",
   "author": {
     "name": "Tbs",
