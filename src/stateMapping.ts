@@ -81,4 +81,16 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		min: 40,
 		max: 65,
 	},
+	heatpump_state_string: {
+		folder: "Information",
+		name: "Status Text",
+		role: "text",
+		type: "string",
+	},
+	heatpump_extendet_state_string: {
+		folder: "Information",
+		name: "Status Text Erweitert",
+		role: "text",
+		type: "string",
+	},
 };

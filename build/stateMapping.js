@@ -72,6 +72,18 @@ const STATE_MAPPING = {
     luxWriteId: "hot_water_target",
     min: 40,
     max: 65
+  },
+  heatpump_state_string: {
+    folder: "Information",
+    name: "Status Text",
+    role: "text",
+    type: "string"
+  },
+  heatpump_extendet_state_string: {
+    folder: "Information",
+    name: "Status Text Erweitert",
+    role: "text",
+    type: "string"
   }
 };
 // Annotate the CommonJS export names for ESM import in node:
