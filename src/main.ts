@@ -31,7 +31,7 @@ class Lwd50a extends utils.Adapter {
 		// Initialize your adapter here
 
 		const ip = "192.168.178.81";
-		const port = 8889;
+		const port = 8888;
 
 		this.log.info(`Verbinde mit Wärmepumpe auf ${ip}:${port}...`);
 
@@ -265,7 +265,7 @@ class Lwd50a extends utils.Adapter {
 
 		this.log.info(`Sende an Luxtronik: ${definition.luxWriteId} = ${state.val}`);
 		// Callback wird "async", damit wir darin await nutzen können
-		this.pump.write(definition.luxWriteId, state.val, (err: Error | null, _result: any) => {
+		this.pump.write(definition.luxWriteId, state.val, (err: any, _result: any) => {
 			if (err) {
 				this.log.error(`Fehler beim Schreiben an Luxtronik (${definition.luxWriteId}): ${err.message}`);
 				return;
