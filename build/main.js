@@ -176,20 +176,15 @@ class Lwd50a extends utils.Adapter {
       return;
     }
     this.log.info(`Sende an Luxtronik: ${definition.luxWriteId} = ${state.val}`);
-    this.pump.write(definition.luxWriteId, state.val, async (err, _result) => {
+    this.pump.write(definition.luxWriteId, state.val, (err, _result) => {
       if (err) {
         this.log.error(`Fehler beim Schreiben an Luxtronik (${definition.luxWriteId}): ${err.message}`);
         return;
       }
-      try {
-        this.log.info(`Wert ${state.val} erfolgreich an W\xE4rmepumpe \xFCbertragen.`);
-        await this.setState(id, state.val, true);
+      this.log.info(`Wert ${state.val} erfolgreich an W\xE4rmepumpe \xFCbertragen.`);
+      setTimeout(() => {
         this.updateData();
-      } catch (catchErr) {
-        this.log.error(
-          `Fehler beim Aktualisieren des ioBroker-Status nach Schreibbefehl: ${catchErr.message}`
-        );
-      }
+      }, 500);
     });
   }
   // If you need to accept messages in your adapter, uncomment the following block and the corresponding line in the constructor.

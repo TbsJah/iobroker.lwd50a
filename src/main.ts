@@ -254,25 +254,19 @@ class Lwd50a extends utils.Adapter {
 
 		this.log.info(`Sende an Luxtronik: ${definition.luxWriteId} = ${state.val}`);
 		// Callback wird "async", damit wir darin await nutzen können
-		this.pump.write(definition.luxWriteId, state.val, async (err: Error | null, _result: any) => {
+		this.pump.write(definition.luxWriteId, state.val, (err: Error | null, _result: any) => {
 			if (err) {
 				this.log.error(`Fehler beim Schreiben an Luxtronik (${definition.luxWriteId}): ${err.message}`);
 				return;
 			}
 
-			try {
-				this.log.info(`Wert ${state.val} erfolgreich an Wärmepumpe übertragen.`);
+			this.log.info(`Wert ${state.val} erfolgreich an Wärmepumpe übertragen.`);
 
-				// Bestätigen wir den Wert im ioBroker (ack = true)
-				await this.setState(id, state.val, true);
-
-				// Sofort frische Daten holen
+			// Wir geben der Wärmepumpe 500ms Zeit, den Wert intern zu verarbeiten,
+			// und holen dann die frischen, bestätigten Daten ab.
+			setTimeout(() => {
 				this.updateData();
-			} catch (catchErr) {
-				this.log.error(
-					`Fehler beim Aktualisieren des ioBroker-Status nach Schreibbefehl: ${(catchErr as Error).message}`,
-				);
-			}
+			}, 500);
 		});
 	}
 	// If you need to accept messages in your adapter, uncomment the following block and the corresponding line in the constructor.
