@@ -23,44 +23,32 @@ __export(stateMapping_exports, {
 module.exports = __toCommonJS(stateMapping_exports);
 const STATE_MAPPING = {
   temperature_supply: {
-    folder: "temperatures",
+    folder: "Temperaturen",
     name: "Vorlauftemperatur",
     role: "value.temperature",
     type: "number",
     unit: "\xB0C"
   },
   temperature_return: {
-    folder: "temperatures",
+    folder: "Temperaturen",
     name: "R\xFCcklauftemperatur",
     role: "value.temperature",
     type: "number",
     unit: "\xB0C"
   },
   temperature_outside: {
-    folder: "temperatures",
+    folder: "Temperaturen",
     name: "Au\xDFentemperatur",
     role: "value.temperature",
     type: "number",
     unit: "\xB0C"
   },
   temperature_hot_water: {
-    folder: "temperatures",
+    folder: "Temperaturen",
     name: "Warmwassertemperatur",
     role: "value.temperature",
     type: "number",
     unit: "\xB0C"
-  },
-  status_heating: {
-    folder: "status",
-    name: "Status Heizung",
-    role: "indicator",
-    type: "boolean"
-  },
-  status_hot_water: {
-    folder: "status",
-    name: "Status Warmwasser",
-    role: "indicator",
-    type: "boolean"
   },
   hot_water_target: {
     folder: "parameters",
@@ -84,6 +72,22 @@ const STATE_MAPPING = {
     name: "Status Text Erweitert",
     role: "text",
     type: "string"
+  },
+  heating_operation_mode: {
+    folder: "Modus",
+    name: "Betriebsart Heizung",
+    role: "level.mode",
+    // "level.mode" passt perfekt für Dropdowns
+    type: "number",
+    write: true,
+    luxWriteId: "heating_operation_mode",
+    states: {
+      0: "Automatik",
+      1: "Zusatzheizung",
+      2: "Party",
+      3: "Ferien",
+      4: "Aus"
+    }
   }
 };
 // Annotate the CommonJS export names for ESM import in node:

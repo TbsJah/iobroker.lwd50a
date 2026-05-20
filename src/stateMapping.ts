@@ -23,6 +23,8 @@ export interface StateDefinition {
 	min?: number;
 	/** Optionaler Maximalwert */
 	max?: number;
+	/** Optionales Mapping für numerische Werte zu Texten (z.B. für Dropdowns) */
+	states?: Record<number, string>;
 }
 
 /**
@@ -31,44 +33,32 @@ export interface StateDefinition {
  */
 export const STATE_MAPPING: Record<string, StateDefinition> = {
 	temperature_supply: {
-		folder: "temperatures",
+		folder: "Temperaturen",
 		name: "Vorlauftemperatur",
 		role: "value.temperature",
 		type: "number",
 		unit: "°C",
 	},
 	temperature_return: {
-		folder: "temperatures",
+		folder: "Temperaturen",
 		name: "Rücklauftemperatur",
 		role: "value.temperature",
 		type: "number",
 		unit: "°C",
 	},
 	temperature_outside: {
-		folder: "temperatures",
+		folder: "Temperaturen",
 		name: "Außentemperatur",
 		role: "value.temperature",
 		type: "number",
 		unit: "°C",
 	},
 	temperature_hot_water: {
-		folder: "temperatures",
+		folder: "Temperaturen",
 		name: "Warmwassertemperatur",
 		role: "value.temperature",
 		type: "number",
 		unit: "°C",
-	},
-	status_heating: {
-		folder: "status",
-		name: "Status Heizung",
-		role: "indicator",
-		type: "boolean",
-	},
-	status_hot_water: {
-		folder: "status",
-		name: "Status Warmwasser",
-		role: "indicator",
-		type: "boolean",
 	},
 	hot_water_target: {
 		folder: "parameters",
@@ -92,5 +82,20 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "Status Text Erweitert",
 		role: "text",
 		type: "string",
+	},
+	heating_operation_mode: {
+		folder: "Modus",
+		name: "Betriebsart Heizung",
+		role: "level.mode", // "level.mode" passt perfekt für Dropdowns
+		type: "number",
+		write: true,
+		luxWriteId: "heating_operation_mode",
+		states: {
+			0: "Automatik",
+			1: "Zusatzheizung",
+			2: "Party",
+			3: "Ferien",
+			4: "Aus",
+		},
 	},
 };
