@@ -57,7 +57,7 @@ const STATE_MAPPING = {
     type: "number",
     unit: "\xB0C",
     write: true,
-    luxWriteId: "temperature_hot_water_target",
+    luxWriteId: "warmwater_target_temperature",
     min: 40,
     max: 65
   },

@@ -67,7 +67,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "°C",
 		write: true,
-		luxWriteId: "temperature_hot_water_target",
+		luxWriteId: "warmwater_target_temperature",
 		min: 40,
 		max: 65,
 	},
