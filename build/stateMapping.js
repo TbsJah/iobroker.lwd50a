@@ -22,6 +22,22 @@ __export(stateMapping_exports, {
 });
 module.exports = __toCommonJS(stateMapping_exports);
 const STATE_MAPPING = {
+  heating_operation_mode: {
+    folder: "Modus",
+    name: "Betriebsart Heizung",
+    role: "value",
+    // "level.mode" passt perfekt für Dropdowns
+    type: "number",
+    write: true,
+    luxWriteId: "heating_operation_mode",
+    states: {
+      0: "Automatik",
+      1: "Zusatzheizung",
+      2: "Party",
+      3: "Ferien",
+      4: "Aus"
+    }
+  },
   temperature_supply: {
     folder: "Temperaturen",
     name: "Vorlauftemperatur",
@@ -79,22 +95,6 @@ const STATE_MAPPING = {
     name: "Status Text Erweitert",
     role: "text",
     type: "string"
-  },
-  heating_operation_mode: {
-    folder: "Modus",
-    name: "Betriebsart Heizung",
-    role: "level.mode",
-    // "level.mode" passt perfekt für Dropdowns
-    type: "number",
-    write: true,
-    luxWriteId: "heating_operation_mode",
-    states: {
-      0: "Automatik",
-      1: "Zusatzheizung",
-      2: "Party",
-      3: "Ferien",
-      4: "Aus"
-    }
   }
 };
 // Annotate the CommonJS export names for ESM import in node:
