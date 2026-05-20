@@ -32,6 +32,7 @@ export interface StateDefinition {
  * Übersetzt die englischen API-Schlüssel in saubere ioBroker-Datenpunkte.
  */
 export const STATE_MAPPING: Record<string, StateDefinition> = {
+	//Einstellungen.Betriebsart
 	heating_operation_mode: {
 		folder: "Einstellungen.Betriebsart",
 		name: "Betriebsart Heizung",
@@ -63,6 +64,31 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		},
 	},
 
+	//Einstellungen.Temperaturen
+	heating_curve_end_point: {
+		folder: "Temperaturen",
+		name: "Heizkurve Endpunkt-Offset",
+		role: "value.temperature",
+		type: "number",
+		unit: "°C",
+		write: true,
+		LuxID: "heating_curve_end_point",
+		min: 20,
+		max: 35,
+	},
+	heating_curve_parallel_offset: {
+		folder: "Temperaturen",
+		name: "Heizkurve Endpunkt-Offset",
+		role: "value.temperature",
+		type: "number",
+		unit: "°C",
+		write: true,
+		LuxID: "heating_curve_parallel_offset",
+		min: 20,
+		max: 35,
+	},
+
+	//Informationen.Betriebsmodus
 	heating_operation_mode_string: {
 		folder: "Informationen.Betriebsmodus",
 		name: "Betriebsart Heizung",

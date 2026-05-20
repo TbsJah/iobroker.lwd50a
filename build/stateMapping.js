@@ -22,6 +22,7 @@ __export(stateMapping_exports, {
 });
 module.exports = __toCommonJS(stateMapping_exports);
 const STATE_MAPPING = {
+  //Einstellungen.Betriebsart
   heating_operation_mode: {
     folder: "Einstellungen.Betriebsart",
     name: "Betriebsart Heizung",
@@ -54,6 +55,30 @@ const STATE_MAPPING = {
       4: "Aus"
     }
   },
+  //Einstellungen.Temperaturen
+  heating_curve_end_point: {
+    folder: "Temperaturen",
+    name: "Heizkurve Endpunkt-Offset",
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    write: true,
+    LuxID: "heating_curve_end_point",
+    min: 20,
+    max: 35
+  },
+  heating_curve_parallel_offset: {
+    folder: "Temperaturen",
+    name: "Heizkurve Endpunkt-Offset",
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    write: true,
+    LuxID: "heating_curve_parallel_offset",
+    min: 20,
+    max: 35
+  },
+  //Informationen.Betriebsmodus
   heating_operation_mode_string: {
     folder: "Informationen.Betriebsmodus",
     name: "Betriebsart Heizung",

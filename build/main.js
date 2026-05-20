@@ -72,7 +72,6 @@ class Lwd50a extends utils.Adapter {
         this.log.error(`Verbindungsfehler beim Einlesen der Daten: ${err.message}`);
         return;
       }
-      this.log.info("Daten von der W\xE4rmepumpe erfolgreich empfangen.");
       try {
         const allIncomingData = {
           ...data.values,

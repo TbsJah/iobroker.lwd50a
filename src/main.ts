@@ -130,7 +130,7 @@ class Lwd50a extends utils.Adapter {
 				this.log.error(`Verbindungsfehler beim Einlesen der Daten: ${err.message}`);
 				return;
 			}
-			this.log.info("Daten von der Wärmepumpe erfolgreich empfangen.");
+			//this.log.info("Daten von der Wärmepumpe erfolgreich empfangen.");
 
 			try {
 				// Wir kombinieren values und parameters in ein einziges Objekt,
