@@ -55,12 +55,19 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 	},
 	temperature_hot_water: {
 		folder: "Temperaturen",
-		name: "Warmwassertemperatur",
+		name: "Warmwasser Soll-Temperatur",
 		role: "value.temperature",
 		type: "number",
 		unit: "°C",
 	},
 	temperature_hot_water_target: {
+		folder: "Temperaturen",
+		name: "Warmwassertemperatur",
+		role: "value.temperature",
+		type: "number",
+		unit: "°C",
+	},
+	warmwater_temperature: {
 		folder: "Parameter",
 		name: "Warmwasser Soll-Temperatur",
 		role: "value.temperature",

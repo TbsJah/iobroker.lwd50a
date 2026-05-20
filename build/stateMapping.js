@@ -45,12 +45,19 @@ const STATE_MAPPING = {
   },
   temperature_hot_water: {
     folder: "Temperaturen",
-    name: "Warmwassertemperatur",
+    name: "Warmwasser Soll-Temperatur",
     role: "value.temperature",
     type: "number",
     unit: "\xB0C"
   },
   temperature_hot_water_target: {
+    folder: "Temperaturen",
+    name: "Warmwassertemperatur",
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C"
+  },
+  warmwater_temperature: {
     folder: "Parameter",
     name: "Warmwasser Soll-Temperatur",
     role: "value.temperature",
