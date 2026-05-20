@@ -69,6 +69,7 @@ class Lwd50a extends utils.Adapter {
           if (definition) {
             const folderId = definition.folder;
             const stateId = `${folderId}.${key}`;
+            this.log.error(folderId);
             await this.setObjectNotExists(folderId, {
               type: "channel",
               common: {

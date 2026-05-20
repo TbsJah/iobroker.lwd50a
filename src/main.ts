@@ -125,6 +125,7 @@ class Lwd50a extends utils.Adapter {
 					if (definition) {
 						const folderId = definition.folder;
 						const stateId = `${folderId}.${key}`;
+						this.log.error(folderId);
 
 						// 1. Zuerst den Ordner (Channel) anlegen
 						await this.setObjectNotExists(folderId, {

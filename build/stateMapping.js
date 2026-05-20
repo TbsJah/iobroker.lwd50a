@@ -38,6 +38,12 @@ const STATE_MAPPING = {
       4: "Aus"
     }
   },
+  heating_operation_mode_string: {
+    folder: "Modus",
+    name: "heating_operation_mode_string",
+    role: "text",
+    type: "string"
+  },
   temperature_supply: {
     folder: "Temperaturen",
     name: "Vorlauftemperatur",
