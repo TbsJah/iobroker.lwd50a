@@ -32,6 +32,21 @@ export interface StateDefinition {
  * Übersetzt die englischen API-Schlüssel in saubere ioBroker-Datenpunkte.
  */
 export const STATE_MAPPING: Record<string, StateDefinition> = {
+	heating_operation_mode: {
+		folder: "Modus",
+		name: "Betriebsart Heizung",
+		role: "value", // "level.mode" passt perfekt für Dropdowns
+		type: "number",
+		write: true,
+		luxWriteId: "heating_operation_mode",
+		states: {
+			0: "Automatik",
+			1: "Zusatzheizung",
+			2: "Party",
+			3: "Ferien",
+			4: "Aus",
+		},
+	},
 	temperature_supply: {
 		folder: "Temperaturen",
 		name: "Vorlauftemperatur",
@@ -89,20 +104,5 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "Status Text Erweitert",
 		role: "text",
 		type: "string",
-	},
-	heating_operation_mode: {
-		folder: "Modus",
-		name: "Betriebsart Heizung",
-		role: "level.mode", // "level.mode" passt perfekt für Dropdowns
-		type: "number",
-		write: true,
-		luxWriteId: "heating_operation_mode",
-		states: {
-			0: "Automatik",
-			1: "Zusatzheizung",
-			2: "Party",
-			3: "Ferien",
-			4: "Aus",
-		},
 	},
 };
