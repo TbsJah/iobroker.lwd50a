@@ -203,55 +203,6 @@ const STATE_MAPPING = {
     min: 30,
     max: 60
   },
-  temperature_heat_source_out: {
-    folder: "temperatures",
-    name: "W\xE4rmequelle Austritt",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C"
-  },
-  temperature_mixer1_flow: {
-    folder: "temperatures",
-    name: "Mischkreis 1 Vorlauf",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C"
-  },
-  temperature_mixer1_target: {
-    folder: "temperatures",
-    name: "Mischkreis 1 Soll",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C"
-  },
-  temperaturw_RFV: {
-    folder: "temperatures",
-    name: "Raumfernversteller RFV",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C"
-  },
-  temperature_solar_collector: {
-    folder: "temperatures",
-    name: "Solar-Kollektor",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C"
-  },
-  temperature_solar_storage: {
-    folder: "temperatures",
-    name: "Solar-Speicher",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C"
-  },
-  temperature_external_source: {
-    folder: "temperatures",
-    name: "Externe Energiequelle",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C"
-  },
   // --- NEUE WERTE: Kältekreis-Temperaturen ---
   temperature_overheating_target: {
     folder: "temperatures",
@@ -472,48 +423,6 @@ const STATE_MAPPING = {
     role: "value",
     type: "number"
   },
-  SLPout: {
-    folder: "outputs",
-    name: "Ausgang Solarladepumpe SLP",
-    role: "value",
-    type: "number"
-  },
-  SUPout: {
-    folder: "outputs",
-    name: "Ausgang Zusatzpumpe SUP",
-    role: "value",
-    type: "number"
-  },
-  MZ2out: {
-    folder: "outputs",
-    name: "Ausgang Mischer 2 Zu MZ2",
-    role: "value",
-    type: "number"
-  },
-  MA2out: {
-    folder: "outputs",
-    name: "Ausgang Mischer 2 Auf MA2",
-    role: "value",
-    type: "number"
-  },
-  MZ3out: {
-    folder: "outputs",
-    name: "Ausgang Mischer 3 Zu MZ3",
-    role: "value",
-    type: "number"
-  },
-  MA3out: {
-    folder: "outputs",
-    name: "Ausgang Mischer 3 Auf MA3",
-    role: "value",
-    type: "number"
-  },
-  FP3out: {
-    folder: "outputs",
-    name: "Ausgang Funktionspumpe 3 FP3",
-    role: "value",
-    type: "number"
-  },
   analogOut1: {
     folder: "outputs",
     name: "Analoger Ausgang 1",
@@ -670,13 +579,6 @@ const STATE_MAPPING = {
   hours_cooling: {
     folder: "statistics",
     name: "Betriebsstunden K\xFChlbetrieb",
-    role: "value",
-    type: "number",
-    unit: "h"
-  },
-  hours_solar: {
-    folder: "statistics",
-    name: "Betriebsstunden Solaranlage",
     role: "value",
     type: "number",
     unit: "h"
@@ -945,38 +847,6 @@ const STATE_MAPPING = {
     role: "text",
     type: "string"
   },
-  opStateMixer1: {
-    folder: "status",
-    name: "Betriebszustand Mischerkreis 1",
-    role: "value",
-    type: "number"
-  },
-  opStateMixer2: {
-    folder: "status",
-    name: "Betriebszustand Mischerkreis 2",
-    role: "value",
-    type: "number"
-  },
-  opStateMixer3: {
-    folder: "status",
-    name: "Betriebszustand Mischerkreis 3",
-    role: "value",
-    type: "number"
-  },
-  temperature_mixer3_flow: {
-    folder: "temperatures",
-    name: "Mischkreis 3 Vorlauf",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C"
-  },
-  temperature_mixer3_target: {
-    folder: "temperatures",
-    name: "Mischkreis 3 Soll",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C"
-  },
   Einst_Kurzprogramm: {
     folder: "status",
     name: "Einstellung Kurzprogramm",
@@ -1019,29 +889,9 @@ const STATE_MAPPING = {
     role: "date",
     type: "string"
   },
-  Temperatur_RFV2: {
-    folder: "temperatures",
-    name: "Raumfernversteller RFV2",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C"
-  },
-  Temperatur_RFV3: {
-    folder: "temperatures",
-    name: "Raumfernversteller RFV3",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C"
-  },
   SH_SW: {
     folder: "status",
     name: "Status SH_SW",
-    role: "value",
-    type: "number"
-  },
-  FreigabKuehl: {
-    folder: "status",
-    name: "Freigabe K\xFChlung",
     role: "value",
     type: "number"
   },
@@ -1063,26 +913,6 @@ const STATE_MAPPING = {
     role: "value",
     type: "number"
   },
-  Temp_Lueftung_Zuluft: {
-    folder: "temperatures",
-    name: "L\xFCftung Zuluft Temperatur",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C"
-  },
-  Temp_Lueftung_Abluft: {
-    folder: "temperatures",
-    name: "L\xFCftung Abluft Temperatur",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C"
-  },
-  Durchfluss_WQ: {
-    folder: "status",
-    name: "Durchfluss W\xE4rmequelle",
-    role: "value",
-    type: "number"
-  },
   flowRate: {
     folder: "status",
     name: "Durchflussmenge",
@@ -1091,54 +921,60 @@ const STATE_MAPPING = {
   },
   // --- NEUE WERTE: LIN-Bus Details ---
   LIN_TUE: {
-    folder: "status",
-    name: "LIN-Bus TUE",
-    role: "value",
-    type: "number"
+    folder: "Informationen.Status",
+    name: "LIN-Bus Verdampfer-Austrittstemperatur (TUE)",
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C"
   },
   LIN_TUE1: {
-    folder: "status",
-    name: "LIN-Bus TUE1",
-    role: "value",
-    type: "number"
+    folder: "Informationen.Status",
+    name: "LIN-Bus Verdampfer-Austrittstemperatur 2 (TUE1)",
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C"
   },
   LIN_VDH: {
-    folder: "status",
-    name: "LIN-Bus VDH",
-    role: "value",
-    type: "number"
+    folder: "Informationen.Status",
+    name: "LIN-Bus Hei\xDFgastemperatur Verdichter (VDH)",
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C"
   },
   LIN_UH: {
-    folder: "status",
-    name: "LIN-Bus UH",
-    role: "value",
-    type: "number"
+    folder: "Informationen.Status",
+    name: "LIN-Bus \xDCberhitzung Ist (UH)",
+    role: "value.temperature",
+    type: "number",
+    unit: "K"
   },
   LIN_UH_Soll: {
-    folder: "status",
-    name: "LIN-Bus UH Soll",
-    role: "value",
-    type: "number"
+    folder: "Informationen.Status",
+    name: "LIN-Bus \xDCberhitzung Soll",
+    role: "value.temperature",
+    type: "number",
+    unit: "K"
   },
   LIN_HD: {
-    folder: "status",
+    folder: "Informationen.Status",
     name: "LIN-Bus Hochdruck",
     role: "value.pressure",
     type: "number",
     unit: "bar"
   },
   LIN_ND: {
-    folder: "status",
+    folder: "Informationen.Status",
     name: "LIN-Bus Niederdruck",
     role: "value.pressure",
     type: "number",
     unit: "bar"
   },
   LIN_VDH_out: {
-    folder: "status",
-    name: "LIN-Bus VDH Ausgang",
+    folder: "Informationen.Status",
+    name: "LIN-Bus Verdichterkopfheizung Ansteuerung",
     role: "value",
-    type: "number"
+    type: "number",
+    unit: "%"
   }
 };
 // Annotate the CommonJS export names for ESM import in node:

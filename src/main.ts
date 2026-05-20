@@ -147,6 +147,12 @@ class Lwd50a extends utils.Adapter {
 						const folderId = definition.folder;
 						const stateId = `${folderId}.${key}`;
 
+						// --- WERT-ANPASSUNG (z.B. Druckwerte von Zentibar in bar umrechnen) ---
+						let finalValue = value;
+						if (definition.unit === "bar" && typeof finalValue === "number") {
+							finalValue = finalValue / 100;
+						}
+
 						// 1. Zuerst den Ordner (Channel) anlegen
 						await this.setObjectNotExists(folderId, {
 							type: "channel",
