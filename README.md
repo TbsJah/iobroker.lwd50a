@@ -143,15 +143,13 @@ For later updates:
 
 ## Changelog
 
-## Changelog
-
 ### 0.0.1
 
 - (Tbs) initial release with dynamic state mapping and 30s polling
 
 ### 0.0.2 (2026-05-20)
 
-- ### **WORK IN PROGRESS**
+### **WORK IN PROGRESS**
 
 ## License
 
