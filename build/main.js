@@ -23,6 +23,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 ));
 var utils = __toESM(require("@iobroker/adapter-core"));
 var luxtronik = __toESM(require("luxtronik2"));
+var import_stateMapping = require("./stateMapping");
 class Lwd50a extends utils.Adapter {
   constructor(options = {}) {
     super({
@@ -37,38 +38,34 @@ class Lwd50a extends utils.Adapter {
    * Is called when databases are connected and adapter received configuration.
    */
   async onReady() {
-    this.log.debug("config option1: ${this.config.option1}");
-    this.log.debug("config option2: ${this.config.option2}");
-    await this.setObjectNotExistsAsync("testVariable", {
-      type: "state",
-      common: {
-        name: "testVariable",
-        type: "boolean",
-        role: "indicator",
-        read: true,
-        write: true
-      },
-      native: {}
-    });
-    this.subscribeStates("testVariable");
-    await this.setState("testVariable", true);
-    await this.setState("testVariable", { val: true, ack: true });
-    await this.setState("testVariable", { val: true, ack: true, expire: 30 });
-    const pwdResult = await this.checkPasswordAsync("admin", "iobroker");
-    this.log.info(`check user admin pw iobroker: ${JSON.stringify(pwdResult)}`);
-    const groupResult = await this.checkGroupAsync("admin", "admin");
-    this.log.info(`check group user admin group admin: ${JSON.stringify(groupResult)}`);
     const ip = "192.168.178.81";
     const port = 8889;
     this.log.info(`Verbinde mit W\xE4rmepumpe auf ${ip}:${port}...`);
     const pump = new luxtronik.createConnection(ip, port);
-    pump.read((err, data) => {
+    await pump.read(async (err, data) => {
       if (err) {
         this.log.error(`Verbindungsfehler: ${err.message}`);
         return;
       }
-      const vorlauf = data.values.temperature_supply;
-      this.log.info(`Vorlauf: ${vorlauf}\xB0C`);
+      for (const [key, value] of Object.entries(data.values)) {
+        const definition = import_stateMapping.STATE_MAPPING[key];
+        if (definition) {
+          const stateId = `values.${key}`;
+          await this.setObjectNotExists(stateId, {
+            type: "state",
+            common: {
+              name: definition.name,
+              type: definition.type,
+              role: definition.role,
+              unit: definition.unit,
+              read: true,
+              write: definition.write || false
+            },
+            native: {}
+          });
+          await this.setState(stateId, value, true);
+        }
+      }
     });
   }
   /**
