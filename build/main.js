@@ -54,40 +54,52 @@ class Lwd50a extends utils.Adapter {
    */
   updateData() {
     if (!this.pump) {
+      this.log.error("Abfrage abgebrochen: Keine aktive Verbindung zur W\xE4rmepumpe vorhanden.");
       return;
     }
     this.pump.read(async (err, data) => {
       if (err) {
-        this.log.error(`Verbindungsfehler: ${err.message}`);
+        this.log.error(`Verbindungsfehler beim Einlesen der Daten: ${err.message}`);
         return;
       }
       this.log.debug("Daten von der W\xE4rmepumpe erfolgreich empfangen.");
-      for (const [key, value] of Object.entries(data.values)) {
-        const definition = import_stateMapping.STATE_MAPPING[key];
-        if (definition) {
-          const folderId = definition.folder;
-          const stateId = `${folderId}.${key}`;
-          await this.setObjectNotExists(folderId, {
-            type: "channel",
-            common: {
-              name: folderId.charAt(0).toUpperCase() + folderId.slice(1)
-            },
-            native: {}
-          });
-          await this.setObjectNotExists(stateId, {
-            type: "state",
-            common: {
-              name: definition.name,
-              type: definition.type,
-              role: definition.role,
-              unit: definition.unit,
-              read: true,
-              write: definition.write || false
-            },
-            native: {}
-          });
-          await this.setState(stateId, value, true);
+      try {
+        for (const [key, value] of Object.entries(data.values)) {
+          const definition = import_stateMapping.STATE_MAPPING[key];
+          if (definition) {
+            const folderId = definition.folder;
+            const stateId = `${folderId}.${key}`;
+            await this.setObjectNotExists(folderId, {
+              type: "channel",
+              common: {
+                name: folderId.charAt(0).toUpperCase() + folderId.slice(1)
+              },
+              native: {}
+            });
+            await this.setObjectNotExists(stateId, {
+              type: "state",
+              common: {
+                name: definition.name,
+                type: definition.type,
+                role: definition.role,
+                unit: definition.unit,
+                read: true,
+                write: definition.write || false,
+                min: definition.min,
+                max: definition.max
+              },
+              native: {}
+            });
+            if (definition.write) {
+              await this.subscribeStatesAsync(stateId);
+            }
+            await this.setState(stateId, value, true);
+          }
         }
+      } catch (catchErr) {
+        this.log.error(
+          `Fehler beim Schreiben der Objekte in die ioBroker-Datenbank: ${catchErr.message}`
+        );
       }
     });
   }
@@ -98,6 +110,9 @@ class Lwd50a extends utils.Adapter {
    */
   onUnload(callback) {
     try {
+      if (this.pollingInterval) {
+        clearInterval(this.pollingInterval);
+      }
       callback();
     } catch (error) {
       this.log.error(`Error during unloading: ${error.message}`);
@@ -125,14 +140,57 @@ class Lwd50a extends utils.Adapter {
    * @param state - State object
    */
   onStateChange(id, state) {
-    if (state) {
-      this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
-      if (state.ack === false) {
-        this.log.info(`User command received for ${id}: ${state.val}`);
-      }
-    } else {
-      this.log.info(`state ${id} deleted`);
+    if (!state) {
+      this.log.info(`State ${id} wurde gel\xF6scht.`);
+      return;
     }
+    if (state.ack) {
+      return;
+    }
+    this.log.info(`Nutzerbefehl empfangen f\xFCr ${id}: ${state.val}`);
+    const idParts = id.split(".");
+    idParts.shift();
+    idParts.shift();
+    const mappingKey = idParts[1];
+    const definition = import_stateMapping.STATE_MAPPING[mappingKey];
+    if (!definition || !definition.luxWriteId) {
+      this.log.warn(`Kein Schreib-Mapping f\xFCr ${mappingKey} gefunden.`);
+      return;
+    }
+    if (typeof state.val === "number") {
+      if (definition.min !== void 0 && state.val < definition.min) {
+        this.log.warn(
+          `Eingabewert ${state.val} unterschreitet Minimum von ${definition.min} f\xFCr ${mappingKey}. Abgebrochen.`
+        );
+        return;
+      }
+      if (definition.max !== void 0 && state.val > definition.max) {
+        this.log.warn(
+          `Eingabewert ${state.val} \xFCberschreitet Maximum von ${definition.max} f\xFCr ${mappingKey}. Abgebrochen.`
+        );
+        return;
+      }
+    }
+    if (!this.pump) {
+      this.log.error("Schreiben abgebrochen: Keine aktive Verbindung zur W\xE4rmepumpe vorhanden.");
+      return;
+    }
+    this.log.info(`Sende an Luxtronik: ${definition.luxWriteId} = ${state.val}`);
+    this.pump.write(definition.luxWriteId, state.val, async (err, _result) => {
+      if (err) {
+        this.log.error(`Fehler beim Schreiben an Luxtronik (${definition.luxWriteId}): ${err.message}`);
+        return;
+      }
+      try {
+        this.log.info(`Wert ${state.val} erfolgreich an W\xE4rmepumpe \xFCbertragen.`);
+        await this.setState(id, state.val, true);
+        this.updateData();
+      } catch (catchErr) {
+        this.log.error(
+          `Fehler beim Aktualisieren des ioBroker-Status nach Schreibbefehl: ${catchErr.message}`
+        );
+      }
+    });
   }
   // If you need to accept messages in your adapter, uncomment the following block and the corresponding line in the constructor.
   // /**

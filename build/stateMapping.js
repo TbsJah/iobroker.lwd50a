@@ -61,6 +61,17 @@ const STATE_MAPPING = {
     name: "Status Warmwasser",
     role: "indicator",
     type: "boolean"
+  },
+  hot_water_target: {
+    folder: "parameters",
+    name: "Warmwasser Soll-Temperatur",
+    role: "level.temperature",
+    type: "number",
+    unit: "\xB0C",
+    write: true,
+    luxWriteId: "hot_water_target",
+    min: 40,
+    max: 65
   }
 };
 // Annotate the CommonJS export names for ESM import in node:
