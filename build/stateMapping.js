@@ -50,14 +50,14 @@ const STATE_MAPPING = {
     type: "number",
     unit: "\xB0C"
   },
-  hot_water_target: {
+  temperature_hot_water_target: {
     folder: "Parameter",
     name: "Warmwasser Soll-Temperatur",
     role: "level.temperature",
     type: "number",
     unit: "\xB0C",
     write: true,
-    luxWriteId: "hot_water_target",
+    luxWriteId: "temperature_hot_water_target",
     min: 40,
     max: 65
   },
