@@ -5,9 +5,19 @@
 // The adapter-core module gives you access to the core ioBroker functions
 // you need to create an adapter
 import * as utils from "@iobroker/adapter-core";
+import * as luxtronik from "luxtronik2";
 
 // Load your modules here, e.g.:
 // import * as fs from "fs";
+interface LuxtronikData {
+	values: {
+		temperature_supply: number; // Vorlauf
+		temperature_return: number; // Rücklauf
+		temperature_outside: number; // Außentemperatur
+		// ... hier könnte man später noch mehr ergänzen
+	};
+	parameters: any;
+}
 
 class Lwd50a extends utils.Adapter {
 	public constructor(options: Partial<utils.AdapterOptions> = {}) {
@@ -81,6 +91,26 @@ class Lwd50a extends utils.Adapter {
 
 		const groupResult = await this.checkGroupAsync("admin", "admin");
 		this.log.info(`check group user admin group admin: ${JSON.stringify(groupResult)}`);
+
+		const ip = "192.168.178.81";
+		const port = 8889;
+
+		this.log.info(`Verbinde mit Wärmepumpe auf ${ip}:${port}...`);
+		const pump = new luxtronik.createConnection(ip, port);
+
+		// 2. DIE TYPISIERUNG BEIM AUSLESEN
+		// Wir sagen TypeScript: "err ist ein Error und data entspricht unserem Bauplan 'LuxtronikData'"
+		pump.read((err: Error | null, data: LuxtronikData) => {
+			if (err) {
+				this.log.error(`Verbindungsfehler: ${err.message}`);
+				return;
+			}
+
+			// 3. DIE MAGIE IM EDITOR
+			const vorlauf = data.values.temperature_supply;
+
+			this.log.info(`Vorlauf: ${vorlauf}°C`);
+		});
 	}
 
 	/**

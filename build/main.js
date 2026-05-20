@@ -22,6 +22,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 var utils = __toESM(require("@iobroker/adapter-core"));
+var luxtronik = __toESM(require("luxtronik2"));
 class Lwd50a extends utils.Adapter {
   constructor(options = {}) {
     super({
@@ -57,6 +58,18 @@ class Lwd50a extends utils.Adapter {
     this.log.info(`check user admin pw iobroker: ${JSON.stringify(pwdResult)}`);
     const groupResult = await this.checkGroupAsync("admin", "admin");
     this.log.info(`check group user admin group admin: ${JSON.stringify(groupResult)}`);
+    const ip = "192.168.178.81";
+    const port = 8889;
+    this.log.info(`Verbinde mit W\xE4rmepumpe auf ${ip}:${port}...`);
+    const pump = new luxtronik.createConnection(ip, port);
+    pump.read((err, data) => {
+      if (err) {
+        this.log.error(`Verbindungsfehler: ${err.message}`);
+        return;
+      }
+      const vorlauf = data.values.temperature_supply;
+      this.log.info(`Vorlauf: ${vorlauf}\xB0C`);
+    });
   }
   /**
    * Is called when adapter shuts down - callback has to be called under any circumstances!
