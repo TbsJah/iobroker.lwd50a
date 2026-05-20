@@ -41,7 +41,7 @@ class Lwd50a extends utils.Adapter {
    */
   onReady() {
     const ip = "192.168.178.81";
-    const port = 8888;
+    const port = 8889;
     this.log.info(`Verbinde mit W\xE4rmepumpe auf ${ip}:${port}...`);
     this.pump = new luxtronik.createConnection(ip, port);
     this.updateData();
@@ -62,6 +62,13 @@ class Lwd50a extends utils.Adapter {
     }
     this.pump.read(async (err, data) => {
       if (err) {
+        if (err.message && err.message.toLowerCase().includes("busy")) {
+          this.log.info("W\xE4rmepumpe ist ausgelastet (busy). Erneuter Versuch in 15 Sekunden...");
+          setTimeout(() => {
+            this.updateData();
+          }, 15e3);
+          return;
+        }
         this.log.error(`Verbindungsfehler beim Einlesen der Daten: ${err.message}`);
         return;
       }
@@ -192,9 +199,14 @@ class Lwd50a extends utils.Adapter {
         return;
       }
       this.log.info(`Wert ${state.val} erfolgreich an W\xE4rmepumpe \xFCbertragen.`);
-      setTimeout(() => {
+      this.setState(id, state.val, true, (setStateErr) => {
+        if (setStateErr) {
+          this.log.error(`Fehler beim Best\xE4tigen des Status im ioBroker: ${setStateErr.message}`);
+        }
         this.updateData();
-      }, 1500);
+      }).catch((err2) => {
+        this.log.error(`Fehler beim Schreiben des Status: ${err2}`);
+      });
     });
   }
   // If you need to accept messages in your adapter, uncomment the following block and the corresponding line in the constructor.

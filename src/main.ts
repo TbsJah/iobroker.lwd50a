@@ -31,7 +31,7 @@ class Lwd50a extends utils.Adapter {
 		// Initialize your adapter here
 
 		const ip = "192.168.178.81";
-		const port = 8888;
+		const port = 8889;
 
 		this.log.info(`Verbinde mit Wärmepumpe auf ${ip}:${port}...`);
 
@@ -115,10 +115,21 @@ class Lwd50a extends utils.Adapter {
 
 		this.pump.read(async (err: Error | null, data: any) => {
 			if (err) {
+				// NEU: Prüfen, ob die Wärmepumpe beschäftigt ("busy") ist
+				if (err.message && err.message.toLowerCase().includes("busy")) {
+					this.log.info("Wärmepumpe ist ausgelastet (busy). Erneuter Versuch in 15 Sekunden...");
+
+					setTimeout(() => {
+						this.updateData();
+					}, 15000);
+
+					return; // Wichtig: Methode hier abbrechen, da keine Daten da sind
+				}
+
+				// Normaler Verbindungsfehler
 				this.log.error(`Verbindungsfehler beim Einlesen der Daten: ${err.message}`);
 				return;
 			}
-
 			this.log.debug("Daten von der Wärmepumpe erfolgreich empfangen.");
 
 			try {
@@ -273,12 +284,19 @@ class Lwd50a extends utils.Adapter {
 			}
 
 			this.log.info(`Wert ${state.val} erfolgreich an Wärmepumpe übertragen.`);
-
+			// Wir nutzen die Standardmethode (ohne await) und hängen ein .catch() an.
+			// Das löst alle Linter-Probleme bezüglich "floating promises" sofort auf.
+			this.setState(id, state.val, true, setStateErr => {
+				if (setStateErr) {
+					this.log.error(`Fehler beim Bestätigen des Status im ioBroker: ${setStateErr.message}`);
+				}
+				// Sofort frische Daten nach dem Bestätigen holen
+				this.updateData();
+			}).catch(err => {
+				this.log.error(`Fehler beim Schreiben des Status: ${err}`);
+			});
 			// Wir geben der Wärmepumpe 500ms Zeit, den Wert intern zu verarbeiten,
 			// und holen dann die frischen, bestätigten Daten ab.
-			setTimeout(() => {
-				this.updateData();
-			}, 1500);
 		});
 	}
 	// If you need to accept messages in your adapter, uncomment the following block and the corresponding line in the constructor.
