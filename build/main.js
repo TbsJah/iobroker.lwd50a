@@ -159,7 +159,9 @@ class Lwd50a extends utils.Adapter {
     const idParts = id.split(".");
     idParts.shift();
     idParts.shift();
-    const mappingKey = idParts[1];
+    idParts.shift();
+    this.log.info(idParts[0]);
+    const mappingKey = idParts[0];
     const definition = import_stateMapping.STATE_MAPPING[mappingKey];
     if (!definition || !definition.luxWriteId) {
       this.log.warn(`Kein Schreib-Mapping f\xFCr ${mappingKey} gefunden.`);
@@ -192,7 +194,7 @@ class Lwd50a extends utils.Adapter {
       this.log.info(`Wert ${state.val} erfolgreich an W\xE4rmepumpe \xFCbertragen.`);
       setTimeout(() => {
         this.updateData();
-      }, 500);
+      }, 1500);
     });
   }
   // If you need to accept messages in your adapter, uncomment the following block and the corresponding line in the constructor.

@@ -233,8 +233,9 @@ class Lwd50a extends utils.Adapter {
 		const idParts = id.split(".");
 		idParts.shift(); // lwd50a entfernen
 		idParts.shift(); // Instanz entfernen
-
-		const mappingKey = idParts[1];
+		idParts.shift(); // Ordner entfernen
+		this.log.info(idParts[0]);
+		const mappingKey = idParts[0];
 		const definition = STATE_MAPPING[mappingKey];
 
 		if (!definition || !definition.luxWriteId) {
@@ -277,7 +278,7 @@ class Lwd50a extends utils.Adapter {
 			// und holen dann die frischen, bestätigten Daten ab.
 			setTimeout(() => {
 				this.updateData();
-			}, 500);
+			}, 1500);
 		});
 	}
 	// If you need to accept messages in your adapter, uncomment the following block and the corresponding line in the constructor.
