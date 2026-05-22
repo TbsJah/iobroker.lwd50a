@@ -33,7 +33,7 @@ const STATE_MAPPING = {
     unit: "\xB0C",
     write: true,
     luxWriteId: "hot_water_target",
-    min: 30,
+    min: 20,
     max: 65
   },
   heating_operation_mode: {

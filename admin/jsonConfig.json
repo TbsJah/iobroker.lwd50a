@@ -2,603 +2,465 @@
 	"i18n": true,
 	"type": "panel",
 	"items": {
-		"mainConfigurationTabs": {
+		"tabConnection": {
 			"type": "panel",
-			"panelType": "tabs",
+			"label": "Verbindungseinstellungen",
 			"items": {
-				"tabConnection": {
-					"type": "panel",
-					"label": "Verbindungseinstellungen",
-					"items": {
-						"host": {
-							"type": "text",
-							"label": "Wärmepumpen IP-Adresse"
-						},
-						"port": {
-							"type": "number",
-							"label": "Port (Standard 8889)",
-							"default": 8889
-						},
-						"interval": {
-							"type": "number",
-							"label": "Abfrageintervall (Sekunden)",
-							"default": 30
-						}
-					}
+				"host": {
+					"type": "text",
+					"label": "Wärmepumpen IP-Adresse"
 				},
-				"tabParameters": {
-					"type": "panel",
-					"label": "Einstellungen / Parameter",
-					"items": {
-						"_label_param": {
-							"type": "staticText",
-							"label": "Schreibbare Einstellungen der Wärmepumpe:"
-						},
-						"sync_hot_water_target": {
-							"type": "checkbox",
-							"label": "Warmwasser Soll-Temperatur",
-							"default": true
-						},
-						"sync_heating_operation_mode": {
-							"type": "checkbox",
-							"label": "Betriebsart Heizung",
-							"default": true
-						}
-					}
+				"port": {
+					"type": "number",
+					"label": "Port (Standard 8889)",
+					"default": 8889
 				},
-				"tabTemperatures": {
-					"type": "panel",
-					"label": "Temperaturen",
-					"items": {
-						"_label_temp": {
-							"type": "staticText",
-							"label": "Fühler- und Systemtemperaturen:"
-						},
-						"sync_temperature_supply": {
-							"type": "checkbox",
-							"label": "Vorlauftemperatur",
-							"default": true
-						},
-						"sync_temperature_return": {
-							"type": "checkbox",
-							"label": "Rücklauftemperatur",
-							"default": true
-						},
-						"sync_temperature_outside": { "type": "checkbox", "label": "Außentemperatur", "default": true },
-						"sync_temperature_hot_water": {
-							"type": "checkbox",
-							"label": "Warmwassertemperatur",
-							"default": true
-						},
-						"sync_temperature_heat_source_in": {
-							"type": "checkbox",
-							"label": "Wärmequelle Eintritt",
-							"default": true
-						},
-						"sync_temperature_heat_source_out": {
-							"type": "checkbox",
-							"label": "Wärmequelle Austritt",
-							"default": true
-						},
-						"sync_temperature_mixer1_flow": {
-							"type": "checkbox",
-							"label": "Mischkreis 1 Vorlauf Ist",
-							"default": false
-						},
-						"sync_temperature_mixer1_target": {
-							"type": "checkbox",
-							"label": "Mischkreis 1 Vorlauf Soll",
-							"default": false
-						},
-						"sync_temperature_mixer3_flow": {
-							"type": "checkbox",
-							"label": "Mischkreis 3 Vorlauf Ist",
-							"default": false
-						},
-						"sync_temperature_mixer3_target": {
-							"type": "checkbox",
-							"label": "Mischkreis 3 Vorlauf Soll",
-							"default": false
-						},
-						"sync_sync_temperaturw_RFV": {
-							"type": "checkbox",
-							"label": "Raumfernversteller RFV1",
-							"default": false
-						},
-						"sync_Temperatur_RFV2": {
-							"type": "checkbox",
-							"label": "Raumfernversteller RFV2",
-							"default": false
-						},
-						"sync_Temperatur_RFV3": {
-							"type": "checkbox",
-							"label": "Raumfernversteller RFV3",
-							"default": false
-						},
-						"sync_temperature_solar_collector": {
-							"type": "checkbox",
-							"label": "Solar-Kollektortemperatur",
-							"default": false
-						},
-						"sync_temperature_solar_storage": {
-							"type": "checkbox",
-							"label": "Solar-Speichertemperatur",
-							"default": false
-						},
-						"sync_temperature_external_source": {
-							"type": "checkbox",
-							"label": "Externe Energiequelle Temp.",
-							"default": false
-						},
-						"sync_Temp_Lueftung_Zuluft": {
-							"type": "checkbox",
-							"label": "Lüftung Zuluft Temperatur",
-							"default": false
-						},
-						"sync_Temp_Lueftung_Abluft": {
-							"type": "checkbox",
-							"label": "Lüftung Abluft Temperatur",
-							"default": false
-						}
-					}
+				"interval": {
+					"type": "number",
+					"label": "Abfrageintervall (Sekunden)",
+					"default": 30
+				}
+			}
+		},
+		"tabParameters": {
+			"type": "panel",
+			"label": "Einstellungen / Parameter",
+			"items": {
+				"_label_param": {
+					"type": "staticText",
+					"label": "Schreibbare Einstellungen der Wärmepumpe:"
 				},
-				"tabKaeltekreis": {
-					"type": "panel",
-					"label": "Kältekreis",
-					"items": {
-						"_label_kk": {
-							"type": "staticText",
-							"label": "Interne Kältekreis-Überwachung:"
-						},
-						"sync_temperature_overheating_target": {
-							"type": "checkbox",
-							"label": "Überhitzung Soll",
-							"default": false
-						},
-						"sync_temperature_compressor1_heating": {
-							"type": "checkbox",
-							"label": "Heißgas Kompressor 1",
-							"default": false
-						},
-						"sync_temperature_overheating": {
-							"type": "checkbox",
-							"label": "Überhitzung Ist",
-							"default": false
-						},
-						"sync_temperature_intake_compressor1": {
-							"type": "checkbox",
-							"label": "Saugstatus Kompressor 1 Temp.",
-							"default": false
-						},
-						"sync_temperature_intake_evaporation": {
-							"type": "checkbox",
-							"label": "Saugstatus Verdampfer Temp.",
-							"default": false
-						}
-					}
+				"sync_hot_water_target": { "type": "checkbox", "label": "Warmwasser Soll-Temperatur", "default": true },
+				"sync_heating_operation_mode": { "type": "checkbox", "label": "Betriebsart Heizung", "default": true }
+			}
+		},
+		"tabTemperatures": {
+			"type": "panel",
+			"label": "Temperaturen",
+			"items": {
+				"_label_temp": {
+					"type": "staticText",
+					"label": "Fühler- und Systemtemperaturen:"
 				},
-				"tabInputs": {
-					"type": "panel",
-					"label": "Eingänge",
-					"items": {
-						"_label_in": {
-							"type": "staticText",
-							"label": "Digitale und analoge Eingänge (Sensoren & Schalter):"
-						},
-						"sync_ASDin": { "type": "checkbox", "label": "Abtau-Endeschalter ASD", "default": true },
-						"sync_BWTin": { "type": "checkbox", "label": "Brauchwasserthermostat BWT", "default": true },
-						"sync_EVUin": { "type": "checkbox", "label": "EVU-Sperre", "default": true },
-						"sync_HDin": { "type": "checkbox", "label": "Hochdruckwächter HD", "default": true },
-						"sync_MOTin": { "type": "checkbox", "label": "Motorschutz MOT", "default": true },
-						"sync_NDin": { "type": "checkbox", "label": "Niederdruckwächter ND", "default": true },
-						"sync_NDin_pressure": {
-							"type": "checkbox",
-							"label": "Niederdruck-Sensorwert (bar)",
-							"default": true
-						},
-						"sync_HDin_pressure": {
-							"type": "checkbox",
-							"label": "Hochdruck-Sensorwert (bar)",
-							"default": true
-						},
-						"sync_PEXin": { "type": "checkbox", "label": "Externer Druckwächter PEX", "default": false },
-						"sync_SWTin": { "type": "checkbox", "label": "Schwimmbadthermostat SWT", "default": false },
-						"sync_AnalogIn": { "type": "checkbox", "label": "Analoger Eingang 1", "default": false },
-						"sync_AnalogIn2": { "type": "checkbox", "label": "Analoger Eingang 2", "default": false },
-						"sync_AnalogIn3": { "type": "checkbox", "label": "Analoger Eingang 3", "default": false },
-						"sync_SAXin": { "type": "checkbox", "label": "Eingang SAX", "default": false },
-						"sync_SPLin": { "type": "checkbox", "label": "Eingang SPL", "default": false }
-					}
+				"sync_temperature_supply": { "type": "checkbox", "label": "Vorlauftemperatur", "default": true },
+				"sync_temperature_return": { "type": "checkbox", "label": "Rücklauftemperatur", "default": true },
+				"sync_temperature_outside": { "type": "checkbox", "label": "Außentemperatur", "default": true },
+				"sync_temperature_hot_water": { "type": "checkbox", "label": "Warmwassertemperatur", "default": true },
+				"sync_temperature_heat_source_in": {
+					"type": "checkbox",
+					"label": "Wärmequelle Eintritt",
+					"default": true
 				},
-				"tabOutputs": {
-					"type": "panel",
-					"label": "Ausgänge",
-					"items": {
-						"_label_out": {
-							"type": "staticText",
-							"label": "Aktoren, Relais und Pumpensteuerungen:"
-						},
-						"sync_AVout": { "type": "checkbox", "label": "Abtauventil AV", "default": false },
-						"sync_BUPout": { "type": "checkbox", "label": "Warmwasser-Umwälzpumpe BUP", "default": true },
-						"sync_HUPout": { "type": "checkbox", "label": "Heizungsumwälzpumpe HUP", "default": true },
-						"sync_MA1out": { "type": "checkbox", "label": "Mischer 1 Auf MA1", "default": false },
-						"sync_MZ1out": { "type": "checkbox", "label": "Mischer 1 Zu MZ1", "default": false },
-						"sync_VENout": { "type": "checkbox", "label": "Ventilator VEN", "default": true },
-						"sync_VBOout": { "type": "checkbox", "label": "Ventilausgang Brunnen VBO", "default": false },
-						"sync_VD1out": { "type": "checkbox", "label": "Verdichter 1 VD1", "default": true },
-						"sync_VD2out": { "type": "checkbox", "label": "Verdichter 2 VD2", "default": false },
-						"sync_ZIPout": { "type": "checkbox", "label": "Zirkulationspumpe ZIP", "default": false },
-						"sync_ZUPout": { "type": "checkbox", "label": "Zusatzumwälzpumpe ZUP", "default": false },
-						"sync_ZW1out": {
-							"type": "checkbox",
-							"label": "Zweiter Wärmeerzeuger 1 ZW1 (Heizstab)",
-							"default": true
-						},
-						"sync_ZW2SSTout": { "type": "checkbox", "label": "ZW2 / Störungsmeldung", "default": false },
-						"sync_ZW3SSTout": { "type": "checkbox", "label": "ZW3 / Sammelstörung", "default": false },
-						"sync_FP2out": { "type": "checkbox", "label": "Funktionspumpe 2 FP2", "default": false },
-						"sync_SLPout": { "type": "checkbox", "label": "Solarladepumpe SLP", "default": false },
-						"sync_SUPout": { "type": "checkbox", "label": "Zusatzpumpe SUP", "default": false },
-						"sync_MZ2out": { "type": "checkbox", "label": "Mischer 2 Zu MZ2", "default": false },
-						"sync_MA2out": { "type": "checkbox", "label": "Mischer 2 Auf MA2", "default": false },
-						"sync_MZ3out": { "type": "checkbox", "label": "Mischer 3 Zu MZ3", "default": false },
-						"sync_MA3out": { "type": "checkbox", "label": "Mischer 3 Auf MA3", "default": false },
-						"sync_FP3out": { "type": "checkbox", "label": "Funktionspumpe 3 FP3", "default": false },
-						"sync_analogOut1": { "type": "checkbox", "label": "Analoger Ausgang 1", "default": false },
-						"sync_analogOut2": { "type": "checkbox", "label": "Analoger Ausgang 2", "default": false },
-						"sync_analogOut3": { "type": "checkbox", "label": "Analoger Ausgang 3", "default": false },
-						"sync_analogOut4": { "type": "checkbox", "label": "Analoger Ausgang 4", "default": false },
-						"sync_Out_VZU": { "type": "checkbox", "label": "Ventilator Zuluft VZU", "default": false },
-						"sync_Out_VAB": { "type": "checkbox", "label": "Ventilator Abluft VAB", "default": false },
-						"sync_Out_VSK": { "type": "checkbox", "label": "Ausgang VSK", "default": false },
-						"sync_Out_FRH": { "type": "checkbox", "label": "Freigabe Heizung FRH", "default": false },
-						"sync_defrostValve": { "type": "checkbox", "label": "Status Abtauventil", "default": false },
-						"sync_hotWaterBoilerValve": {
-							"type": "checkbox",
-							"label": "Status Umschaltventil Warmwasser",
-							"default": false
-						},
-						"sync_heatingSystemCircPump": {
-							"type": "checkbox",
-							"label": "Heizungssystem Zirkulationspumpe Laufindikator",
-							"default": false
-						},
-						"sync_heatSourceMotor": { "type": "checkbox", "label": "Motor Wärmequelle", "default": false },
-						"sync_compressor1": {
-							"type": "checkbox",
-							"label": "Status Kompressor 1 Laufrückmeldung",
-							"default": false
-						},
-						"sync_hotWaterCircPumpExtern": {
-							"type": "checkbox",
-							"label": "Warmwasser Zirkulationspumpe Extern",
-							"default": false
-						}
-					}
+				"sync_temperature_heat_source_out": {
+					"type": "checkbox",
+					"label": "Wärmequelle Austritt",
+					"default": true
 				},
-				"tabStats": {
-					"type": "panel",
-					"label": "Statistik & Zähler",
-					"items": {
-						"_label_stats": {
-							"type": "staticText",
-							"label": "Betriebsstunden und erzeugte Wärmemengen:"
-						},
-						"sync_hours_compressor1": {
-							"type": "checkbox",
-							"label": "Betriebsstunden Kompressor 1",
-							"default": true
-						},
-						"sync_starts_compressor1": {
-							"type": "checkbox",
-							"label": "Schaltspiele Kompressor 1",
-							"default": true
-						},
-						"sync_hours_compressor2": {
-							"type": "checkbox",
-							"label": "Betriebsstunden Kompressor 2",
-							"default": false
-						},
-						"sync_starts_compressor2": {
-							"type": "checkbox",
-							"label": "Schaltspiele Kompressor 2",
-							"default": false
-						},
-						"sync_hours_2nd_heat_source1": {
-							"type": "checkbox",
-							"label": "Betriebsstunden ZWE1 (Heizstab)",
-							"default": true
-						},
-						"sync_hours_2nd_heat_source2": {
-							"type": "checkbox",
-							"label": "Betriebsstunden ZWE2",
-							"default": false
-						},
-						"sync_hours_2nd_heat_source3": {
-							"type": "checkbox",
-							"label": "Betriebsstunden ZWE3",
-							"default": false
-						},
-						"sync_hours_heatpump": {
-							"type": "checkbox",
-							"label": "Betriebsstunden WP Gesamt",
-							"default": true
-						},
-						"sync_hours_heating": {
-							"type": "checkbox",
-							"label": "Betriebsstunden Heizbetrieb",
-							"default": true
-						},
-						"sync_hours_warmwater": {
-							"type": "checkbox",
-							"label": "Betriebsstunden Warmwasser",
-							"default": true
-						},
-						"sync_hours_cooling": {
-							"type": "checkbox",
-							"label": "Betriebsstunden Kühlbetrieb",
-							"default": false
-						},
-						"sync_hours_solar": {
-							"type": "checkbox",
-							"label": "Betriebsstunden Solaranlage",
-							"default": false
-						},
-						"sync_Zaehler_BetrZeitSW": {
-							"type": "checkbox",
-							"label": "Betriebsstundenzähler SW",
-							"default": false
-						},
-						"sync_thermalenergy_heating": {
-							"type": "checkbox",
-							"label": "Wärmemenge Heizung Erzeugt",
-							"default": true
-						},
-						"sync_thermalenergy_warmwater": {
-							"type": "checkbox",
-							"label": "Wärmemenge Warmwasser Erzeugt",
-							"default": true
-						},
-						"sync_thermalenergy_pool": {
-							"type": "checkbox",
-							"label": "Wärmemenge Schwimmbad Erzeugt",
-							"default": false
-						},
-						"sync_thermalenergy_total": {
-							"type": "checkbox",
-							"label": "Wärmemenge Gesamt Erzeugt",
-							"default": true
-						}
-					}
+				"sync_temperature_mixer1_flow": {
+					"type": "checkbox",
+					"label": "Mischkreis 1 Vorlauf Ist",
+					"default": false
 				},
-				"tabTimer": {
-					"type": "panel",
-					"label": "Timer & Zeiten",
-					"items": {
-						"_label_timer": {
-							"type": "staticText",
-							"label": "Interne Verzögerungszeiten und Sperrzeiten (in Sekunden):"
-						},
-						"sync_Time_WPein_akt": {
-							"type": "checkbox",
-							"label": "Aktuelle Einschaltzeit Wärmepumpe",
-							"default": false
-						},
-						"sync_Time_ZWE1_akt": {
-							"type": "checkbox",
-							"label": "Aktuelle Laufzeit ZWE1",
-							"default": false
-						},
-						"sync_Time_ZWE2_akt": {
-							"type": "checkbox",
-							"label": "Aktuelle Laufzeit ZWE2",
-							"default": false
-						},
-						"sync_Timer_EinschVerz": {
-							"type": "checkbox",
-							"label": "Einschaltverzögerung Restzeit",
-							"default": false
-						},
-						"sync_Time_SSPAUS_akt": {
-							"type": "checkbox",
-							"label": "Aktuelle Sperrzeit AUS",
-							"default": false
-						},
-						"sync_Time_SSPEIN_akt": {
-							"type": "checkbox",
-							"label": "Aktuelle Sperrzeit EIN",
-							"default": false
-						},
-						"sync_Time_VDStd_akt": {
-							"type": "checkbox",
-							"label": "Aktuelle Standzeit Verdichter",
-							"default": false
-						},
-						"sync_Time_HRM_akt": { "type": "checkbox", "label": "Aktuelle Zeit HRM", "default": false },
-						"sync_Time_HRW_akt": { "type": "checkbox", "label": "Aktuelle Zeit HRW", "default": false },
-						"sync_Time_LGS_akt": { "type": "checkbox", "label": "Aktuelle Zeit LGS", "default": false },
-						"sync_Time_SBW_akt": { "type": "checkbox", "label": "Aktuelle Zeit SBW", "default": false },
-						"sync_heatSourceDefrostTimer": {
-							"type": "checkbox",
-							"label": "Abtautimer Wärmequelle",
-							"default": false
-						},
-						"sync_Time_Heissgas": {
-							"type": "checkbox",
-							"label": "Zeit Heißgasüberwachung",
-							"default": false
-						},
-						"sync_ahp_Zeit": { "type": "checkbox", "label": "Zeit ahp-Stufe", "default": false }
-					}
+				"sync_temperature_mixer1_target": {
+					"type": "checkbox",
+					"label": "Mischkreis 1 Vorlauf Soll",
+					"default": false
 				},
-				"tabStatusInfo": {
-					"type": "panel",
-					"label": "Status & System",
-					"items": {
-						"_label_status": {
-							"type": "staticText",
-							"label": "Betriebszustände, Firmware und Netzwerk:"
-						},
-						"sync_typeHeatpump": { "type": "checkbox", "label": "Wärmepumpen-Typ", "default": true },
-						"sync_firmware": { "type": "checkbox", "label": "Firmware-Version", "default": true },
-						"sync_AdresseIP_akt": { "type": "checkbox", "label": "Aktuelle IP-Adresse", "default": false },
-						"sync_SubNetMask_akt": { "type": "checkbox", "label": "Subnetzmaske", "default": false },
-						"sync_Add_Broadcast": { "type": "checkbox", "label": "Broadcast-Adresse", "default": false },
-						"sync_Add_StdGateway": { "type": "checkbox", "label": "Standard-Gateway", "default": false },
-						"sync_Comfort_exists": {
-							"type": "checkbox",
-							"label": "Comfort-Platine vorhanden",
-							"default": false
-						},
-						"sync_Compact_exists": {
-							"type": "checkbox",
-							"label": "Compact-Bauform vorhanden",
-							"default": false
-						},
-						"sync_LIN_exists": { "type": "checkbox", "label": "LIN-Bus vorhanden", "default": false },
-						"sync_rawDeviceTimeCalc": {
-							"type": "checkbox",
-							"label": "Berechnete Gerätezeit",
-							"default": false
-						},
-						"sync_status_heating": { "type": "checkbox", "label": "Status Heizbetrieb", "default": true },
-						"sync_bivalentLevel": { "type": "checkbox", "label": "Bivalenzstufe", "default": false },
-						"sync_WP_BZ_akt": {
-							"type": "checkbox",
-							"label": "Aktueller Betriebszustand Code",
-							"default": true
-						},
-						"sync_heatpump_state1": {
-							"type": "checkbox",
-							"label": "Wärmepumpen Status-Code 1",
-							"default": false
-						},
-						"sync_heatpump_state2": {
-							"type": "checkbox",
-							"label": "Wärmepumpen Status-Code 2",
-							"default": false
-						},
-						"sync_heatpump_state3": {
-							"type": "checkbox",
-							"label": "Wärmepumpen Status-Code 3",
-							"default": false
-						},
-						"sync_heatpump_duration": {
-							"type": "checkbox",
-							"label": "Dauer aktueller Zustand",
-							"default": false
-						},
-						"sync_heatpump_state_string": {
-							"type": "checkbox",
-							"label": "Wärmepumpen Status Text",
-							"default": true
-						},
-						"sync_heatpump_extendet_state_string": {
-							"type": "checkbox",
-							"label": "Erweiterter Status Text",
-							"default": true
-						},
-						"sync_ahp_Stufe": { "type": "checkbox", "label": "Aktuelle ahp-Stufe", "default": false },
-						"sync_ahp_Temp": { "type": "checkbox", "label": "Temperatur ahp-Stufe", "default": false },
-						"sync_opStateHotWater": {
-							"type": "checkbox",
-							"label": "Betriebszustand Warmwasser Code",
-							"default": false
-						},
-						"sync_opStateHotWaterString": {
-							"type": "checkbox",
-							"label": "Betriebszustand Warmwasser Text",
-							"default": true
-						},
-						"sync_opStateHeating": {
-							"type": "checkbox",
-							"label": "Betriebszustand Heizung Code",
-							"default": false
-						},
-						"sync_opStateHeatingString": {
-							"type": "checkbox",
-							"label": "Betriebszustand Heizung Text",
-							"default": true
-						},
-						"sync_opStateMixer1": {
-							"type": "checkbox",
-							"label": "Betriebszustand Mischerkreis 1",
-							"default": false
-						},
-						"sync_opStateMixer2": {
-							"type": "checkbox",
-							"label": "Betriebszustand Mischerkreis 2",
-							"default": false
-						},
-						"sync_opStateMixer3": {
-							"type": "checkbox",
-							"label": "Betriebszustand Mischerkreis 3",
-							"default": false
-						},
-						"sync_Einst_Kurzprogramm": {
-							"type": "checkbox",
-							"label": "Einstellung Kurzprogramm",
-							"default": false
-						},
-						"sync_StatusSlave_1": { "type": "checkbox", "label": "Status Slave 1", "default": false },
-						"sync_StatusSlave_2": { "type": "checkbox", "label": "Status Slave 2", "default": false },
-						"sync_StatusSlave_3": { "type": "checkbox", "label": "Status Slave 3", "default": false },
-						"sync_StatusSlave_4": { "type": "checkbox", "label": "Status Slave 4", "default": false },
-						"sync_StatusSlave_5": { "type": "checkbox", "label": "Status Slave 5", "default": false },
-						"sync_SH_SW": { "type": "checkbox", "label": "Status SH_SW", "default": false },
-						"sync_FreigabKuehl": { "type": "checkbox", "label": "Freigabe Kühlung", "default": false },
-						"sync_SonderZeichen": { "type": "checkbox", "label": "Sonderzeichen Code", "default": false },
-						"sync_SH_ZIP": { "type": "checkbox", "label": "Status SH_ZIP", "default": false },
-						"sync_WebsrvProgrammWerteBeobarten": {
-							"type": "checkbox",
-							"label": "Webserver Programmwerte Beobachten",
-							"default": false
-						},
-						"sync_Durchfluss_WQ": {
-							"type": "checkbox",
-							"label": "Durchfluss Wärmequelle",
-							"default": false
-						},
-						"sync_flowRate": { "type": "checkbox", "label": "Durchflussmenge", "default": true }
-					}
+				"sync_temperature_mixer3_flow": {
+					"type": "checkbox",
+					"label": "Mischkreis 3 Vorlauf Ist",
+					"default": false
 				},
-				"tabLinBus": {
-					"type": "panel",
-					"label": "LIN-Bus Details",
-					"items": {
-						"_label_lin": {
-							"type": "staticText",
-							"label": "Interne Diagnose- und Kältekreiswerte über den LIN-Bus:"
-						},
-						"sync_LIN_TUE": { "type": "checkbox", "label": "Verdampfer-Austritt (TUE)", "default": false },
-						"sync_LIN_TUE1": {
-							"type": "checkbox",
-							"label": "Verdampfer-Austritt 2 (TUE1)",
-							"default": false
-						},
-						"sync_LIN_VDH": {
-							"type": "checkbox",
-							"label": "Heißgastemperatur Verdichter (VDH)",
-							"default": false
-						},
-						"sync_LIN_UH": {
-							"type": "checkbox",
-							"label": "LIN-Bus Überhitzung Ist (UH)",
-							"default": false
-						},
-						"sync_LIN_UH_Soll": {
-							"type": "checkbox",
-							"label": "LIN-Bus Überhitzung Soll",
-							"default": false
-						},
-						"sync_LIN_HD": { "type": "checkbox", "label": "LIN-Bus Hochdruck (bar)", "default": false },
-						"sync_LIN_ND": { "type": "checkbox", "label": "LIN-Bus Niederdruck (bar)", "default": false },
-						"sync_LIN_VDH_out": {
-							"type": "checkbox",
-							"label": "Verdichterkopfheizung Ansteuerung (%)",
-							"default": false
-						}
-					}
+				"sync_temperature_mixer3_target": {
+					"type": "checkbox",
+					"label": "Mischkreis 3 Vorlauf Soll",
+					"default": false
+				},
+				"sync_sync_temperaturw_RFV": {
+					"type": "checkbox",
+					"label": "Raumfernversteller RFV1",
+					"default": false
+				},
+				"sync_Temperatur_RFV2": { "type": "checkbox", "label": "Raumfernversteller RFV2", "default": false },
+				"sync_Temperatur_RFV3": { "type": "checkbox", "label": "Raumfernversteller RFV3", "default": false },
+				"sync_temperature_solar_collector": {
+					"type": "checkbox",
+					"label": "Solar-Kollektortemperatur",
+					"default": false
+				},
+				"sync_temperature_solar_storage": {
+					"type": "checkbox",
+					"label": "Solar-Speichertemperatur",
+					"default": false
+				},
+				"sync_temperature_external_source": {
+					"type": "checkbox",
+					"label": "Externe Energiequelle Temp.",
+					"default": false
+				},
+				"sync_Temp_Lueftung_Zuluft": {
+					"type": "checkbox",
+					"label": "Lüftung Zuluft Temperatur",
+					"default": false
+				},
+				"sync_Temp_Lueftung_Abluft": {
+					"type": "checkbox",
+					"label": "Lüftung Abluft Temperatur",
+					"default": false
+				}
+			}
+		},
+		"tabKaeltekreis": {
+			"type": "panel",
+			"label": "Kältekreis",
+			"items": {
+				"_label_kk": {
+					"type": "staticText",
+					"label": "Interne Kältekreis-Überwachung:"
+				},
+				"sync_temperature_overheating_target": {
+					"type": "checkbox",
+					"label": "Überhitzung Soll",
+					"default": false
+				},
+				"sync_temperature_compressor1_heating": {
+					"type": "checkbox",
+					"label": "Heißgas Kompressor 1",
+					"default": false
+				},
+				"sync_temperature_overheating": { "type": "checkbox", "label": "Überhitzung Ist", "default": false },
+				"sync_temperature_intake_compressor1": {
+					"type": "checkbox",
+					"label": "Saugstatus Kompressor 1 Temp.",
+					"default": false
+				},
+				"sync_temperature_intake_evaporation": {
+					"type": "checkbox",
+					"label": "Saugstatus Verdampfer Temp.",
+					"default": false
+				}
+			}
+		},
+		"tabInputs": {
+			"type": "panel",
+			"label": "Eingänge",
+			"items": {
+				"_label_in": {
+					"type": "staticText",
+					"label": "Digitale und analoge Eingänge (Sensoren & Schalter):"
+				},
+				"sync_ASDin": { "type": "checkbox", "label": "Abtau-Endeschalter ASD", "default": true },
+				"sync_BWTin": { "type": "checkbox", "label": "Brauchwasserthermostat BWT", "default": true },
+				"sync_EVUin": { "type": "checkbox", "label": "EVU-Sperre", "default": true },
+				"sync_HDin": { "type": "checkbox", "label": "Hochdruckwächter HD", "default": true },
+				"sync_MOTin": { "type": "checkbox", "label": "Motorschutz MOT", "default": true },
+				"sync_NDin": { "type": "checkbox", "label": "Niederdruckwächter ND", "default": true },
+				"sync_NDin_pressure": { "type": "checkbox", "label": "Niederdruck-Sensorwert (bar)", "default": true },
+				"sync_HDin_pressure": { "type": "checkbox", "label": "Hochdruck-Sensorwert (bar)", "default": true },
+				"sync_PEXin": { "type": "checkbox", "label": "Externer Druckwächter PEX", "default": false },
+				"sync_SWTin": { "type": "checkbox", "label": "Schwimmbadthermostat SWT", "default": false },
+				"sync_AnalogIn": { "type": "checkbox", "label": "Analoger Eingang 1", "default": false },
+				"sync_AnalogIn2": { "type": "checkbox", "label": "Analoger Eingang 2", "default": false },
+				"sync_AnalogIn3": { "type": "checkbox", "label": "Analoger Eingang 3", "default": false },
+				"sync_SAXin": { "type": "checkbox", "label": "Eingang SAX", "default": false },
+				"sync_SPLin": { "type": "checkbox", "label": "Eingang SPL", "default": false }
+			}
+		},
+		"tabOutputs": {
+			"type": "panel",
+			"label": "Ausgänge",
+			"items": {
+				"_label_out": {
+					"type": "staticText",
+					"label": "Aktoren, Relais und Pumpensteuerungen:"
+				},
+				"sync_AVout": { "type": "checkbox", "label": "Abtauventil AV", "default": false },
+				"sync_BUPout": { "type": "checkbox", "label": "Warmwasser-Umwälzpumpe BUP", "default": true },
+				"sync_HUPout": { "type": "checkbox", "label": "Heizungsumwälzpumpe HUP", "default": true },
+				"sync_MA1out": { "type": "checkbox", "label": "Mischer 1 Auf MA1", "default": false },
+				"sync_MZ1out": { "type": "checkbox", "label": "Mischer 1 Zu MZ1", "default": false },
+				"sync_VENout": { "type": "checkbox", "label": "Ventilator VEN", "default": true },
+				"sync_VBOout": { "type": "checkbox", "label": "Ventilausgang Brunnen VBO", "default": false },
+				"sync_VD1out": { "type": "checkbox", "label": "Verdichter 1 VD1", "default": true },
+				"sync_VD2out": { "type": "checkbox", "label": "Verdichter 2 VD2", "default": false },
+				"sync_ZIPout": { "type": "checkbox", "label": "Zirkulationspumpe ZIP", "default": false },
+				"sync_ZUPout": { "type": "checkbox", "label": "Zusatzumwälzpumpe ZUP", "default": false },
+				"sync_ZW1out": {
+					"type": "checkbox",
+					"label": "Zweiter Wärmeerzeuger 1 ZW1 (Heizstab)",
+					"default": true
+				},
+				"sync_ZW2SSTout": { "type": "checkbox", "label": "ZW2 / Störungsmeldung", "default": false },
+				"sync_ZW3SSTout": { "type": "checkbox", "label": "ZW3 / Sammelstörung", "default": false },
+				"sync_FP2out": { "type": "checkbox", "label": "Funktionspumpe 2 FP2", "default": false },
+				"sync_SLPout": { "type": "checkbox", "label": "Solarladepumpe SLP", "default": false },
+				"sync_SUPout": { "type": "checkbox", "label": "Zusatzpumpe SUP", "default": false },
+				"sync_MZ2out": { "type": "checkbox", "label": "Mischer 2 Zu MZ2", "default": false },
+				"sync_MA2out": { "type": "checkbox", "label": "Mischer 2 Auf MA2", "default": false },
+				"sync_MZ3out": { "type": "checkbox", "label": "Mischer 3 Zu MZ3", "default": false },
+				"sync_MA3out": { "type": "checkbox", "label": "Mischer 3 Auf MA3", "default": false },
+				"sync_FP3out": { "type": "checkbox", "label": "Funktionspumpe 3 FP3", "default": false },
+				"sync_analogOut1": { "type": "checkbox", "label": "Analoger Ausgang 1", "default": false },
+				"sync_analogOut2": { "type": "checkbox", "label": "Analoger Ausgang 2", "default": false },
+				"sync_analogOut3": { "type": "checkbox", "label": "Analoger Ausgang 3", "default": false },
+				"sync_analogOut4": { "type": "checkbox", "label": "Analoger Ausgang 4", "default": false },
+				"sync_Out_VZU": { "type": "checkbox", "label": "Ventilator Zuluft VZU", "default": false },
+				"sync_Out_VAB": { "type": "checkbox", "label": "Ventilator Abluft VAB", "default": false },
+				"sync_Out_VSK": { "type": "checkbox", "label": "Ausgang VSK", "default": false },
+				"sync_Out_FRH": { "type": "checkbox", "label": "Freigabe Heizung FRH", "default": false },
+				"sync_defrostValve": { "type": "checkbox", "label": "Status Abtauventil", "default": false },
+				"sync_hotWaterBoilerValve": {
+					"type": "checkbox",
+					"label": "Status Umschaltventil Warmwasser",
+					"default": false
+				},
+				"sync_heatingSystemCircPump": {
+					"type": "checkbox",
+					"label": "Heizungssystem Zirkulationspumpe Laufindikator",
+					"default": false
+				},
+				"sync_heatSourceMotor": { "type": "checkbox", "label": "Motor Wärmequelle", "default": false },
+				"sync_compressor1": {
+					"type": "checkbox",
+					"label": "Status Kompressor 1 Laufrückmeldung",
+					"default": false
+				},
+				"sync_hotWaterCircPumpExtern": {
+					"type": "checkbox",
+					"label": "Warmwasser Zirkulationspumpe Extern",
+					"default": false
+				}
+			}
+		},
+		"tabStats": {
+			"type": "panel",
+			"label": "Statistik & Zähler",
+			"items": {
+				"_label_stats": {
+					"type": "staticText",
+					"label": "Betriebsstunden und erzeugte Wärmemengen:"
+				},
+				"sync_hours_compressor1": {
+					"type": "checkbox",
+					"label": "Betriebsstunden Kompressor 1",
+					"default": true
+				},
+				"sync_starts_compressor1": {
+					"type": "checkbox",
+					"label": "Schaltspiele Kompressor 1",
+					"default": true
+				},
+				"sync_hours_compressor2": {
+					"type": "checkbox",
+					"label": "Betriebsstunden Kompressor 2",
+					"default": false
+				},
+				"sync_starts_compressor2": {
+					"type": "checkbox",
+					"label": "Schaltspiele Kompressor 2",
+					"default": false
+				},
+				"sync_hours_2nd_heat_source1": {
+					"type": "checkbox",
+					"label": "Betriebsstunden ZWE1 (Heizstab)",
+					"default": true
+				},
+				"sync_hours_2nd_heat_source2": {
+					"type": "checkbox",
+					"label": "Betriebsstunden ZWE2",
+					"default": false
+				},
+				"sync_hours_2nd_heat_source3": {
+					"type": "checkbox",
+					"label": "Betriebsstunden ZWE3",
+					"default": false
+				},
+				"sync_hours_heatpump": { "type": "checkbox", "label": "Betriebsstunden WP Gesamt", "default": true },
+				"sync_hours_heating": { "type": "checkbox", "label": "Betriebsstunden Heizbetrieb", "default": true },
+				"sync_hours_warmwater": { "type": "checkbox", "label": "Betriebsstunden Warmwasser", "default": true },
+				"sync_hours_cooling": { "type": "checkbox", "label": "Betriebsstunden Kühlbetrieb", "default": false },
+				"sync_hours_solar": { "type": "checkbox", "label": "Betriebsstunden Solaranlage", "default": false },
+				"sync_Zaehler_BetrZeitSW": {
+					"type": "checkbox",
+					"label": "Betriebsstundenzähler SW",
+					"default": false
+				},
+				"sync_thermalenergy_heating": {
+					"type": "checkbox",
+					"label": "Wärmemenge Heizung Erzeugt",
+					"default": true
+				},
+				"sync_thermalenergy_warmwater": {
+					"type": "checkbox",
+					"label": "Wärmemenge Warmwasser Erzeugt",
+					"default": true
+				},
+				"sync_thermalenergy_pool": {
+					"type": "checkbox",
+					"label": "Wärmemenge Schwimmbad Erzeugt",
+					"default": false
+				},
+				"sync_thermalenergy_total": {
+					"type": "checkbox",
+					"label": "Wärmemenge Gesamt Erzeugt",
+					"default": true
+				}
+			}
+		},
+		"tabTimer": {
+			"type": "panel",
+			"label": "Timer & Zeiten",
+			"items": {
+				"_label_timer": {
+					"type": "staticText",
+					"label": "Interne Verzögerungszeiten und Sperrzeiten (in Sekunden):"
+				},
+				"sync_Time_WPein_akt": {
+					"type": "checkbox",
+					"label": "Aktuelle Einschaltzeit Wärmepumpe",
+					"default": false
+				},
+				"sync_Time_ZWE1_akt": { "type": "checkbox", "label": "Aktuelle Laufzeit ZWE1", "default": false },
+				"sync_Time_ZWE2_akt": { "type": "checkbox", "label": "Aktuelle Laufzeit ZWE2", "default": false },
+				"sync_Timer_EinschVerz": {
+					"type": "checkbox",
+					"label": "Einschaltverzögerung Restzeit",
+					"default": false
+				},
+				"sync_Time_SSPAUS_akt": { "type": "checkbox", "label": "Aktuelle Sperrzeit AUS", "default": false },
+				"sync_Time_SSPEIN_akt": { "type": "checkbox", "label": "Aktuelle Sperrzeit EIN", "default": false },
+				"sync_Time_VDStd_akt": {
+					"type": "checkbox",
+					"label": "Aktuelle Standzeit Verdichter",
+					"default": false
+				},
+				"sync_Time_HRM_akt": { "type": "checkbox", "label": "Aktuelle Zeit HRM", "default": false },
+				"sync_Time_HRW_akt": { "type": "checkbox", "label": "Aktuelle Zeit HRW", "default": false },
+				"sync_Time_LGS_akt": { "type": "checkbox", "label": "Aktuelle Zeit LGS", "default": false },
+				"sync_Time_SBW_akt": { "type": "checkbox", "label": "Aktuelle Zeit SBW", "default": false },
+				"sync_heatSourceDefrostTimer": {
+					"type": "checkbox",
+					"label": "Abtautimer Wärmequelle",
+					"default": false
+				},
+				"sync_Time_Heissgas": { "type": "checkbox", "label": "Zeit Heißgasüberwachung", "default": false },
+				"sync_ahp_Zeit": { "type": "checkbox", "label": "Zeit ahp-Stufe", "default": false }
+			}
+		},
+		"tabStatusInfo": {
+			"type": "panel",
+			"label": "Status & System",
+			"items": {
+				"_label_status": {
+					"type": "staticText",
+					"label": "Betriebszustände, Firmware und Netzwerk:"
+				},
+				"sync_typeHeatpump": { "type": "checkbox", "label": "Wärmepumpen-Typ", "default": true },
+				"sync_firmware": { "type": "checkbox", "label": "Firmware-Version", "default": true },
+				"sync_AdresseIP_akt": { "type": "checkbox", "label": "Aktuelle IP-Adresse", "default": false },
+				"sync_SubNetMask_akt": { "type": "checkbox", "label": "Subnetzmaske", "default": false },
+				"sync_Add_Broadcast": { "type": "checkbox", "label": "Broadcast-Adresse", "default": false },
+				"sync_Add_StdGateway": { "type": "checkbox", "label": "Standard-Gateway", "default": false },
+				"sync_Comfort_exists": { "type": "checkbox", "label": "Comfort-Platine vorhanden", "default": false },
+				"sync_Compact_exists": { "type": "checkbox", "label": "Compact-Bauform vorhanden", "default": false },
+				"sync_LIN_exists": { "type": "checkbox", "label": "LIN-Bus vorhanden", "default": false },
+				"sync_rawDeviceTimeCalc": { "type": "checkbox", "label": "Berechnete Gerätezeit", "default": false },
+				"sync_status_heating": { "type": "checkbox", "label": "Status Heizbetrieb", "default": true },
+				"sync_bivalentLevel": { "type": "checkbox", "label": "Bivalenzstufe", "default": false },
+				"sync_WP_BZ_akt": { "type": "checkbox", "label": "Aktueller Betriebszustand Code", "default": true },
+				"sync_heatpump_state1": { "type": "checkbox", "label": "Wärmepumpen Status-Code 1", "default": false },
+				"sync_heatpump_state2": { "type": "checkbox", "label": "Wärmepumpen Status-Code 2", "default": false },
+				"sync_heatpump_state3": { "type": "checkbox", "label": "Wärmepumpen Status-Code 3", "default": false },
+				"sync_heatpump_duration": { "type": "checkbox", "label": "Dauer aktueller Zustand", "default": false },
+				"sync_heatpump_state_string": {
+					"type": "checkbox",
+					"label": "Wärmepumpen Status Text",
+					"default": true
+				},
+				"sync_heatpump_extendet_state_string": {
+					"type": "checkbox",
+					"label": "Erweiterter Status Text",
+					"default": true
+				},
+				"sync_ahp_Stufe": { "type": "checkbox", "label": "Aktuelle ahp-Stufe", "default": false },
+				"sync_ahp_Temp": { "type": "checkbox", "label": "Temperatur ahp-Stufe", "default": false },
+				"sync_opStateHotWater": {
+					"type": "checkbox",
+					"label": "Betriebszustand Warmwasser Code",
+					"default": false
+				},
+				"sync_opStateHotWaterString": {
+					"type": "checkbox",
+					"label": "Betriebszustand Warmwasser Text",
+					"default": true
+				},
+				"sync_opStateHeating": {
+					"type": "checkbox",
+					"label": "Betriebszustand Heizung Code",
+					"default": false
+				},
+				"sync_opStateHeatingString": {
+					"type": "checkbox",
+					"label": "Betriebszustand Heizung Text",
+					"default": true
+				},
+				"sync_opStateMixer1": {
+					"type": "checkbox",
+					"label": "Betriebszustand Mischerkreis 1",
+					"default": false
+				},
+				"sync_opStateMixer2": {
+					"type": "checkbox",
+					"label": "Betriebszustand Mischerkreis 2",
+					"default": false
+				},
+				"sync_opStateMixer3": {
+					"type": "checkbox",
+					"label": "Betriebszustand Mischerkreis 3",
+					"default": false
+				},
+				"sync_Einst_Kurzprogramm": {
+					"type": "checkbox",
+					"label": "Einstellung Kurzprogramm",
+					"default": false
+				},
+				"sync_StatusSlave_1": { "type": "checkbox", "label": "Status Slave 1", "default": false },
+				"sync_StatusSlave_2": { "type": "checkbox", "label": "Status Slave 2", "default": false },
+				"sync_StatusSlave_3": { "type": "checkbox", "label": "Status Slave 3", "default": false },
+				"sync_StatusSlave_4": { "type": "checkbox", "label": "Status Slave 4", "default": false },
+				"sync_StatusSlave_5": { "type": "checkbox", "label": "Status Slave 5", "default": false },
+				"sync_SH_SW": { "type": "checkbox", "label": "Status SH_SW", "default": false },
+				"sync_FreigabKuehl": { "type": "checkbox", "label": "Freigabe Kühlung", "default": false },
+				"sync_SonderZeichen": { "type": "checkbox", "label": "Sonderzeichen Code", "default": false },
+				"sync_SH_ZIP": { "type": "checkbox", "label": "Status SH_ZIP", "default": false },
+				"sync_WebsrvProgrammWerteBeobarten": {
+					"type": "checkbox",
+					"label": "Webserver Programmwerte Beobachten",
+					"default": false
+				},
+				"sync_Durchfluss_WQ": { "type": "checkbox", "label": "Durchfluss Wärmequelle", "default": false },
+				"sync_flowRate": { "type": "checkbox", "label": "Durchflussmenge", "default": true }
+			}
+		},
+		"tabLinBus": {
+			"type": "panel",
+			"label": "LIN-Bus Details",
+			"items": {
+				"_label_lin": {
+					"type": "staticText",
+					"label": "Interne Diagnose- und Kältekreiswerte über den LIN-Bus:"
+				},
+				"sync_LIN_TUE": { "type": "checkbox", "label": "Verdampfer-Austritt (TUE)", "default": false },
+				"sync_LIN_TUE1": { "type": "checkbox", "label": "Verdampfer-Austritt 2 (TUE1)", "default": false },
+				"sync_LIN_VDH": { "type": "checkbox", "label": "Heißgastemperatur Verdichter (VDH)", "default": false },
+				"sync_LIN_UH": { "type": "checkbox", "label": "LIN-Bus Überhitzung Ist (UH)", "default": false },
+				"sync_LIN_UH_Soll": { "type": "checkbox", "label": "LIN-Bus Überhitzung Soll", "default": false },
+				"sync_LIN_HD": { "type": "checkbox", "label": "LIN-Bus Hochdruck (bar)", "default": false },
+				"sync_LIN_ND": { "type": "checkbox", "label": "LIN-Bus Niederdruck (bar)", "default": false },
+				"sync_LIN_VDH_out": {
+					"type": "checkbox",
+					"label": "Verdichterkopfheizung Ansteuerung (%)",
+					"default": false
 				}
 			}
 		}
