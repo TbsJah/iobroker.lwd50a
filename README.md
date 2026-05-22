@@ -144,8 +144,7 @@ For later updates:
    //- Test
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 0.1.4-alpha.0 (2026-05-22)
 
 - Korrekte Einheiten
 
