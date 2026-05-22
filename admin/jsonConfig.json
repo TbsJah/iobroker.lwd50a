@@ -2,8 +2,9 @@
 	"i18n": true,
 	"type": "panel",
 	"items": {
-		"tabs": {
-			"type": "tabs",
+		"mainConfigurationTabs": {
+			"type": "panel",
+			"panelType": "tabs",
 			"items": {
 				"tabConnection": {
 					"type": "panel",
@@ -99,7 +100,7 @@
 							"label": "Mischkreis 3 Vorlauf Soll",
 							"default": false
 						},
-						"sync_temperaturw_RFV": {
+						"sync_sync_temperaturw_RFV": {
 							"type": "checkbox",
 							"label": "Raumfernversteller RFV1",
 							"default": false
@@ -570,7 +571,7 @@
 							"label": "Interne Diagnose- und Kältekreiswerte über den LIN-Bus:"
 						},
 						"sync_LIN_TUE": { "type": "checkbox", "label": "Verdampfer-Austritt (TUE)", "default": false },
-						"sync_LIN_TUE1: ": {
+						"sync_LIN_TUE1": {
 							"type": "checkbox",
 							"label": "Verdampfer-Austritt 2 (TUE1)",
 							"default": false
