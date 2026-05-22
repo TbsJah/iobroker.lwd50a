@@ -2,25 +2,100 @@
 	"i18n": true,
 	"type": "panel",
 	"items": {
-		"option1": {
-			"type": "checkbox",
-			"label": "option1",
-			"newLine": true,
-			"xs": 12,
-			"sm": 12,
-			"md": 6,
-			"lg": 4,
-			"xl": 4
+		"tabConnection": {
+			"type": "panel",
+			"label": "Verbindungseinstellungen",
+			"items": {
+				"host": {
+					"type": "text",
+					"label": "Wärmepumpen IP-Adresse"
+				},
+				"port": {
+					"type": "number",
+					"label": "Port (Standard 8889)",
+					"default": 8889
+				},
+				"interval": {
+					"type": "number",
+					"label": "Abfrageintervall (Sekunden)",
+					"default": 30
+				}
+			}
 		},
-		"option2": {
-			"type": "text",
-			"label": "option2",
-			"newLine": true,
-			"xs": 12,
-			"sm": 12,
-			"md": 6,
-			"lg": 4,
-			"xl": 4
+		"tabTemperatures": {
+			"type": "panel",
+			"label": "Temperaturen",
+			"items": {
+				"_label1": {
+					"type": "staticText",
+					"label": "Wähle aus, welche Temperatur-Datenpunkte aktiv sein sollen:"
+				},
+				"sync_temperature_supply": { "type": "checkbox", "label": "Vorlauftemperatur", "default": true },
+				"sync_temperature_return": { "type": "checkbox", "label": "Rücklauftemperatur", "default": true },
+				"sync_temperature_outside": { "type": "checkbox", "label": "Außentemperatur", "default": true },
+				"sync_temperature_hot_water": { "type": "checkbox", "label": "Warmwassertemperatur", "default": true },
+				"sync_temperature_heat_source_in": {
+					"type": "checkbox",
+					"label": "Wärmequelle Eintritt",
+					"default": true
+				},
+				"sync_temperature_heat_source_out": {
+					"type": "checkbox",
+					"label": "Wärmequelle Austritt",
+					"default": true
+				},
+				"sync_temperature_mixer1_flow": {
+					"type": "checkbox",
+					"label": "Mischkreis 1 Vorlauf Ist",
+					"default": false
+				},
+				"sync_temperature_mixer1_target": {
+					"type": "checkbox",
+					"label": "Mischkreis 1 Vorlauf Soll",
+					"default": false
+				},
+				"sync_temperature_mixer3_flow": {
+					"type": "checkbox",
+					"label": "Mischkreis 3 Vorlauf Ist",
+					"default": false
+				},
+				"sync_temperature_mixer3_target": {
+					"type": "checkbox",
+					"label": "Mischkreis 3 Vorlauf Soll",
+					"default": false
+				}
+			}
+		},
+		"tabInputsOutputs": {
+			"type": "panel",
+			"label": "Eingänge & Ausgänge",
+			"items": {
+				"_label2": {
+					"type": "staticText",
+					"label": "Digitale / Analoge Zustände abfragen:"
+				},
+				"sync_EVUin": { "type": "checkbox", "label": "EVU-Sperre", "default": true },
+				"sync_HDin_pressure": { "type": "checkbox", "label": "Hochdruck-Sensor (bar)", "default": true },
+				"sync_NDin_pressure": { "type": "checkbox", "label": "Niederdruck-Sensor (bar)", "default": true },
+				"sync_HUPout": { "type": "checkbox", "label": "Heizungsumwälzpumpe (HUP)", "default": true },
+				"sync_BUPout": { "type": "checkbox", "label": "Warmwasserpumpe (BUP)", "default": true },
+				"sync_VD1out": { "type": "checkbox", "label": "Verdichter 1 (VD1)", "default": true }
+			}
+		},
+		"tabLinBus": {
+			"type": "panel",
+			"label": "LIN-Bus Details",
+			"items": {
+				"_label3": {
+					"type": "staticText",
+					"label": "Interne Diagnose- und Kältekreiswerte über LIN-Bus:"
+				},
+				"sync_LIN_TUE": { "type": "checkbox", "label": "Verdampfer-Austritt (TUE)", "default": false },
+				"sync_LIN_VDH": { "type": "checkbox", "label": "Heißgastemperatur (VDH)", "default": false },
+				"sync_LIN_HD": { "type": "checkbox", "label": "LIN-Bus Hochdruck", "default": false },
+				"sync_LIN_ND": { "type": "checkbox", "label": "LIN-Bus Niederdruck", "default": false },
+				"sync_LIN_UH": { "type": "checkbox", "label": "LIN-Bus Überhitzung Ist", "default": false }
+			}
 		}
 	}
 }

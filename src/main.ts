@@ -144,6 +144,16 @@ class Lwd50a extends utils.Adapter {
 					const definition = STATE_MAPPING[key];
 
 					if (definition) {
+						// Wir sagen TypeScript, dass wir für diesen kurzen Check die Config
+						// als Objekt betrachten, das mit beliebigen Text-Schlüsseln (string) abgefragt werden darf.
+						const configWithDynamicKeys = this.config as Record<string, any>;
+						const configKey = `sync_${key}`;
+
+						if (configWithDynamicKeys[configKey] === false) {
+							this.log.debug(`Datenpunkt ${key} übersprungen, da in der Konfiguration deaktiviert.`);
+							continue;
+						}
+
 						const folderId = definition.folder;
 						const stateId = `${folderId}.${key}`;
 
@@ -255,7 +265,7 @@ class Lwd50a extends utils.Adapter {
 		const mappingKey = idParts[0];
 		const definition = STATE_MAPPING[mappingKey];
 
-		if (!definition || !definition.LuxID) {
+		if (!definition || !definition.luxWriteId) {
 			this.log.warn(`Kein Schreib-Mapping für ${mappingKey} gefunden.`);
 			return;
 		}
@@ -281,11 +291,11 @@ class Lwd50a extends utils.Adapter {
 			return;
 		}
 
-		this.log.info(`Sende an Luxtronik: ${definition.LuxID} = ${state.val}`);
+		this.log.info(`Sende an Luxtronik: ${definition.luxWriteId} = ${state.val}`);
 		// Callback wird "async", damit wir darin await nutzen können
-		this.pump.write(definition.LuxID, state.val, (err: any, _result: any) => {
+		this.pump.write(definition.luxWriteId, state.val, (err: any, _result: any) => {
 			if (err) {
-				this.log.error(`Fehler beim Schreiben an Luxtronik (${definition.LuxID}): ${err.message}`);
+				this.log.error(`Fehler beim Schreiben an Luxtronik (${definition.luxWriteId}): ${err.message}`);
 				return;
 			}
 

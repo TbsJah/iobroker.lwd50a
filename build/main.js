@@ -80,6 +80,12 @@ class Lwd50a extends utils.Adapter {
         for (const [key, value] of Object.entries(allIncomingData)) {
           const definition = import_stateMapping.STATE_MAPPING[key];
           if (definition) {
+            const configWithDynamicKeys = this.config;
+            const configKey = `sync_${key}`;
+            if (configWithDynamicKeys[configKey] === false) {
+              this.log.debug(`Datenpunkt ${key} \xFCbersprungen, da in der Konfiguration deaktiviert.`);
+              continue;
+            }
             const folderId = definition.folder;
             const stateId = `${folderId}.${key}`;
             let finalValue = value;
@@ -173,7 +179,7 @@ class Lwd50a extends utils.Adapter {
     this.log.info(idParts[0]);
     const mappingKey = idParts[0];
     const definition = import_stateMapping.STATE_MAPPING[mappingKey];
-    if (!definition || !definition.LuxID) {
+    if (!definition || !definition.luxWriteId) {
       this.log.warn(`Kein Schreib-Mapping f\xFCr ${mappingKey} gefunden.`);
       return;
     }
@@ -195,10 +201,10 @@ class Lwd50a extends utils.Adapter {
       this.log.error("Schreiben abgebrochen: Keine aktive Verbindung zur W\xE4rmepumpe vorhanden.");
       return;
     }
-    this.log.info(`Sende an Luxtronik: ${definition.LuxID} = ${state.val}`);
-    this.pump.write(definition.LuxID, state.val, (err, _result) => {
+    this.log.info(`Sende an Luxtronik: ${definition.luxWriteId} = ${state.val}`);
+    this.pump.write(definition.luxWriteId, state.val, (err, _result) => {
       if (err) {
-        this.log.error(`Fehler beim Schreiben an Luxtronik (${definition.LuxID}): ${err.message}`);
+        this.log.error(`Fehler beim Schreiben an Luxtronik (${definition.luxWriteId}): ${err.message}`);
         return;
       }
       this.log.info(`Wert ${state.val} erfolgreich an W\xE4rmepumpe \xFCbertragen.`);
