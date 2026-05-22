@@ -1,6 +1,6 @@
 {
 	"i18n": true,
-	"type": "panel",
+	"type": "tabs",
 	"items": {
 		"tabConnection": {
 			"type": "panel",

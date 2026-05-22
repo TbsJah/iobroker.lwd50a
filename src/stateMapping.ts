@@ -43,7 +43,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		unit: "°C",
 		write: true,
 		luxWriteId: "hot_water_target",
-		min: 20,
+		min: 25,
 		max: 65,
 	},
 	heating_operation_mode: {
