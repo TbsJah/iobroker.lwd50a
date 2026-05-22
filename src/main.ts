@@ -159,8 +159,12 @@ class Lwd50a extends utils.Adapter {
 
 						// --- WERT-ANPASSUNG (z.B. Druckwerte von Zentibar in bar umrechnen) ---
 						let finalValue = value;
-						if (definition.unit === "bar" && typeof finalValue === "number") {
-							finalValue = finalValue / 100;
+						if (typeof finalValue === "number") {
+							if (definition.unit === "bar") {
+								finalValue = finalValue / 100;
+							} else if (definition.unit === "V") {
+								finalValue = finalValue / 10;
+							}
 						}
 
 						// 1. Zuerst den Ordner (Channel) anlegen
