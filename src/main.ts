@@ -160,10 +160,8 @@ class Lwd50a extends utils.Adapter {
 						// --- WERT-ANPASSUNG (z.B. Druckwerte von Zentibar in bar umrechnen) ---
 						let finalValue = value;
 						if (typeof finalValue === "number") {
-							if (definition.unit === "bar") {
+							if (definition.unit === "bar" || definition.unit === "V") {
 								finalValue = finalValue / 100;
-							} else if (definition.unit === "V") {
-								finalValue = finalValue / 10;
 							}
 						}
 
