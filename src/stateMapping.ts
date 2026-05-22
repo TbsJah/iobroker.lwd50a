@@ -35,15 +35,15 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 	// ==========================================
 	// EINSTELLUNGEN & PARAMETER (Beschreibbar)
 	// ==========================================
-	temperature_hot_water_target: {
-		folder: "Einstellungen.Parameter",
+	warmwater_temperature: {
+		folder: "Parameter",
 		name: "Warmwasser Soll-Temperatur",
-		role: "level.temperature",
+		role: "value.temperature",
 		type: "number",
 		unit: "°C",
 		write: true,
-		luxWriteId: "hot_water_target",
-		min: 25,
+		luxWriteId: "temperature_hot_water_target",
+		min: 40,
 		max: 65,
 	},
 	heating_operation_mode: {
