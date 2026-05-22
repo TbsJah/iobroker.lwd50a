@@ -40,7 +40,7 @@
 			"items": {
 				"_label_temp": {
 					"type": "staticText",
-					"label": "Fühler- und Systemtemperaturen:"
+					"label": "Haupt-Systemtemperaturen (Empfohlen):"
 				},
 				"sync_temperature_supply": { "type": "checkbox", "label": "Vorlauftemperatur", "default": true },
 				"sync_temperature_return": { "type": "checkbox", "label": "Rücklauftemperatur", "default": true },
@@ -56,57 +56,78 @@
 					"label": "Wärmequelle Austritt",
 					"default": true
 				},
-				"sync_temperature_mixer1_flow": {
-					"type": "checkbox",
-					"label": "Mischkreis 1 Vorlauf Ist",
-					"default": false
-				},
-				"sync_temperature_mixer1_target": {
-					"type": "checkbox",
-					"label": "Mischkreis 1 Vorlauf Soll",
-					"default": false
-				},
-				"sync_temperature_mixer3_flow": {
-					"type": "checkbox",
-					"label": "Mischkreis 3 Vorlauf Ist",
-					"default": false
-				},
-				"sync_temperature_mixer3_target": {
-					"type": "checkbox",
-					"label": "Mischkreis 3 Vorlauf Soll",
-					"default": false
-				},
-				"sync_sync_temperaturw_RFV": {
-					"type": "checkbox",
-					"label": "Raumfernversteller RFV1",
-					"default": false
-				},
-				"sync_Temperatur_RFV2": { "type": "checkbox", "label": "Raumfernversteller RFV2", "default": false },
-				"sync_Temperatur_RFV3": { "type": "checkbox", "label": "Raumfernversteller RFV3", "default": false },
-				"sync_temperature_solar_collector": {
-					"type": "checkbox",
-					"label": "Solar-Kollektortemperatur",
-					"default": false
-				},
-				"sync_temperature_solar_storage": {
-					"type": "checkbox",
-					"label": "Solar-Speichertemperatur",
-					"default": false
-				},
-				"sync_temperature_external_source": {
-					"type": "checkbox",
-					"label": "Externe Energiequelle Temp.",
-					"default": false
-				},
-				"sync_Temp_Lueftung_Zuluft": {
-					"type": "checkbox",
-					"label": "Lüftung Zuluft Temperatur",
-					"default": false
-				},
-				"sync_Temp_Lueftung_Abluft": {
-					"type": "checkbox",
-					"label": "Lüftung Abluft Temperatur",
-					"default": false
+
+				"acc_extra_temps": {
+					"type": "accordion",
+					"label": "Weitere Mischkreise, Solar- & Lüftungstemperaturen anzeigen",
+					"items": [
+						{
+							"type": "panel",
+							"label": "Zusatz-Temperaturen aufklappen",
+							"items": {
+								"sync_temperature_mixer1_flow": {
+									"type": "checkbox",
+									"label": "Mischkreis 1 Vorlauf Ist",
+									"default": false
+								},
+								"sync_temperature_mixer1_target": {
+									"type": "checkbox",
+									"label": "Mischkreis 1 Vorlauf Soll",
+									"default": false
+								},
+								"sync_temperature_mixer3_flow": {
+									"type": "checkbox",
+									"label": "Mischkreis 3 Vorlauf Ist",
+									"default": false
+								},
+								"sync_temperature_mixer3_target": {
+									"type": "checkbox",
+									"label": "Mischkreis 3 Vorlauf Soll",
+									"default": false
+								},
+								"sync_sync_temperaturw_RFV": {
+									"type": "checkbox",
+									"label": "Raumfernversteller RFV1",
+									"default": false
+								},
+								"sync_Temperatur_RFV2": {
+									"type": "checkbox",
+									"label": "Raumfernversteller RFV2",
+									"default": false
+								},
+								"sync_Temperatur_RFV3": {
+									"type": "checkbox",
+									"label": "Raumfernversteller RFV3",
+									"default": false
+								},
+								"sync_temperature_solar_collector": {
+									"type": "checkbox",
+									"label": "Solar-Kollektortemperatur",
+									"default": false
+								},
+								"sync_temperature_solar_storage": {
+									"type": "checkbox",
+									"label": "Solar-Speichertemperatur",
+									"default": false
+								},
+								"sync_temperature_external_source": {
+									"type": "checkbox",
+									"label": "Externe Energiequelle Temp.",
+									"default": false
+								},
+								"sync_Temp_Lueftung_Zuluft": {
+									"type": "checkbox",
+									"label": "Lüftung Zuluft Temperatur",
+									"default": false
+								},
+								"sync_Temp_Lueftung_Abluft": {
+									"type": "checkbox",
+									"label": "Lüftung Abluft Temperatur",
+									"default": false
+								}
+							}
+						}
+					]
 				}
 			}
 		},
@@ -157,13 +178,46 @@
 				"sync_NDin": { "type": "checkbox", "label": "Niederdruckwächter ND", "default": true },
 				"sync_NDin_pressure": { "type": "checkbox", "label": "Niederdruck-Sensorwert (bar)", "default": true },
 				"sync_HDin_pressure": { "type": "checkbox", "label": "Hochdruck-Sensorwert (bar)", "default": true },
-				"sync_PEXin": { "type": "checkbox", "label": "Externer Druckwächter PEX", "default": false },
-				"sync_SWTin": { "type": "checkbox", "label": "Schwimmbadthermostat SWT", "default": false },
-				"sync_AnalogIn": { "type": "checkbox", "label": "Analoger Eingang 1", "default": false },
-				"sync_AnalogIn2": { "type": "checkbox", "label": "Analoger Eingang 2", "default": false },
-				"sync_AnalogIn3": { "type": "checkbox", "label": "Analoger Eingang 3", "default": false },
-				"sync_SAXin": { "type": "checkbox", "label": "Eingang SAX", "default": false },
-				"sync_SPLin": { "type": "checkbox", "label": "Eingang SPL", "default": false }
+
+				"acc_extra_inputs": {
+					"type": "accordion",
+					"label": "Selten genutzte Analog- & Zusatz-Eingänge anzeigen",
+					"items": [
+						{
+							"type": "panel",
+							"label": "Zusatz-Eingänge aufklappen",
+							"items": {
+								"sync_PEXin": {
+									"type": "checkbox",
+									"label": "Externer Druckwächter PEX",
+									"default": false
+								},
+								"sync_SWTin": {
+									"type": "checkbox",
+									"label": "Schwimmbadthermostat SWT",
+									"default": false
+								},
+								"sync_AnalogIn": {
+									"type": "checkbox",
+									"label": "Analoger Eingang 1",
+									"default": false
+								},
+								"sync_AnalogIn2": {
+									"type": "checkbox",
+									"label": "Analoger Eingang 2",
+									"default": false
+								},
+								"sync_AnalogIn3": {
+									"type": "checkbox",
+									"label": "Analoger Eingang 3",
+									"default": false
+								},
+								"sync_SAXin": { "type": "checkbox", "label": "Eingang SAX", "default": false },
+								"sync_SPLin": { "type": "checkbox", "label": "Eingang SPL", "default": false }
+							}
+						}
+					]
+				}
 			}
 		},
 		"tabOutputs": {
@@ -172,63 +226,140 @@
 			"items": {
 				"_label_out": {
 					"type": "staticText",
-					"label": "Aktoren, Relais und Pumpensteuerungen:"
+					"label": "Wichtigste Aktoren und Pumpensteuerungen:"
 				},
-				"sync_AVout": { "type": "checkbox", "label": "Abtauventil AV", "default": false },
 				"sync_BUPout": { "type": "checkbox", "label": "Warmwasser-Umwälzpumpe BUP", "default": true },
 				"sync_HUPout": { "type": "checkbox", "label": "Heizungsumwälzpumpe HUP", "default": true },
-				"sync_MA1out": { "type": "checkbox", "label": "Mischer 1 Auf MA1", "default": false },
-				"sync_MZ1out": { "type": "checkbox", "label": "Mischer 1 Zu MZ1", "default": false },
 				"sync_VENout": { "type": "checkbox", "label": "Ventilator VEN", "default": true },
-				"sync_VBOout": { "type": "checkbox", "label": "Ventilausgang Brunnen VBO", "default": false },
 				"sync_VD1out": { "type": "checkbox", "label": "Verdichter 1 VD1", "default": true },
-				"sync_VD2out": { "type": "checkbox", "label": "Verdichter 2 VD2", "default": false },
-				"sync_ZIPout": { "type": "checkbox", "label": "Zirkulationspumpe ZIP", "default": false },
-				"sync_ZUPout": { "type": "checkbox", "label": "Zusatzumwälzpumpe ZUP", "default": false },
 				"sync_ZW1out": {
 					"type": "checkbox",
 					"label": "Zweiter Wärmeerzeuger 1 ZW1 (Heizstab)",
 					"default": true
 				},
-				"sync_ZW2SSTout": { "type": "checkbox", "label": "ZW2 / Störungsmeldung", "default": false },
-				"sync_ZW3SSTout": { "type": "checkbox", "label": "ZW3 / Sammelstörung", "default": false },
-				"sync_FP2out": { "type": "checkbox", "label": "Funktionspumpe 2 FP2", "default": false },
-				"sync_SLPout": { "type": "checkbox", "label": "Solarladepumpe SLP", "default": false },
-				"sync_SUPout": { "type": "checkbox", "label": "Zusatzpumpe SUP", "default": false },
-				"sync_MZ2out": { "type": "checkbox", "label": "Mischer 2 Zu MZ2", "default": false },
-				"sync_MA2out": { "type": "checkbox", "label": "Mischer 2 Auf MA2", "default": false },
-				"sync_MZ3out": { "type": "checkbox", "label": "Mischer 3 Zu MZ3", "default": false },
-				"sync_MA3out": { "type": "checkbox", "label": "Mischer 3 Auf MA3", "default": false },
-				"sync_FP3out": { "type": "checkbox", "label": "Funktionspumpe 3 FP3", "default": false },
-				"sync_analogOut1": { "type": "checkbox", "label": "Analoger Ausgang 1", "default": false },
-				"sync_analogOut2": { "type": "checkbox", "label": "Analoger Ausgang 2", "default": false },
-				"sync_analogOut3": { "type": "checkbox", "label": "Analoger Ausgang 3", "default": false },
-				"sync_analogOut4": { "type": "checkbox", "label": "Analoger Ausgang 4", "default": false },
-				"sync_Out_VZU": { "type": "checkbox", "label": "Ventilator Zuluft VZU", "default": false },
-				"sync_Out_VAB": { "type": "checkbox", "label": "Ventilator Abluft VAB", "default": false },
-				"sync_Out_VSK": { "type": "checkbox", "label": "Ausgang VSK", "default": false },
-				"sync_Out_FRH": { "type": "checkbox", "label": "Freigabe Heizung FRH", "default": false },
-				"sync_defrostValve": { "type": "checkbox", "label": "Status Abtauventil", "default": false },
-				"sync_hotWaterBoilerValve": {
-					"type": "checkbox",
-					"label": "Status Umschaltventil Warmwasser",
-					"default": false
-				},
-				"sync_heatingSystemCircPump": {
-					"type": "checkbox",
-					"label": "Heizungssystem Zirkulationspumpe Laufindikator",
-					"default": false
-				},
-				"sync_heatSourceMotor": { "type": "checkbox", "label": "Motor Wärmequelle", "default": false },
-				"sync_compressor1": {
-					"type": "checkbox",
-					"label": "Status Kompressor 1 Laufrückmeldung",
-					"default": false
-				},
-				"sync_hotWaterCircPumpExtern": {
-					"type": "checkbox",
-					"label": "Warmwasser Zirkulationspumpe Extern",
-					"default": false
+
+				"acc_extra_outputs": {
+					"type": "accordion",
+					"label": "Zusätzliche Relais-, Ventil- & Mischer-Ausgänge anzeigen",
+					"items": [
+						{
+							"type": "panel",
+							"label": "Zusatz-Ausgänge aufklappen",
+							"items": {
+								"sync_AVout": { "type": "checkbox", "label": "Abtauventil AV", "default": false },
+								"sync_MA1out": { "type": "checkbox", "label": "Mischer 1 Auf MA1", "default": false },
+								"sync_MZ1out": { "type": "checkbox", "label": "Mischer 1 Zu MZ1", "default": false },
+								"sync_VBOout": {
+									"type": "checkbox",
+									"label": "Ventilausgang Brunnen VBO",
+									"default": false
+								},
+								"sync_VD2out": { "type": "checkbox", "label": "Verdichter 2 VD2", "default": false },
+								"sync_ZIPout": {
+									"type": "checkbox",
+									"label": "Zirkulationspumpe ZIP",
+									"default": false
+								},
+								"sync_ZUPout": {
+									"type": "checkbox",
+									"label": "Zusatzumwälzpumpe ZUP",
+									"default": false
+								},
+								"sync_ZW2SSTout": {
+									"type": "checkbox",
+									"label": "ZW2 / Störungsmeldung",
+									"default": false
+								},
+								"sync_ZW3SSTout": {
+									"type": "checkbox",
+									"label": "ZW3 / Sammelstörung",
+									"default": false
+								},
+								"sync_FP2out": {
+									"type": "checkbox",
+									"label": "Funktionspumpe 2 FP2",
+									"default": false
+								},
+								"sync_SLPout": { "type": "checkbox", "label": "Solarladepumpe SLP", "default": false },
+								"sync_SUPout": { "type": "checkbox", "label": "Zusatzpumpe SUP", "default": false },
+								"sync_MZ2out": { "type": "checkbox", "label": "Mischer 2 Zu MZ2", "default": false },
+								"sync_MA2out": { "type": "checkbox", "label": "Mischer 2 Auf MA2", "default": false },
+								"sync_MZ3out": { "type": "checkbox", "label": "Mischer 3 Zu MZ3", "default": false },
+								"sync_MA3out": { "type": "checkbox", "label": "Mischer 3 Auf MA3", "default": false },
+								"sync_FP3out": {
+									"type": "checkbox",
+									"label": "Funktionspumpe 3 FP3",
+									"default": false
+								},
+								"sync_analogOut1": {
+									"type": "checkbox",
+									"label": "Analoger Ausgang 1",
+									"default": false
+								},
+								"sync_analogOut2": {
+									"type": "checkbox",
+									"label": "Analoger Ausgang 2",
+									"default": false
+								},
+								"sync_analogOut3": {
+									"type": "checkbox",
+									"label": "Analoger Ausgang 3",
+									"default": false
+								},
+								"sync_analogOut4": {
+									"type": "checkbox",
+									"label": "Analoger Ausgang 4",
+									"default": false
+								},
+								"sync_Out_VZU": {
+									"type": "checkbox",
+									"label": "Ventilator Zuluft VZU",
+									"default": false
+								},
+								"sync_Out_VAB": {
+									"type": "checkbox",
+									"label": "Ventilator Abluft VAB",
+									"default": false
+								},
+								"sync_Out_VSK": { "type": "checkbox", "label": "Ausgang VSK", "default": false },
+								"sync_Out_FRH": {
+									"type": "checkbox",
+									"label": "Freigabe Heizung FRH",
+									"default": false
+								},
+								"sync_defrostValve": {
+									"type": "checkbox",
+									"label": "Status Abtauventil",
+									"default": false
+								},
+								"sync_hotWaterBoilerValve": {
+									"type": "checkbox",
+									"label": "Status Umschaltventil Warmwasser",
+									"default": false
+								},
+								"sync_heatingSystemCircPump": {
+									"type": "checkbox",
+									"label": "Heizungssystem Zirkulationspumpe Laufindikator",
+									"default": false
+								},
+								"sync_heatSourceMotor": {
+									"type": "checkbox",
+									"label": "Motor Wärmequelle",
+									"default": false
+								},
+								"sync_compressor1": {
+									"type": "checkbox",
+									"label": "Status Kompressor 1 Laufrückmeldung",
+									"default": false
+								},
+								"sync_hotWaterCircPumpExtern": {
+									"type": "checkbox",
+									"label": "Warmwasser Zirkulationspumpe Extern",
+									"default": false
+								}
+							}
+						}
+					]
 				}
 			}
 		},
