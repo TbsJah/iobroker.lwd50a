@@ -44,7 +44,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		write: true,
 		luxWriteId: "hot_water_target",
 		min: 30,
-		max: 60,
+		max: 65,
 	},
 	heating_operation_mode: {
 		folder: "Einstellungen.Parameter",
