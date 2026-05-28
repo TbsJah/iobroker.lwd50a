@@ -200,7 +200,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 
 	// --- BETRIEBSARTEN ---
 	heating_operation_mode: {
-		folder: "Einstellungen.Allgemein",
+		folder: "Einstellungen.Betriebsmodus",
 		name: "Betriebsart Heizung",
 		role: "level.mode",
 		type: "number",
@@ -209,7 +209,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		states: { 0: "Automatik", 1: "Zweites WEZ", 2: "Party", 3: "Ferien", 4: "Aus" },
 	},
 	warmwater_operation_mode: {
-		folder: "Einstellungen.Allgemein",
+		folder: "Einstellungen.Betriebsmodus",
 		name: "Betriebsart Warmwasser",
 		role: "level.mode",
 		type: "number",
@@ -218,7 +218,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		states: { 0: "Automatik", 1: "Zweites WEZ", 2: "Party", 3: "Ferien", 4: "Aus" },
 	},
 	cooling_operation_mode: {
-		folder: "Einstellungen.Allgemein",
+		folder: "Einstellungen.Betriebsmodus",
 		name: "Betriebsart Kühlung",
 		role: "level.mode",
 		type: "number",

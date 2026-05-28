@@ -185,7 +185,7 @@ const STATE_MAPPING = {
   },
   // --- BETRIEBSARTEN ---
   heating_operation_mode: {
-    folder: "Einstellungen.Allgemein",
+    folder: "Einstellungen.Betriebsmodus",
     name: "Betriebsart Heizung",
     role: "level.mode",
     type: "number",
@@ -194,7 +194,7 @@ const STATE_MAPPING = {
     states: { 0: "Automatik", 1: "Zweites WEZ", 2: "Party", 3: "Ferien", 4: "Aus" }
   },
   warmwater_operation_mode: {
-    folder: "Einstellungen.Allgemein",
+    folder: "Einstellungen.Betriebsmodus",
     name: "Betriebsart Warmwasser",
     role: "level.mode",
     type: "number",
@@ -203,7 +203,7 @@ const STATE_MAPPING = {
     states: { 0: "Automatik", 1: "Zweites WEZ", 2: "Party", 3: "Ferien", 4: "Aus" }
   },
   cooling_operation_mode: {
-    folder: "Einstellungen.Allgemein",
+    folder: "Einstellungen.Betriebsmodus",
     name: "Betriebsart K\xFChlung",
     role: "level.mode",
     type: "number",
