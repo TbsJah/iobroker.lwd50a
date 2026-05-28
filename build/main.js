@@ -89,10 +89,37 @@ class Lwd50a extends utils.Adapter {
             const folderId = definition.folder;
             const stateId = `${folderId}.${key}`;
             let finalValue = value;
-            if (typeof finalValue === "number") {
-              if (definition.unit === "bar" || definition.unit === "V") {
+            if (definition.type === "number") {
+              if (typeof value === "string") {
+                const textValue = value.toLowerCase();
+                if (textValue === "ein") {
+                  finalValue = 1;
+                } else if (textValue === "aus") {
+                  finalValue = 0;
+                } else {
+                  finalValue = parseFloat(value);
+                }
+              } else {
+                finalValue = value;
+              }
+            } else if (definition.type === "boolean") {
+              if (typeof value === "string") {
+                const textValue = value.toLowerCase();
+                if (textValue === "ein" || textValue === "true" || textValue === "1") {
+                  finalValue = true;
+                } else if (textValue === "aus" || textValue === "false" || textValue === "0") {
+                  finalValue = false;
+                } else {
+                  finalValue = false;
+                }
+              } else {
+                finalValue = value === true || value === 1;
+              }
+            }
+            if (typeof finalValue === "number" && !isNaN(finalValue)) {
+              if (definition.unit === "bar") {
                 finalValue = finalValue / 100;
-              } else if (definition.unit === "K") {
+              } else if (definition.unit === "V") {
                 finalValue = finalValue / 10;
               }
             }

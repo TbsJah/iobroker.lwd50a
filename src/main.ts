@@ -160,20 +160,42 @@ class Lwd50a extends utils.Adapter {
 						// --- WERT-ANPASSUNG (z.B. Druckwerte von Zentibar in bar umrechnen) ---
 						let finalValue = value;
 
-						// Wenn das Mapping eine Zahl verlangt, den String zwingend in eine Zahl umwandeln
+						// 1. Behandlung für den Typ "number" (Zahlen)
 						if (definition.type === "number") {
-							// parseFloat macht aus "1" eine 1 und aus "45.5" eine 45.5
-							finalValue = typeof value === "string" ? parseFloat(value) : value;
+							if (typeof value === "string") {
+								const textValue = value.toLowerCase();
+								if (textValue === "ein") {
+									finalValue = 1;
+								} else if (textValue === "aus") {
+									finalValue = 0;
+								} else {
+									finalValue = parseFloat(value);
+								}
+							} else {
+								finalValue = value;
+							}
 						} else if (definition.type === "boolean") {
-							// Falls du irgendwo echte Booleans hast
-							finalValue = value === "true" || value === true || value === "1" || value === 1;
+							if (typeof value === "string") {
+								const textValue = value.toLowerCase();
+								if (textValue === "ein" || textValue === "true" || textValue === "1") {
+									finalValue = true;
+								} else if (textValue === "aus" || textValue === "false" || textValue === "0") {
+									finalValue = false;
+								} else {
+									// Fallback, falls die Pumpe Unerwartetes sendet
+									finalValue = false;
+								}
+							} else {
+								// Wenn der Wert von der Pumpe schon ein echter Boolean oder eine Zahl ist
+								finalValue = value === true || value === 1;
+							}
 						}
 
 						// --- DYNAMISCHE WERT-ANPASSUNG (bar und Volt) ---
 						if (typeof finalValue === "number" && !isNaN(finalValue)) {
 							if (definition.unit === "bar") {
 								finalValue = finalValue / 100;
-							} else if (definition.unit === "V" || definition.unit === "K") {
+							} else if (definition.unit === "V") {
 								finalValue = finalValue / 10;
 							}
 						}
