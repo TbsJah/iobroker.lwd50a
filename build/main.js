@@ -116,12 +116,8 @@ class Lwd50a extends utils.Adapter {
                 finalValue = value === true || value === 1;
               }
             }
-            if (typeof finalValue === "number" && !isNaN(finalValue)) {
-              if (definition.unit === "bar") {
-                finalValue = finalValue / 100;
-              } else if (definition.unit === "V") {
-                finalValue = finalValue / 10;
-              }
+            if (typeof finalValue === "number" && !isNaN(finalValue) && definition.factor) {
+              finalValue = finalValue / definition.factor;
             }
             await this.setObjectNotExists(folderId, {
               type: "channel",

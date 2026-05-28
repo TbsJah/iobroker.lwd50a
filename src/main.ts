@@ -191,14 +191,12 @@ class Lwd50a extends utils.Adapter {
 							}
 						}
 
-						// --- DYNAMISCHE WERT-ANPASSUNG (bar und Volt) ---
-						if (typeof finalValue === "number" && !isNaN(finalValue)) {
-							if (definition.unit === "bar") {
-								finalValue = finalValue / 100;
-							} else if (definition.unit === "V") {
-								finalValue = finalValue / 10;
-							}
+						// --- UNIVERSELLE FAKTOR-ANPASSUNG FÜR NUMMERN ---
+						// Wenn ein Faktor im Mapping definiert ist, wird der Wert hierdurch geteilt
+						if (typeof finalValue === "number" && !isNaN(finalValue) && definition.factor) {
+							finalValue = finalValue / definition.factor;
 						}
+						// -------------------------------------------------
 
 						// 1. Zuerst den Ordner (Channel) anlegen
 						await this.setObjectNotExists(folderId, {

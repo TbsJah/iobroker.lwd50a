@@ -56,6 +56,7 @@ const STATE_MAPPING = {
     unit: "K",
     write: true,
     luxWriteId: "deltaHeatingReduction",
+    factor: 10,
     min: -10,
     max: 10
   },
@@ -101,6 +102,7 @@ const STATE_MAPPING = {
     unit: "K",
     write: true,
     luxWriteId: "mk1_curve_parallel_offset",
+    factor: 10,
     min: -5,
     max: 5
   },
@@ -112,6 +114,7 @@ const STATE_MAPPING = {
     unit: "K",
     write: true,
     luxWriteId: "deltaMk1Reduction",
+    factor: 10,
     min: -10,
     max: 10
   },
@@ -135,6 +138,7 @@ const STATE_MAPPING = {
     unit: "K",
     write: true,
     luxWriteId: "mk2_curve_parallel_offset",
+    factor: 10,
     min: -5,
     max: 5
   },
@@ -146,6 +150,7 @@ const STATE_MAPPING = {
     unit: "K",
     write: true,
     luxWriteId: "deltaMk2Reduction",
+    factor: 10,
     min: -10,
     max: 10
   },
@@ -169,6 +174,7 @@ const STATE_MAPPING = {
     unit: "K",
     write: true,
     luxWriteId: "mk3_curve_parallel_offset",
+    factor: 10,
     min: -5,
     max: 5
   },
@@ -180,6 +186,7 @@ const STATE_MAPPING = {
     unit: "K",
     write: true,
     luxWriteId: "deltaMk3Reduction",
+    factor: 10,
     min: -10,
     max: 10
   },
@@ -261,6 +268,7 @@ const STATE_MAPPING = {
     unit: "K",
     write: true,
     luxWriteId: "hotwater_temperature_hysteresis",
+    factor: 10,
     min: 1,
     max: 15
   },
@@ -272,6 +280,7 @@ const STATE_MAPPING = {
     unit: "K",
     write: true,
     luxWriteId: "return_temperature_hysteresis",
+    factor: 10,
     min: 1,
     max: 5
   },
@@ -306,6 +315,7 @@ const STATE_MAPPING = {
     unit: "V",
     write: true,
     luxWriteId: "heating_system_circ_pump_voltage_nominal",
+    factor: 100,
     min: 3,
     max: 10
   },
@@ -317,6 +327,7 @@ const STATE_MAPPING = {
     unit: "V",
     write: true,
     luxWriteId: "heating_system_circ_pump_voltage_minimal",
+    factor: 100,
     min: 3,
     max: 10
   },
@@ -559,14 +570,16 @@ const STATE_MAPPING = {
     name: "Niederdruck-Sensorwert",
     role: "value.pressure",
     type: "number",
-    unit: "bar"
+    unit: "bar",
+    factor: 100
   },
   HDin_pressure: {
     folder: "Informationen.Eingaenge",
     name: "Hochdruck-Sensorwert",
     role: "value.pressure",
     type: "number",
-    unit: "bar"
+    unit: "bar",
+    factor: 100
   },
   PEXin: {
     folder: "Informationen.Eingaenge",
@@ -585,21 +598,24 @@ const STATE_MAPPING = {
     name: "Analoger Eingang 1",
     role: "value",
     type: "number",
-    unit: "V"
+    unit: "V",
+    factor: 100
   },
   AnalogIn2: {
     folder: "Informationen.Eingaenge",
     name: "Analoger Eingang 2",
     role: "value",
     type: "number",
-    unit: "V"
+    unit: "V",
+    factor: 100
   },
   AnalogIn3: {
     folder: "Informationen.Eingaenge",
     name: "Analoger Eingang 3",
     role: "value",
     type: "number",
-    unit: "V"
+    unit: "V",
+    factor: 100
   },
   SAXin: {
     folder: "Informationen.Eingaenge",
@@ -837,28 +853,32 @@ const STATE_MAPPING = {
     name: "Analoger Ausgang 1",
     role: "value",
     type: "number",
-    unit: "V"
+    unit: "V",
+    factor: 100
   },
   analogOut2: {
     folder: "Informationen.Ausgaenge",
     name: "Analoger Ausgang 2",
     role: "value",
     type: "number",
-    unit: "V"
+    unit: "V",
+    factor: 100
   },
   analogOut3: {
     folder: "Informationen.Ausgaenge",
     name: "Analoger Ausgang 3",
     role: "value",
     type: "number",
-    unit: "V"
+    unit: "V",
+    factor: 100
   },
   analogOut4: {
     folder: "Informationen.Ausgaenge",
     name: "Analoger Ausgang 4",
     role: "value",
     type: "number",
-    unit: "V"
+    unit: "V",
+    factor: 100
   },
   Out_VZU: {
     folder: "Informationen.Ausgaenge",
@@ -1460,28 +1480,32 @@ const STATE_MAPPING = {
     name: "LIN-Bus \xDCberhitzung Ist (UH)",
     role: "value.temperature",
     type: "number",
-    unit: "K"
+    unit: "K",
+    factor: 10
   },
   LIN_UH_Soll: {
     folder: "Informationen.Status",
     name: "LIN-Bus \xDCberhitzung Soll",
     role: "value.temperature",
     type: "number",
-    unit: "K"
+    unit: "K",
+    factor: 10
   },
   LIN_HD: {
     folder: "Informationen.Status",
     name: "LIN-Bus Hochdruck",
     role: "value.pressure",
     type: "number",
-    unit: "bar"
+    unit: "bar",
+    factor: 100
   },
   LIN_ND: {
     folder: "Informationen.Status",
     name: "LIN-Bus Niederdruck",
     role: "value.pressure",
     type: "number",
-    unit: "bar"
+    unit: "bar",
+    factor: 100
   },
   LIN_VDH_out: {
     folder: "Informationen.Status",
