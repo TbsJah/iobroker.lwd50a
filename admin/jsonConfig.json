@@ -26,12 +26,192 @@
 			"type": "panel",
 			"label": "Einstellungen / Parameter",
 			"items": {
-				"_label_param": {
-					"type": "staticText",
-					"label": "Schreibbare Einstellungen der Wärmepumpe:"
+				"panel_modes": {
+					"type": "panel",
+					"label": "Betriebsarten",
+					"items": {
+						"sync_heating_operation_mode": {
+							"type": "checkbox",
+							"label": "Betriebsart Heizung",
+							"default": true
+						},
+						"sync_warmwater_operation_mode": {
+							"type": "checkbox",
+							"label": "Betriebsart Warmwasser",
+							"default": true
+						},
+						"sync_cooling_operation_mode": {
+							"type": "checkbox",
+							"label": "Betriebsart Kühlung",
+							"default": false
+						}
+					}
 				},
-				"sync_hot_water_target": { "type": "checkbox", "label": "Warmwasser Soll-Temperatur", "default": true },
-				"sync_heating_operation_mode": { "type": "checkbox", "label": "Betriebsart Heizung", "default": true }
+				"panel_heating": {
+					"type": "panel",
+					"label": "Heizkreis 1",
+					"items": {
+						"sync_heating_target_temperature": {
+							"type": "checkbox",
+							"label": "Heizung Soll-Temperatur (Wunschwert)",
+							"default": true
+						},
+						"sync_heating_curve_end_point": {
+							"type": "checkbox",
+							"label": "Heizkurve Endpunkt (Rücklauf)",
+							"default": true
+						},
+						"sync_heating_curve_parallel_offset": {
+							"type": "checkbox",
+							"label": "Heizkurve Parallelverschiebung",
+							"default": true
+						},
+						"sync_deltaHeatingReduction": {
+							"type": "checkbox",
+							"label": "Nachtabsenkung (Delta)",
+							"default": false
+						},
+						"sync_return_temperature_hysteresis": {
+							"type": "checkbox",
+							"label": "Rücklauftemperatur Hysterese",
+							"default": false
+						}
+					}
+				},
+				"panel_warmwater": {
+					"type": "panel",
+					"label": "Warmwasser",
+					"items": {
+						"sync_warmwater_target_temperature": {
+							"type": "checkbox",
+							"label": "Warmwasser Soll-Temperatur",
+							"default": true
+						},
+						"sync_hotwater_temperature_hysteresis": {
+							"type": "checkbox",
+							"label": "Warmwasser Hysterese",
+							"default": false
+						}
+					}
+				},
+				"panel_mixers": {
+					"type": "panel",
+					"label": "Mischkreise 1 bis 3",
+					"items": {
+						"sync_mk1_curve_end_point": {
+							"type": "checkbox",
+							"label": "Mischkreis 1: Heizkurve Endpunkt",
+							"default": false
+						},
+						"sync_mk1_curve_parallel_offset": {
+							"type": "checkbox",
+							"label": "Mischkreis 1: Parallelverschiebung",
+							"default": false
+						},
+						"sync_deltaMk1Reduction": {
+							"type": "checkbox",
+							"label": "Mischkreis 1: Nachtabsenkung",
+							"default": false
+						},
+						"sync_mk2_curve_end_point": {
+							"type": "checkbox",
+							"label": "Mischkreis 2: Heizkurve Endpunkt",
+							"default": false
+						},
+						"sync_mk2_curve_parallel_offset": {
+							"type": "checkbox",
+							"label": "Mischkreis 2: Parallelverschiebung",
+							"default": false
+						},
+						"sync_deltaMk2Reduction": {
+							"type": "checkbox",
+							"label": "Mischkreis 2: Nachtabsenkung",
+							"default": false
+						},
+						"sync_mk3_curve_end_point": {
+							"type": "checkbox",
+							"label": "Mischkreis 3: Heizkurve Endpunkt",
+							"default": false
+						},
+						"sync_mk3_curve_parallel_offset": {
+							"type": "checkbox",
+							"label": "Mischkreis 3: Parallelverschiebung",
+							"default": false
+						},
+						"sync_deltaMk3Reduction": {
+							"type": "checkbox",
+							"label": "Mischkreis 3: Nachtabsenkung",
+							"default": false
+						}
+					}
+				},
+				"panel_cooling": {
+					"type": "panel",
+					"label": "Kühlung",
+					"items": {
+						"sync_cooling_release_temp": {
+							"type": "checkbox",
+							"label": "Kühlung Freigabe-Temperatur",
+							"default": false
+						},
+						"sync_cooling_inlet_temp": {
+							"type": "checkbox",
+							"label": "Kühlung Vorlauf-Soll-Temperatur",
+							"default": false
+						},
+						"sync_cooling_start": {
+							"type": "checkbox",
+							"label": "Kühlung Start-Temperatur",
+							"default": false
+						},
+						"sync_cooling_stop": {
+							"type": "checkbox",
+							"label": "Kühlung Stopp-Temperatur",
+							"default": false
+						}
+					}
+				},
+				"panel_system": {
+					"type": "panel",
+					"label": "System, Verdichter & Entlüftung",
+					"items": {
+						"sync_heating_temperature_outside_2nd_compressor": {
+							"type": "checkbox",
+							"label": "Freigabe 2. Verdichter (Außentemperatur)",
+							"default": false
+						},
+						"sync_hotwater_temperature_forerun_2nd_compressor": {
+							"type": "checkbox",
+							"label": "Freigabe 2. Verdichter (Warmwasser)",
+							"default": false
+						},
+						"sync_heating_system_circ_pump_voltage_nominal": {
+							"type": "checkbox",
+							"label": "Heizungsumwälzpumpe Nennspannung",
+							"default": false
+						},
+						"sync_heating_system_circ_pump_voltage_minimal": {
+							"type": "checkbox",
+							"label": "Heizungsumwälzpumpe Minimalspannung",
+							"default": false
+						},
+						"sync_runDeaerate": {
+							"type": "checkbox",
+							"label": "Entlüftungsprogramm Anlage",
+							"default": false
+						},
+						"sync_hotWaterCircPumpDeaerate": {
+							"type": "checkbox",
+							"label": "Entlüftungsprogramm Zirkulationspumpe",
+							"default": false
+						},
+						"sync_solarPumpDeaerate": {
+							"type": "checkbox",
+							"label": "Entlüftungsprogramm Solarpumpe",
+							"default": false
+						}
+					}
+				}
 			}
 		},
 		"tabTemperatures": {
