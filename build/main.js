@@ -229,20 +229,24 @@ class Lwd50a extends utils.Adapter {
       return;
     }
     this.log.info(`Sende an Luxtronik: ${definition.luxWriteId} = ${state.val}`);
-    this.pump.write(definition.luxWriteId, state.val, (err, _result) => {
+    let valueToWrite = state.val;
+    if (definition.factor && typeof state.val === "number") {
+      valueToWrite = state.val * definition.factor;
+    }
+    this.log.info(`Sende an Luxtronik: ${definition.luxWriteId} = ${valueToWrite}`);
+    this.pump.write(definition.luxWriteId, valueToWrite, async (err, _result) => {
       if (err) {
         this.log.error(`Fehler beim Schreiben an Luxtronik (${definition.luxWriteId}): ${err.message}`);
         return;
       }
       this.log.info(`Wert ${state.val} erfolgreich an W\xE4rmepumpe \xFCbertragen.`);
-      this.setState(id, state.val, true, (setStateErr) => {
-        if (setStateErr) {
-          this.log.error(`Fehler beim Best\xE4tigen des Status im ioBroker: ${setStateErr.message}`);
-        }
+      try {
+        await this.setState(id, state.val, true);
+        await new Promise((resolve) => setTimeout(resolve, 500));
         this.updateData();
-      }).catch((err2) => {
-        this.log.error(`Fehler beim Schreiben des Status: ${err2}`);
-      });
+      } catch (setStateErr) {
+        this.log.error(`Fehler beim Best\xE4tigen des Status im ioBroker: ${setStateErr.message}`);
+      }
     });
   }
   // If you need to accept messages in your adapter, uncomment the following block and the corresponding line in the constructor.

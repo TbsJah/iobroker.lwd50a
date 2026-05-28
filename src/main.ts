@@ -330,26 +330,36 @@ class Lwd50a extends utils.Adapter {
 
 		this.log.info(`Sende an Luxtronik: ${definition.luxWriteId} = ${state.val}`);
 		// Callback wird "async", damit wir darin await nutzen können
-		this.pump.write(definition.luxWriteId, state.val, (err: any, _result: any) => {
+		// 1. Umrechnung: Falls ein Faktor definiert ist, den ioBroker-Wert wieder für die Pumpe hochrechnen!
+		let valueToWrite = state.val as number;
+		if (definition.factor && typeof state.val === "number") {
+			valueToWrite = state.val * definition.factor;
+		}
+
+		this.log.info(`Sende an Luxtronik: ${definition.luxWriteId} = ${valueToWrite}`);
+
+		// Callback als async deklarieren, damit wir innen "await" nutzen können
+		this.pump.write(definition.luxWriteId, valueToWrite, async (err: any, _result: any) => {
 			if (err) {
 				this.log.error(`Fehler beim Schreiben an Luxtronik (${definition.luxWriteId}): ${err.message}`);
 				return;
 			}
 
 			this.log.info(`Wert ${state.val} erfolgreich an Wärmepumpe übertragen.`);
-			// Wir nutzen die Standardmethode (ohne await) und hängen ein .catch() an.
-			// Das löst alle Linter-Probleme bezüglich "floating promises" sofort auf.
-			this.setState(id, state.val, true, setStateErr => {
-				if (setStateErr) {
-					this.log.error(`Fehler beim Bestätigen des Status im ioBroker: ${setStateErr.message}`);
-				}
-				// Sofort frische Daten nach dem Bestätigen holen
+
+			try {
+				// 2. Den Wert im ioBroker offiziell bestätigen (ack: true)
+				// Moderne Schreibweise: setState (ohne Async am Ende) gibt automatisch ein Promise zurück
+				await this.setState(id, state.val, true);
+
+				// 3. Der Luxtronik-Steuerung eine kleine Pause geben, um den internen Speicher zu schreiben
+				await new Promise(resolve => setTimeout(resolve, 500));
+
+				// 4. Frische Daten von der Anlage holen, damit alles 100% synchron ist
 				this.updateData();
-			}).catch(err => {
-				this.log.error(`Fehler beim Schreiben des Status: ${err}`);
-			});
-			// Wir geben der Wärmepumpe 500ms Zeit, den Wert intern zu verarbeiten,
-			// und holen dann die frischen, bestätigten Daten ab.
+			} catch (setStateErr: any) {
+				this.log.error(`Fehler beim Bestätigen des Status im ioBroker: ${setStateErr.message}`);
+			}
 		});
 	}
 	// If you need to accept messages in your adapter, uncomment the following block and the corresponding line in the constructor.
