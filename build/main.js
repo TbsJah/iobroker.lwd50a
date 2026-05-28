@@ -88,14 +88,7 @@ class Lwd50a extends utils.Adapter {
             }
             const folderId = definition.folder;
             const stateId = `${folderId}.${key}`;
-            let finalValue = value;
-            if (typeof finalValue === "number") {
-              if (definition.unit === "bar" || definition.unit === "V") {
-                finalValue = finalValue / 100;
-              } else if (definition.unit === "K") {
-                finalValue = finalValue / 10;
-              }
-            }
+            const finalValue = value;
             await this.setObjectNotExists(folderId, {
               type: "channel",
               common: {
