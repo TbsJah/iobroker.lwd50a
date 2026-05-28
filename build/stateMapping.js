@@ -25,39 +25,6 @@ const STATE_MAPPING = {
   // ==========================================
   // EINSTELLUNGEN & PARAMETER (Beschreibbar)
   // ==========================================
-  heating_target_temperature: {
-    folder: "Einstellungen.Heizung",
-    name: "Heizung Soll-Temperatur (Wunschwert)",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C",
-    write: true,
-    luxWriteId: "heating_target_temperature",
-    min: -5,
-    max: 5
-  },
-  heating_temperature: {
-    folder: "Einstellungen.Heizung",
-    name: "Heizung Soll-Temperatur (Wunschwert)",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C",
-    write: true,
-    luxWriteId: "heating_target_temperature",
-    min: -5,
-    max: 5
-  },
-  warmwater_target_temperature: {
-    folder: "Einstellungen.Warmwasser",
-    name: "Warmwasser Soll-Temperatur",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C",
-    write: true,
-    luxWriteId: "warmwater_target_temperature",
-    min: 30,
-    max: 65
-  },
   // --- HEIZKURVE (HAUPT-HEIZKREIS) ---
   heating_curve_end_point: {
     folder: "Einstellungen.Heizung",
@@ -78,8 +45,8 @@ const STATE_MAPPING = {
     unit: "\xB0C",
     write: true,
     luxWriteId: "heating_curve_parallel_offset",
-    min: -5,
-    max: 5
+    min: 20,
+    max: 45
   },
   deltaHeatingReduction: {
     folder: "Einstellungen.Heizung",
@@ -91,6 +58,28 @@ const STATE_MAPPING = {
     luxWriteId: "deltaHeatingReduction",
     min: -10,
     max: 10
+  },
+  heating_target_temperature: {
+    folder: "Einstellungen.Heizung",
+    name: "Heizung Verschiebng Soll-Temperatur (Wunschwert)",
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    write: true,
+    luxWriteId: "heating_target_temperature",
+    min: -5,
+    max: 5
+  },
+  warmwater_target_temperature: {
+    folder: "Einstellungen.Warmwasser",
+    name: "Warmwasser Soll-Temperatur",
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    write: true,
+    luxWriteId: "warmwater_target_temperature",
+    min: 30,
+    max: 65
   },
   // --- MISCHKREIS 1 ---
   mk1_curve_end_point: {

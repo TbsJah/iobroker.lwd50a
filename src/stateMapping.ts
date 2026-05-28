@@ -35,20 +35,43 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 	// ==========================================
 	// EINSTELLUNGEN & PARAMETER (Beschreibbar)
 	// ==========================================
-	heating_target_temperature: {
+	// --- HEIZKURVE (HAUPT-HEIZKREIS) ---
+	heating_curve_end_point: {
 		folder: "Einstellungen.Heizung",
-		name: "Heizung Soll-Temperatur (Wunschwert)",
+		name: "Heizkurve Endpunkt (Rücklauf)",
 		role: "value.temperature",
 		type: "number",
 		unit: "°C",
 		write: true,
-		luxWriteId: "heating_target_temperature",
-		min: -5,
-		max: 5,
+		luxWriteId: "heating_curve_end_point",
+		min: 20,
+		max: 45,
 	},
-	heating_temperature: {
+	heating_curve_parallel_offset: {
 		folder: "Einstellungen.Heizung",
-		name: "Heizung Soll-Temperatur (Wunschwert)",
+		name: "Heizkurve Fusspunkt",
+		role: "value.temperature",
+		type: "number",
+		unit: "°C",
+		write: true,
+		luxWriteId: "heating_curve_parallel_offset",
+		min: 20,
+		max: 45,
+	},
+	deltaHeatingReduction: {
+		folder: "Einstellungen.Heizung",
+		name: "Heizung Nachtabsenkung (Delta)",
+		role: "value.temperature",
+		type: "number",
+		unit: "K",
+		write: true,
+		luxWriteId: "deltaHeatingReduction",
+		min: -10,
+		max: 10,
+	},
+	heating_target_temperature: {
+		folder: "Einstellungen.Heizung",
+		name: "Heizung Verschiebng Soll-Temperatur (Wunschwert)",
 		role: "value.temperature",
 		type: "number",
 		unit: "°C",
@@ -70,40 +93,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		max: 65,
 	},
 
-	// --- HEIZKURVE (HAUPT-HEIZKREIS) ---
-	heating_curve_end_point: {
-		folder: "Einstellungen.Heizung",
-		name: "Heizkurve Endpunkt (Rücklauf)",
-		role: "value.temperature",
-		type: "number",
-		unit: "°C",
-		write: true,
-		luxWriteId: "heating_curve_end_point",
-		min: 20,
-		max: 45,
-	},
-	heating_curve_parallel_offset: {
-		folder: "Einstellungen.Heizung",
-		name: "Heizkurve Fusspunkt",
-		role: "value.temperature",
-		type: "number",
-		unit: "°C",
-		write: true,
-		luxWriteId: "heating_curve_parallel_offset",
-		min: -5,
-		max: 5,
-	},
-	deltaHeatingReduction: {
-		folder: "Einstellungen.Heizung",
-		name: "Heizung Nachtabsenkung (Delta)",
-		role: "value.temperature",
-		type: "number",
-		unit: "K",
-		write: true,
-		luxWriteId: "deltaHeatingReduction",
-		min: -10,
-		max: 10,
-	},
 	// --- MISCHKREIS 1 ---
 	mk1_curve_end_point: {
 		folder: "Einstellungen.Mischkreis1",
