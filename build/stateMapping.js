@@ -33,8 +33,8 @@ const STATE_MAPPING = {
     unit: "\xB0C",
     write: true,
     luxWriteId: "heating_target_temperature",
-    min: 15,
-    max: 35
+    min: -5,
+    max: 5
   },
   warmwater_target_temperature: {
     folder: "Einstellungen.Warmwasser",
@@ -61,10 +61,10 @@ const STATE_MAPPING = {
   },
   heating_curve_parallel_offset: {
     folder: "Einstellungen.Heizung",
-    name: "Heizkurve Parallelverschiebung",
+    name: "Heizkurve Fusspunkt",
     role: "value.temperature",
     type: "number",
-    unit: "K",
+    unit: "\xB0C",
     write: true,
     luxWriteId: "heating_curve_parallel_offset",
     min: -5,

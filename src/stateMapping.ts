@@ -43,8 +43,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		unit: "°C",
 		write: true,
 		luxWriteId: "heating_target_temperature",
-		min: 15,
-		max: 35,
+		min: -5,
+		max: 5,
 	},
 	warmwater_target_temperature: {
 		folder: "Einstellungen.Warmwasser",
@@ -72,10 +72,10 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 	},
 	heating_curve_parallel_offset: {
 		folder: "Einstellungen.Heizung",
-		name: "Heizkurve Parallelverschiebung",
+		name: "Heizkurve Fusspunkt",
 		role: "value.temperature",
 		type: "number",
-		unit: "K",
+		unit: "°C",
 		write: true,
 		luxWriteId: "heating_curve_parallel_offset",
 		min: -5,
@@ -92,7 +92,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		min: -10,
 		max: 10,
 	},
-
 	// --- MISCHKREIS 1 ---
 	mk1_curve_end_point: {
 		folder: "Einstellungen.Mischkreis1",
