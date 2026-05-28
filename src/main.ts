@@ -162,6 +162,8 @@ class Lwd50a extends utils.Adapter {
 						if (typeof finalValue === "number") {
 							if (definition.unit === "bar" || definition.unit === "V") {
 								finalValue = finalValue / 100;
+							} else if (definition.unit === "K") {
+								finalValue = finalValue / 10;
 							}
 						}
 
@@ -197,7 +199,7 @@ class Lwd50a extends utils.Adapter {
 						}
 
 						// 4. Zuletzt den Wert in den Datenpunkt schreiben
-						await this.setState(stateId, value as any, true);
+						await this.setState(stateId, finalValue as any, true);
 					}
 				}
 			} catch (catchErr) {

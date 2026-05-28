@@ -92,6 +92,8 @@ class Lwd50a extends utils.Adapter {
             if (typeof finalValue === "number") {
               if (definition.unit === "bar" || definition.unit === "V") {
                 finalValue = finalValue / 100;
+              } else if (definition.unit === "K") {
+                finalValue = finalValue / 10;
               }
             }
             await this.setObjectNotExists(folderId, {
@@ -119,7 +121,7 @@ class Lwd50a extends utils.Adapter {
             if (definition.write) {
               await this.subscribeStatesAsync(stateId);
             }
-            await this.setState(stateId, value, true);
+            await this.setState(stateId, finalValue, true);
           }
         }
       } catch (catchErr) {

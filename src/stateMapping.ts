@@ -339,8 +339,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: {
-			0: "AUS",
-			1: "EIN",
+			0: "Aus",
+			1: "Ein",
 		},
 	},
 	BUPout: {
@@ -349,8 +349,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: {
-			0: "AUS",
-			1: "EIN",
+			0: "Aus",
+			1: "Ein",
 		},
 	},
 	HUPout: {
@@ -359,8 +359,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: {
-			0: "AUS",
-			1: "EIN",
+			0: "Aus",
+			1: "Ein",
 		},
 	},
 	MA1out: {
@@ -369,8 +369,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: {
-			0: "AUS",
-			1: "EIN",
+			0: "Aus",
+			1: "Ein",
 		},
 	},
 	MZ1out: {
@@ -379,8 +379,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: {
-			0: "AUS",
-			1: "EIN",
+			0: "Aus",
+			1: "Ein",
 		},
 	},
 	VENout: {
@@ -389,8 +389,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: {
-			0: "AUS",
-			1: "EIN",
+			0: "Aus",
+			1: "Ein",
 		},
 	},
 	VBOout: {
@@ -399,8 +399,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: {
-			0: "AUS",
-			1: "EIN",
+			0: "Aus",
+			1: "Ein",
 		},
 	},
 	VD1out: {
@@ -409,8 +409,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: {
-			0: "AUS",
-			1: "EIN",
+			0: "Aus",
+			1: "Ein",
 		},
 	},
 	VD2out: {
@@ -419,8 +419,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: {
-			0: "AUS",
-			1: "EIN",
+			0: "Aus",
+			1: "Ein",
 		},
 	},
 	ZIPout: {
@@ -429,8 +429,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: {
-			0: "AUS",
-			1: "EIN",
+			0: "Aus",
+			1: "Ein",
 		},
 	},
 	ZUPout: {
@@ -439,8 +439,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: {
-			0: "AUS",
-			1: "EIN",
+			0: "Aus",
+			1: "Ein",
 		},
 	},
 	ZW1out: {
@@ -449,8 +449,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: {
-			0: "AUS",
-			1: "EIN",
+			0: "Aus",
+			1: "Ein",
 		},
 	},
 	ZW2SSTout: {
@@ -459,8 +459,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: {
-			0: "AUS",
-			1: "EIN",
+			0: "Aus",
+			1: "Ein",
 		},
 	},
 	ZW3SSTout: {
@@ -469,8 +469,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: {
-			0: "AUS",
-			1: "EIN",
+			0: "Aus",
+			1: "Ein",
 		},
 	},
 	FP2out: {
@@ -479,8 +479,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: {
-			0: "AUS",
-			1: "EIN",
+			0: "Aus",
+			1: "Ein",
 		},
 	},
 	SLPout: {
@@ -489,8 +489,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: {
-			0: "AUS",
-			1: "EIN",
+			0: "Aus",
+			1: "Ein",
 		},
 	},
 	SUPout: {
@@ -505,8 +505,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: {
-			0: "AUS",
-			1: "EIN",
+			0: "Aus",
+			1: "Ein",
 		},
 	},
 	MA2out: {
@@ -515,8 +515,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: {
-			0: "AUS",
-			1: "EIN",
+			0: "Aus",
+			1: "Ein",
 		},
 	},
 	MZ3out: {
@@ -525,8 +525,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: {
-			0: "AUS",
-			1: "EIN",
+			0: "Aus",
+			1: "Ein",
 		},
 	},
 	MA3out: {
@@ -535,8 +535,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: {
-			0: "AUS",
-			1: "EIN",
+			0: "Aus",
+			1: "Ein",
 		},
 	},
 	FP3out: {
@@ -545,8 +545,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: {
-			0: "AUS",
-			1: "EIN",
+			0: "Aus",
+			1: "Ein",
 		},
 	},
 	analogOut1: {
@@ -583,8 +583,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: {
-			0: "AUS",
-			1: "EIN",
+			0: "Aus",
+			1: "Ein",
 		},
 	},
 	Out_VAB: {
@@ -593,8 +593,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: {
-			0: "AUS",
-			1: "EIN",
+			0: "Aus",
+			1: "Ein",
 		},
 	},
 	Out_VSK: {
@@ -603,8 +603,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: {
-			0: "AUS",
-			1: "EIN",
+			0: "Aus",
+			1: "Ein",
 		},
 	},
 	Out_FRH: {
@@ -613,8 +613,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: {
-			0: "AUS",
-			1: "EIN",
+			0: "Aus",
+			1: "Ein",
 		},
 	},
 	defrostValve: {
@@ -623,8 +623,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: {
-			0: "AUS",
-			1: "EIN",
+			0: "Aus",
+			1: "Ein",
 		},
 	},
 	hotWaterBoilerValve: {
@@ -633,8 +633,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: {
-			0: "AUS",
-			1: "EIN",
+			0: "Aus",
+			1: "Ein",
 		},
 	},
 	heatingSystemCircPump: {
@@ -649,8 +649,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: {
-			0: "AUS",
-			1: "EIN",
+			0: "Aus",
+			1: "Ein",
 		},
 	},
 	compressor1: {
@@ -659,8 +659,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: {
-			0: "AUS",
-			1: "EIN",
+			0: "Aus",
+			1: "Ein",
 		},
 	},
 	hotWaterCircPumpExtern: {
@@ -669,8 +669,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: {
-			0: "AUS",
-			1: "EIN",
+			0: "Aus",
+			1: "Ein",
 		},
 	},
 
@@ -951,8 +951,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 	LIN_exists: {
 		folder: "Informationen.Systeminfo",
 		name: "LIN-Bus vorhanden",
-		role: "value",
-		type: "number",
+		role: "indicator",
+		type: "boolean",
 	},
 	rawDeviceTimeCalc: {
 		folder: "Informationen.Systeminfo",

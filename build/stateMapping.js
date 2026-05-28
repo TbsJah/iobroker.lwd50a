@@ -325,8 +325,8 @@ const STATE_MAPPING = {
     role: "value",
     type: "number",
     states: {
-      0: "AUS",
-      1: "EIN"
+      0: "Aus",
+      1: "Ein"
     }
   },
   BUPout: {
@@ -335,8 +335,8 @@ const STATE_MAPPING = {
     role: "value",
     type: "number",
     states: {
-      0: "AUS",
-      1: "EIN"
+      0: "Aus",
+      1: "Ein"
     }
   },
   HUPout: {
@@ -345,8 +345,8 @@ const STATE_MAPPING = {
     role: "value",
     type: "number",
     states: {
-      0: "AUS",
-      1: "EIN"
+      0: "Aus",
+      1: "Ein"
     }
   },
   MA1out: {
@@ -355,8 +355,8 @@ const STATE_MAPPING = {
     role: "value",
     type: "number",
     states: {
-      0: "AUS",
-      1: "EIN"
+      0: "Aus",
+      1: "Ein"
     }
   },
   MZ1out: {
@@ -365,8 +365,8 @@ const STATE_MAPPING = {
     role: "value",
     type: "number",
     states: {
-      0: "AUS",
-      1: "EIN"
+      0: "Aus",
+      1: "Ein"
     }
   },
   VENout: {
@@ -375,8 +375,8 @@ const STATE_MAPPING = {
     role: "value",
     type: "number",
     states: {
-      0: "AUS",
-      1: "EIN"
+      0: "Aus",
+      1: "Ein"
     }
   },
   VBOout: {
@@ -385,8 +385,8 @@ const STATE_MAPPING = {
     role: "value",
     type: "number",
     states: {
-      0: "AUS",
-      1: "EIN"
+      0: "Aus",
+      1: "Ein"
     }
   },
   VD1out: {
@@ -395,8 +395,8 @@ const STATE_MAPPING = {
     role: "value",
     type: "number",
     states: {
-      0: "AUS",
-      1: "EIN"
+      0: "Aus",
+      1: "Ein"
     }
   },
   VD2out: {
@@ -405,8 +405,8 @@ const STATE_MAPPING = {
     role: "value",
     type: "number",
     states: {
-      0: "AUS",
-      1: "EIN"
+      0: "Aus",
+      1: "Ein"
     }
   },
   ZIPout: {
@@ -415,8 +415,8 @@ const STATE_MAPPING = {
     role: "value",
     type: "number",
     states: {
-      0: "AUS",
-      1: "EIN"
+      0: "Aus",
+      1: "Ein"
     }
   },
   ZUPout: {
@@ -425,8 +425,8 @@ const STATE_MAPPING = {
     role: "value",
     type: "number",
     states: {
-      0: "AUS",
-      1: "EIN"
+      0: "Aus",
+      1: "Ein"
     }
   },
   ZW1out: {
@@ -435,8 +435,8 @@ const STATE_MAPPING = {
     role: "value",
     type: "number",
     states: {
-      0: "AUS",
-      1: "EIN"
+      0: "Aus",
+      1: "Ein"
     }
   },
   ZW2SSTout: {
@@ -445,8 +445,8 @@ const STATE_MAPPING = {
     role: "value",
     type: "number",
     states: {
-      0: "AUS",
-      1: "EIN"
+      0: "Aus",
+      1: "Ein"
     }
   },
   ZW3SSTout: {
@@ -455,8 +455,8 @@ const STATE_MAPPING = {
     role: "value",
     type: "number",
     states: {
-      0: "AUS",
-      1: "EIN"
+      0: "Aus",
+      1: "Ein"
     }
   },
   FP2out: {
@@ -465,8 +465,8 @@ const STATE_MAPPING = {
     role: "value",
     type: "number",
     states: {
-      0: "AUS",
-      1: "EIN"
+      0: "Aus",
+      1: "Ein"
     }
   },
   SLPout: {
@@ -475,8 +475,8 @@ const STATE_MAPPING = {
     role: "value",
     type: "number",
     states: {
-      0: "AUS",
-      1: "EIN"
+      0: "Aus",
+      1: "Ein"
     }
   },
   SUPout: {
@@ -491,8 +491,8 @@ const STATE_MAPPING = {
     role: "value",
     type: "number",
     states: {
-      0: "AUS",
-      1: "EIN"
+      0: "Aus",
+      1: "Ein"
     }
   },
   MA2out: {
@@ -501,8 +501,8 @@ const STATE_MAPPING = {
     role: "value",
     type: "number",
     states: {
-      0: "AUS",
-      1: "EIN"
+      0: "Aus",
+      1: "Ein"
     }
   },
   MZ3out: {
@@ -511,8 +511,8 @@ const STATE_MAPPING = {
     role: "value",
     type: "number",
     states: {
-      0: "AUS",
-      1: "EIN"
+      0: "Aus",
+      1: "Ein"
     }
   },
   MA3out: {
@@ -521,8 +521,8 @@ const STATE_MAPPING = {
     role: "value",
     type: "number",
     states: {
-      0: "AUS",
-      1: "EIN"
+      0: "Aus",
+      1: "Ein"
     }
   },
   FP3out: {
@@ -531,8 +531,8 @@ const STATE_MAPPING = {
     role: "value",
     type: "number",
     states: {
-      0: "AUS",
-      1: "EIN"
+      0: "Aus",
+      1: "Ein"
     }
   },
   analogOut1: {
@@ -569,8 +569,8 @@ const STATE_MAPPING = {
     role: "value",
     type: "number",
     states: {
-      0: "AUS",
-      1: "EIN"
+      0: "Aus",
+      1: "Ein"
     }
   },
   Out_VAB: {
@@ -579,8 +579,8 @@ const STATE_MAPPING = {
     role: "value",
     type: "number",
     states: {
-      0: "AUS",
-      1: "EIN"
+      0: "Aus",
+      1: "Ein"
     }
   },
   Out_VSK: {
@@ -589,8 +589,8 @@ const STATE_MAPPING = {
     role: "value",
     type: "number",
     states: {
-      0: "AUS",
-      1: "EIN"
+      0: "Aus",
+      1: "Ein"
     }
   },
   Out_FRH: {
@@ -599,8 +599,8 @@ const STATE_MAPPING = {
     role: "value",
     type: "number",
     states: {
-      0: "AUS",
-      1: "EIN"
+      0: "Aus",
+      1: "Ein"
     }
   },
   defrostValve: {
@@ -609,8 +609,8 @@ const STATE_MAPPING = {
     role: "value",
     type: "number",
     states: {
-      0: "AUS",
-      1: "EIN"
+      0: "Aus",
+      1: "Ein"
     }
   },
   hotWaterBoilerValve: {
@@ -619,8 +619,8 @@ const STATE_MAPPING = {
     role: "value",
     type: "number",
     states: {
-      0: "AUS",
-      1: "EIN"
+      0: "Aus",
+      1: "Ein"
     }
   },
   heatingSystemCircPump: {
@@ -635,8 +635,8 @@ const STATE_MAPPING = {
     role: "value",
     type: "number",
     states: {
-      0: "AUS",
-      1: "EIN"
+      0: "Aus",
+      1: "Ein"
     }
   },
   compressor1: {
@@ -645,8 +645,8 @@ const STATE_MAPPING = {
     role: "value",
     type: "number",
     states: {
-      0: "AUS",
-      1: "EIN"
+      0: "Aus",
+      1: "Ein"
     }
   },
   hotWaterCircPumpExtern: {
@@ -655,8 +655,8 @@ const STATE_MAPPING = {
     role: "value",
     type: "number",
     states: {
-      0: "AUS",
-      1: "EIN"
+      0: "Aus",
+      1: "Ein"
     }
   },
   // ==========================================
@@ -934,8 +934,8 @@ const STATE_MAPPING = {
   LIN_exists: {
     folder: "Informationen.Systeminfo",
     name: "LIN-Bus vorhanden",
-    role: "value",
-    type: "number"
+    role: "indicator",
+    type: "boolean"
   },
   rawDeviceTimeCalc: {
     folder: "Informationen.Systeminfo",
