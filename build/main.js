@@ -176,12 +176,12 @@ class Lwd50a extends utils.Adapter {
       return;
     }
     this.log.info(`Nutzerbefehl empfangen f\xFCr ${id}: ${state.val}`);
-    const idParts = id.split(".");
-    idParts.shift();
-    idParts.shift();
-    idParts.shift();
-    this.log.info(idParts[0]);
-    const mappingKey = idParts[0];
+    const mappingKey = id.split(".").pop();
+    if (!mappingKey) {
+      this.log.warn(`Konnte keinen g\xFCltigen State-Schl\xFCssel aus der ID extrahieren: ${id}`);
+      return;
+    }
+    this.log.info(mappingKey);
     const definition = import_stateMapping.STATE_MAPPING[mappingKey];
     if (!definition || !definition.luxWriteId || definition.write !== true) {
       this.log.warn(`Kein Schreib-Mapping f\xFCr ${mappingKey} gefunden.`);

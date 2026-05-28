@@ -262,12 +262,14 @@ class Lwd50a extends utils.Adapter {
 
 		this.log.info(`Nutzerbefehl empfangen für ${id}: ${state.val}`);
 
-		const idParts = id.split(".");
-		idParts.shift(); // lwd50a entfernen
-		idParts.shift(); // Instanz entfernen
-		idParts.shift(); // Ordner entfernen
-		this.log.info(idParts[0]);
-		const mappingKey = idParts[0];
+		const mappingKey = id.split(".").pop();
+		// 1. Sicherheits-Check: Abbrechen, wenn mappingKey undefined oder leer ist
+		if (!mappingKey) {
+			this.log.warn(`Konnte keinen gültigen State-Schlüssel aus der ID extrahieren: ${id}`);
+			return; // Bricht die Funktion hier ab, damit es keine Abstürze gibt
+		}
+
+		this.log.info(mappingKey);
 		const definition = STATE_MAPPING[mappingKey];
 
 		if (!definition || !definition.luxWriteId || definition.write !== true) {
