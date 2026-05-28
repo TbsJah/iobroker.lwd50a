@@ -315,7 +315,7 @@ const STATE_MAPPING = {
     unit: "V",
     write: true,
     luxWriteId: "heating_system_circ_pump_voltage_nominal",
-    factor: 100,
+    factor: 1,
     min: 3,
     max: 10
   },
@@ -327,7 +327,7 @@ const STATE_MAPPING = {
     unit: "V",
     write: true,
     luxWriteId: "heating_system_circ_pump_voltage_minimal",
-    factor: 100,
+    factor: 1,
     min: 3,
     max: 10
   },
