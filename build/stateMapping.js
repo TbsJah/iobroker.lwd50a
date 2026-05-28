@@ -36,6 +36,17 @@ const STATE_MAPPING = {
     min: -5,
     max: 5
   },
+  heating_temperature: {
+    folder: "Einstellungen.Heizung",
+    name: "Heizung Soll-Temperatur (Wunschwert)",
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    write: true,
+    luxWriteId: "heating_target_temperature",
+    min: -5,
+    max: 5
+  },
   warmwater_target_temperature: {
     folder: "Einstellungen.Warmwasser",
     name: "Warmwasser Soll-Temperatur",
