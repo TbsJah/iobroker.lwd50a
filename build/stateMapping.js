@@ -32,6 +32,7 @@ const STATE_MAPPING = {
     type: "number",
     unit: "\xB0C",
     write: true,
+    luxWriteId: "heating_target_temperature",
     min: 15,
     max: 35
   },
@@ -42,6 +43,7 @@ const STATE_MAPPING = {
     type: "number",
     unit: "\xB0C",
     write: true,
+    luxWriteId: "warmwater_target_temperature",
     min: 30,
     max: 65
   },
@@ -53,6 +55,7 @@ const STATE_MAPPING = {
     type: "number",
     unit: "\xB0C",
     write: true,
+    luxWriteId: "heating_curve_end_point",
     min: 20,
     max: 45
   },
@@ -63,6 +66,7 @@ const STATE_MAPPING = {
     type: "number",
     unit: "K",
     write: true,
+    luxWriteId: "heating_curve_parallel_offset",
     min: -5,
     max: 5
   },
@@ -73,6 +77,7 @@ const STATE_MAPPING = {
     type: "number",
     unit: "K",
     write: true,
+    luxWriteId: "deltaHeatingReduction",
     min: -10,
     max: 10
   },
@@ -84,6 +89,7 @@ const STATE_MAPPING = {
     type: "number",
     unit: "\xB0C",
     write: true,
+    luxWriteId: "mk1_curve_end_point",
     min: 20,
     max: 50
   },
@@ -94,6 +100,7 @@ const STATE_MAPPING = {
     type: "number",
     unit: "K",
     write: true,
+    luxWriteId: "mk1_curve_parallel_offset",
     min: -5,
     max: 5
   },
@@ -104,6 +111,7 @@ const STATE_MAPPING = {
     type: "number",
     unit: "K",
     write: true,
+    luxWriteId: "deltaMk1Reduction",
     min: -10,
     max: 10
   },
@@ -115,6 +123,7 @@ const STATE_MAPPING = {
     type: "number",
     unit: "\xB0C",
     write: true,
+    luxWriteId: "mk2_curve_end_point",
     min: 20,
     max: 50
   },
@@ -125,6 +134,7 @@ const STATE_MAPPING = {
     type: "number",
     unit: "K",
     write: true,
+    luxWriteId: "mk2_curve_parallel_offset",
     min: -5,
     max: 5
   },
@@ -135,6 +145,7 @@ const STATE_MAPPING = {
     type: "number",
     unit: "K",
     write: true,
+    luxWriteId: "deltaMk2Reduction",
     min: -10,
     max: 10
   },
@@ -146,6 +157,7 @@ const STATE_MAPPING = {
     type: "number",
     unit: "\xB0C",
     write: true,
+    luxWriteId: "mk3_curve_end_point",
     min: 20,
     max: 50
   },
@@ -156,6 +168,7 @@ const STATE_MAPPING = {
     type: "number",
     unit: "K",
     write: true,
+    luxWriteId: "mk3_curve_parallel_offset",
     min: -5,
     max: 5
   },
@@ -166,50 +179,39 @@ const STATE_MAPPING = {
     type: "number",
     unit: "K",
     write: true,
+    luxWriteId: "deltaMk3Reduction",
     min: -10,
     max: 10
   },
-  // --- BETRIEBSARTEN (0 = Automatik, 1 = ZWE, 2 = Party, 3 = Ferien, 4 = Aus) ---
+  // --- BETRIEBSARTEN ---
   heating_operation_mode: {
-    folder: "Einstellungen.Betriebsmodus",
+    folder: "Einstellungen.Allgemein",
     name: "Betriebsart Heizung",
     role: "level.mode",
     type: "number",
     write: true,
-    states: {
-      0: "Automatik",
-      1: "Zweites WEZ (Heizstab)",
-      2: "Party",
-      3: "Ferien",
-      4: "Aus"
-    }
+    luxWriteId: "heating_operation_mode",
+    states: { 0: "Automatik", 1: "Zweites WEZ", 2: "Party", 3: "Ferien", 4: "Aus" }
   },
   warmwater_operation_mode: {
-    folder: "Einstellungen.Betriebsmodus",
+    folder: "Einstellungen.Allgemein",
     name: "Betriebsart Warmwasser",
     role: "level.mode",
     type: "number",
     write: true,
-    states: {
-      0: "Automatik",
-      1: "Zweites WEZ (Heizstab)",
-      2: "Party",
-      3: "Ferien",
-      4: "Aus"
-    }
+    luxWriteId: "warmwater_operation_mode",
+    states: { 0: "Automatik", 1: "Zweites WEZ", 2: "Party", 3: "Ferien", 4: "Aus" }
   },
   cooling_operation_mode: {
-    folder: "Einstellungen.Betriebsmodus",
+    folder: "Einstellungen.Allgemein",
     name: "Betriebsart K\xFChlung",
     role: "level.mode",
     type: "number",
     write: true,
-    states: {
-      0: "Aus",
-      1: "Automatik"
-    }
+    luxWriteId: "cooling_operation_mode",
+    states: { 0: "Aus", 1: "Automatik" }
   },
-  // --- KÜHLUNG (ZUSATZPARAMETER) ---
+  // --- KÜHLUNG ---
   cooling_release_temp: {
     folder: "Einstellungen.Kuehlung",
     name: "K\xFChlung Freigabe-Temperatur",
@@ -217,6 +219,7 @@ const STATE_MAPPING = {
     type: "number",
     unit: "\xB0C",
     write: true,
+    luxWriteId: "cooling_release_temp",
     min: 15,
     max: 30
   },
@@ -227,6 +230,7 @@ const STATE_MAPPING = {
     type: "number",
     unit: "\xB0C",
     write: true,
+    luxWriteId: "cooling_inlet_temp",
     min: 15,
     max: 25
   },
@@ -236,7 +240,8 @@ const STATE_MAPPING = {
     role: "value.temperature",
     type: "number",
     unit: "\xB0C",
-    write: true
+    write: true,
+    luxWriteId: "cooling_start"
   },
   cooling_stop: {
     folder: "Einstellungen.Kuehlung",
@@ -244,9 +249,10 @@ const STATE_MAPPING = {
     role: "value.temperature",
     type: "number",
     unit: "\xB0C",
-    write: true
+    write: true,
+    luxWriteId: "cooling_stop"
   },
-  // --- HYSTERESEN & ZWEITER VERDICHTER ---
+  // --- HYSTERESEN ---
   hotwater_temperature_hysteresis: {
     folder: "Einstellungen.Warmwasser",
     name: "Warmwasser Hysterese",
@@ -254,6 +260,7 @@ const STATE_MAPPING = {
     type: "number",
     unit: "K",
     write: true,
+    luxWriteId: "hotwater_temperature_hysteresis",
     min: 1,
     max: 15
   },
@@ -264,6 +271,7 @@ const STATE_MAPPING = {
     type: "number",
     unit: "K",
     write: true,
+    luxWriteId: "return_temperature_hysteresis",
     min: 1,
     max: 5
   },
@@ -274,6 +282,7 @@ const STATE_MAPPING = {
     type: "number",
     unit: "\xB0C",
     write: true,
+    luxWriteId: "heating_temperature_outside_2nd_compressor",
     min: -20,
     max: 10
   },
@@ -284,10 +293,11 @@ const STATE_MAPPING = {
     type: "number",
     unit: "\xB0C",
     write: true,
+    luxWriteId: "hotwater_temperature_forerun_2nd_compressor",
     min: 10,
     max: 60
   },
-  // --- PUMPENSTEUERUNG / SPANNUNG ---
+  // --- PUMPEN ---
   heating_system_circ_pump_voltage_nominal: {
     folder: "Einstellungen.Pumpen",
     name: "Heizungsumw\xE4lzpumpe Nennspannung",
@@ -295,6 +305,7 @@ const STATE_MAPPING = {
     type: "number",
     unit: "V",
     write: true,
+    luxWriteId: "heating_system_circ_pump_voltage_nominal",
     min: 3,
     max: 10
   },
@@ -305,16 +316,18 @@ const STATE_MAPPING = {
     type: "number",
     unit: "V",
     write: true,
+    luxWriteId: "heating_system_circ_pump_voltage_minimal",
     min: 3,
     max: 10
   },
-  // --- SPEZIALFUNKTIONEN (ENTLÜFTUNG / DEAERATE) ---
+  // --- ENTLÜFTUNG ---
   runDeaerate: {
     folder: "Einstellungen.Spezial",
     name: "Entl\xFCftungsprogramm starten",
     role: "switch",
     type: "number",
     write: true,
+    luxWriteId: "runDeaerate",
     states: { 0: "AUS", 1: "EIN" }
   },
   hotWaterCircPumpDeaerate: {
@@ -323,6 +336,7 @@ const STATE_MAPPING = {
     role: "switch",
     type: "number",
     write: true,
+    luxWriteId: "hotWaterCircPumpDeaerate",
     states: { 0: "AUS", 1: "EIN" }
   },
   solarPumpDeaerate: {
@@ -331,6 +345,7 @@ const STATE_MAPPING = {
     role: "switch",
     type: "number",
     write: true,
+    luxWriteId: "solarPumpDeaerate",
     states: { 0: "AUS", 1: "EIN" }
   },
   // ==========================================

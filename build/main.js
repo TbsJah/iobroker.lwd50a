@@ -88,7 +88,14 @@ class Lwd50a extends utils.Adapter {
             }
             const folderId = definition.folder;
             const stateId = `${folderId}.${key}`;
-            const finalValue = value;
+            let finalValue = value;
+            if (typeof finalValue === "number") {
+              if (definition.unit === "bar" || definition.unit === "V") {
+                finalValue = finalValue / 100;
+              } else if (definition.unit === "K") {
+                finalValue = finalValue / 10;
+              }
+            }
             await this.setObjectNotExists(folderId, {
               type: "channel",
               common: {
@@ -176,7 +183,7 @@ class Lwd50a extends utils.Adapter {
     this.log.info(idParts[0]);
     const mappingKey = idParts[0];
     const definition = import_stateMapping.STATE_MAPPING[mappingKey];
-    if (!definition || !definition.luxWriteId) {
+    if (!definition || !definition.luxWriteId || definition.write !== true) {
       this.log.warn(`Kein Schreib-Mapping f\xFCr ${mappingKey} gefunden.`);
       return;
     }
