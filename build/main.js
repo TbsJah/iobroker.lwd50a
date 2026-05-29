@@ -39,12 +39,30 @@ class Lwd50a extends utils.Adapter {
   /**
    * Is called when databases are connected and adapter received configuration.
    */
-  onReady() {
+  async onReady() {
     const ip = "192.168.178.81";
     const port = 8889;
     this.log.info(`Verbinde mit W\xE4rmepumpe auf ${ip}:${port}...`);
     this.pump = new luxtronik.createConnection(ip, port);
     this.updateData();
+    const zipDef = import_stateMapping.STATE_MAPPING.Activate_Zip;
+    if (zipDef) {
+      await this.setObjectNotExistsAsync(`${zipDef.folder}.Activate_Zip`, {
+        type: "state",
+        common: {
+          name: zipDef.name,
+          type: zipDef.type,
+          role: zipDef.role,
+          read: true,
+          write: zipDef.write || false,
+          def: 0,
+          // Standardwert auf AUS
+          states: zipDef.states
+        },
+        native: {}
+      });
+      await this.setState(`${zipDef.folder}.Activate_Zip`, { val: 0, ack: true });
+    }
     let intervalSeconds = this.config.interval || 30;
     if (intervalSeconds < 10) {
       intervalSeconds = 10;
@@ -56,9 +74,6 @@ class Lwd50a extends utils.Adapter {
       this.updateData();
     }, intervalSeconds * 1e3);
   }
-  /**
-   * Holt die Daten von der Wärmepumpe und schreibt sie in ioBroker
-   */
   /**
    * Holt die Daten von der Wärmepumpe und schreibt sie in ioBroker
    */
