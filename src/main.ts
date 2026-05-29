@@ -306,6 +306,56 @@ class Lwd50a extends utils.Adapter {
 			this.log.warn(`Kein Schreib-Mapping für ${mappingKey} gefunden.`);
 			return;
 		}
+		// --- NEUER KOMBI-BEFEHL (MAKRO FÜR ZIP) ---
+		if (mappingKey === "Activate_Zip") {
+			// Prüfen, ob der Schalter auf EIN/1 gesetzt wurde
+			if (
+				state.val === 1 ||
+				state.val === true ||
+				state.val === "1" ||
+				String(state.val).toLowerCase() === "ein"
+			) {
+				this.log.info("Makro gestartet: Aktiviere ZIP Entlüftung (Schritt 1 von 2)...");
+
+				// Schritt 1: hotWaterCircPumpDeaerate auf 1 setzen
+				this.pump.write("hotWaterCircPumpDeaerate", 1, async (err1: any) => {
+					if (err1) {
+						this.log.error(`Makro Fehler bei Schritt 1: ${err1.message}`);
+						return;
+					}
+
+					// 1 Sekunde warten, damit die Steuerung den Speicher sauber umschalten kann
+					await new Promise(resolve => setTimeout(resolve, 1000));
+					this.log.info("Makro: ZIP gewählt. Starte Entlüftung (Schritt 2 von 2)...");
+
+					// Schritt 2: runDeaerate auf 1 setzen
+					this.pump.write("runDeaerate", 1, async (err2: any) => {
+						if (err2) {
+							this.log.error(`Makro Fehler bei Schritt 2: ${err2.message}`);
+							return;
+						}
+
+						this.log.info("Makro erfolgreich: ZIP Entlüftungsprogramm läuft!");
+
+						// Virtuellen Schalter im ioBroker grün/bestätigt schalten
+						await this.setState(id, { val: state.val, ack: true });
+
+						// EXTRA-TIPP: Nach 4 Sekunden den Schalter optisch wieder auf "AUS" springen lassen.
+						// Dadurch verhält er sich wie ein Taster und du kannst ihn später erneut drücken!
+						setTimeout(() => {
+							this.setState(id, { val: 0, ack: true }).catch(err => {
+								this.log.error(`Fehler beim automatischen Zurücksetzen des Tasters: ${err}`);
+							});
+						}, 4000);
+						this.updateData();
+					});
+				});
+			}
+
+			// WICHTIG: Nach Ausführung des Makros die onStateChange Funktion hier beenden.
+			// Ansonsten würde der Code unten versuchen, "Activate_Zip" direkt an die Pumpe zu schicken!
+			return;
+		}
 
 		// Zusätzlicher Schutz: Prüfen, ob der eingegebene Wert die Limits sprengt
 		if (typeof state.val === "number") {

@@ -210,6 +210,34 @@ class Lwd50a extends utils.Adapter {
       this.log.warn(`Kein Schreib-Mapping f\xFCr ${mappingKey} gefunden.`);
       return;
     }
+    if (mappingKey === "Activate_Zip") {
+      if (state.val === 1 || state.val === true || state.val === "1" || String(state.val).toLowerCase() === "ein") {
+        this.log.info("Makro gestartet: Aktiviere ZIP Entl\xFCftung (Schritt 1 von 2)...");
+        this.pump.write("hotWaterCircPumpDeaerate", 1, async (err1) => {
+          if (err1) {
+            this.log.error(`Makro Fehler bei Schritt 1: ${err1.message}`);
+            return;
+          }
+          await new Promise((resolve) => setTimeout(resolve, 1e3));
+          this.log.info("Makro: ZIP gew\xE4hlt. Starte Entl\xFCftung (Schritt 2 von 2)...");
+          this.pump.write("runDeaerate", 1, async (err2) => {
+            if (err2) {
+              this.log.error(`Makro Fehler bei Schritt 2: ${err2.message}`);
+              return;
+            }
+            this.log.info("Makro erfolgreich: ZIP Entl\xFCftungsprogramm l\xE4uft!");
+            await this.setState(id, { val: state.val, ack: true });
+            setTimeout(() => {
+              this.setState(id, { val: 0, ack: true }).catch((err) => {
+                this.log.error(`Fehler beim automatischen Zur\xFCcksetzen des Tasters: ${err}`);
+              });
+            }, 4e3);
+            this.updateData();
+          });
+        });
+      }
+      return;
+    }
     if (typeof state.val === "number") {
       if (definition.min !== void 0 && state.val < definition.min) {
         this.log.warn(

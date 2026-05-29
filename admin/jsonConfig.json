@@ -209,6 +209,11 @@
 							"type": "checkbox",
 							"label": "Entlüftungsprogramm Solarpumpe",
 							"default": false
+						},
+						"sync_Activate_Zip": {
+							"type": "checkbox",
+							"label": "Makro-Schalter: ZIP Entlüftung aktivieren",
+							"default": true
 						}
 					}
 				}

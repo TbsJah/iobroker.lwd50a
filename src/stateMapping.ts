@@ -71,7 +71,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		min: -10,
 		max: 10,
 	},
-	heating_target_temperature: {
+	heating_temperature: {
 		folder: "Einstellungen.Heizung",
 		name: "Heizung Verschiebng Soll-Temperatur (Wunschwert)",
 		role: "value.temperature",
@@ -82,19 +82,42 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		min: -5,
 		max: 5,
 	},
-
-	warmwater_target_temperature: {
+	returnTemperatureHysteresis: {
+		folder: "Einstellungen.Heizung",
+		name: "Rücklauftemperatur Hysterese",
+		role: "value.temperature",
+		type: "number",
+		unit: "K",
+		write: true,
+		luxWriteId: "return_temperature_hysteresis",
+		factor: 10,
+		min: 1,
+		max: 5,
+	},
+	// --- Wasser ---
+	warmwater_temperature: {
 		folder: "Einstellungen.Warmwasser",
 		name: "Warmwasser Soll-Temperatur",
 		role: "value.temperature",
 		type: "number",
 		unit: "°C",
 		write: true,
-		luxWriteId: "warmwater_target_temperature",
+		luxWriteId: "temperature_hot_water_target",
 		min: 30,
 		max: 65,
 	},
-
+	hotWaterTemperatureHysteresis: {
+		folder: "Einstellungen.Warmwasser",
+		name: "Warmwasser Hysterese",
+		role: "value.temperature",
+		type: "number",
+		unit: "K",
+		write: true,
+		luxWriteId: "hotwater_temperature_hysteresis",
+		factor: 10,
+		min: 1,
+		max: 15,
+	},
 	// --- MISCHKREIS 1 ---
 	mk1_curve_end_point: {
 		folder: "Einstellungen.Mischkreis1",
@@ -104,6 +127,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		unit: "°C",
 		write: true,
 		luxWriteId: "mk1_curve_end_point",
+		factor: 1,
 		min: 20,
 		max: 50,
 	},
@@ -112,10 +136,10 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "MK1 Heizkurve Parallelverschiebung",
 		role: "value.temperature",
 		type: "number",
-		unit: "K",
+		unit: "°C",
 		write: true,
 		luxWriteId: "mk1_curve_parallel_offset",
-		factor: 10,
+		factor: 1,
 		min: -5,
 		max: 5,
 	},
@@ -149,10 +173,10 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "MK2 Heizkurve Parallelverschiebung",
 		role: "value.temperature",
 		type: "number",
-		unit: "K",
+		unit: "°C",
 		write: true,
 		luxWriteId: "mk2_curve_parallel_offset",
-		factor: 10,
+		factor: 1,
 		min: -5,
 		max: 5,
 	},
@@ -236,7 +260,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 	},
 
 	// --- KÜHLUNG ---
-	cooling_release_temp: {
+	cooling_release_temperature: {
 		folder: "Einstellungen.Kuehlung",
 		name: "Kühlung Freigabe-Temperatur",
 		role: "value.temperature",
@@ -258,7 +282,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		min: 15,
 		max: 25,
 	},
-	cooling_start: {
+	cooling_start_after_hours: {
 		folder: "Einstellungen.Kuehlung",
 		name: "Kühlung Start-Temperatur",
 		role: "value.temperature",
@@ -267,7 +291,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		write: true,
 		luxWriteId: "cooling_start",
 	},
-	cooling_stop: {
+	cooling_stop_after_hours: {
 		folder: "Einstellungen.Kuehlung",
 		name: "Kühlung Stopp-Temperatur",
 		role: "value.temperature",
@@ -277,31 +301,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "cooling_stop",
 	},
 
-	// --- HYSTERESEN ---
-	hotwater_temperature_hysteresis: {
-		folder: "Einstellungen.Warmwasser",
-		name: "Warmwasser Hysterese",
-		role: "value.temperature",
-		type: "number",
-		unit: "K",
-		write: true,
-		luxWriteId: "hotwater_temperature_hysteresis",
-		factor: 10,
-		min: 1,
-		max: 15,
-	},
-	return_temperature_hysteresis: {
-		folder: "Einstellungen.Heizung",
-		name: "Rücklauftemperatur Hysterese",
-		role: "value.temperature",
-		type: "number",
-		unit: "K",
-		write: true,
-		luxWriteId: "return_temperature_hysteresis",
-		factor: 10,
-		min: 1,
-		max: 5,
-	},
 	heating_temperature_outside_2nd_compressor: {
 		folder: "Einstellungen.Verdichter",
 		name: "Freigabe 2. Verdichter (Außentemperatur)",
@@ -378,6 +377,16 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		write: true,
 		luxWriteId: "solarPumpDeaerate",
 		states: { 0: "AUS", 1: "EIN" },
+	},
+	// --- ENTLÜFTUNG ---
+	Activate_Zip: {
+		folder: "Einstellungen.Spezial",
+		name: "Makro: ZIP Entlüftung starten",
+		role: "switch",
+		type: "number",
+		write: true,
+		states: { 0: "AUS", 1: "EIN" },
+		// KEINE luxWriteId, da dies ein rein virtueller Schalter im Adapter ist!
 	},
 
 	// ==========================================
@@ -557,36 +566,42 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "Abtau-Endeschalter ASD",
 		role: "value",
 		type: "number",
+		states: { 0: "AUS", 1: "EIN" },
 	},
 	BWTin: {
 		folder: "Informationen.Eingaenge",
 		name: "Brauchwasserthermostat BWT",
 		role: "value",
 		type: "number",
+		states: { 0: "AUS", 1: "EIN" },
 	},
 	EVUin: {
 		folder: "Informationen.Eingaenge",
 		name: "EVU-Sperre",
 		role: "value",
 		type: "number",
+		states: { 0: "AUS", 1: "EIN" },
 	},
 	HDin: {
 		folder: "Informationen.Eingaenge",
 		name: "Hochdruckwächter HD",
 		role: "value",
 		type: "number",
+		states: { 0: "AUS", 1: "EIN" },
 	},
 	MOTin: {
 		folder: "Informationen.Eingaenge",
 		name: "Motorschutz MOT",
 		role: "value",
 		type: "number",
+		states: { 0: "AUS", 1: "EIN" },
 	},
 	NDin: {
 		folder: "Informationen.Eingaenge",
 		name: "Niederdruckwächter ND",
 		role: "value",
 		type: "number",
+		states: { 0: "AUS", 1: "EIN" },
 	},
 	NDin_pressure: {
 		folder: "Informationen.Eingaenge",
@@ -594,7 +609,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value.pressure",
 		type: "number",
 		unit: "bar",
-		factor: 100,
+		factor: 1,
 	},
 	HDin_pressure: {
 		folder: "Informationen.Eingaenge",
@@ -602,19 +617,21 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value.pressure",
 		type: "number",
 		unit: "bar",
-		factor: 100,
+		factor: 1,
 	},
 	PEXin: {
 		folder: "Informationen.Eingaenge",
 		name: "Externer Druckwächter PEX",
 		role: "value",
 		type: "number",
+		states: { 0: "AUS", 1: "EIN" },
 	},
 	SWTin: {
 		folder: "Informationen.Eingaenge",
 		name: "Schwimmbadthermostat SWT",
 		role: "value",
 		type: "number",
+		states: { 0: "AUS", 1: "EIN" },
 	},
 	AnalogIn: {
 		folder: "Informationen.Eingaenge",
@@ -645,12 +662,14 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "Eingang SAX",
 		role: "value",
 		type: "number",
+		states: { 0: "AUS", 1: "EIN" },
 	},
 	SPLin: {
 		folder: "Informationen.Eingaenge",
 		name: "Eingang SPL",
 		role: "value",
 		type: "number",
+		states: { 0: "AUS", 1: "EIN" },
 	},
 
 	// ==========================================
@@ -821,6 +840,10 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "Zusatzpumpe SUP",
 		role: "value",
 		type: "number",
+		states: {
+			0: "Aus",
+			1: "Ein",
+		},
 	},
 	MZ2out: {
 		folder: "Informationen.Ausgaenge",
@@ -1120,6 +1143,16 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value.power.consumption",
 		type: "number",
 		unit: "kWh",
+	},
+	thermalenergyTotal: {
+		folder: "Informationen.Statistik",
+		name: "Wärmemenge Gesamt Erzeugt",
+		role: "value.power.consumption",
+		type: "number",
+		unit: "kWh",
+		write: false,
+		luxWriteId: "thermalenergy_total",
+		factor: 10,
 	},
 
 	// ==========================================
@@ -1485,17 +1518,19 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 	// ==========================================
 	LIN_TUE: {
 		folder: "Informationen.Status",
-		name: "LIN-Bus Verdampfer-Austrittstemperatur (TUE)",
+		name: "LIN-Bus Verdampfer-Ansaug (TUE)",
 		role: "value.temperature",
 		type: "number",
 		unit: "°C",
+		factor: 10,
 	},
 	LIN_TUE1: {
 		folder: "Informationen.Status",
-		name: "LIN-Bus Verdampfer-Austrittstemperatur 2 (TUE1)",
+		name: "LIN-Bus Ansaug VD",
 		role: "value.temperature",
 		type: "number",
 		unit: "°C",
+		factor: 10,
 	},
 	LIN_VDH: {
 		folder: "Informationen.Status",
