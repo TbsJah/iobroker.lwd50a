@@ -45,9 +45,16 @@ class Lwd50a extends utils.Adapter {
     this.log.info(`Verbinde mit W\xE4rmepumpe auf ${ip}:${port}...`);
     this.pump = new luxtronik.createConnection(ip, port);
     this.updateData();
+    let intervalSeconds = this.config.interval || 30;
+    if (intervalSeconds < 10) {
+      intervalSeconds = 10;
+      this.log.warn("Eingestelltes Intervall war zu kurz. Wurde zum Schutz auf 10 Sekunden korrigiert.");
+    }
+    this.log.info(`Starte Polling-Intervall. Lese Daten alle ${intervalSeconds} Sekunden aus.`);
     this.pollingInterval = setInterval(() => {
+      this.log.debug("Polling ausgel\xF6st: Hole frische Daten von der W\xE4rmepumpe...");
       this.updateData();
-    }, 3e4);
+    }, intervalSeconds * 1e3);
   }
   /**
    * Holt die Daten von der Wärmepumpe und schreibt sie in ioBroker
@@ -155,18 +162,24 @@ class Lwd50a extends utils.Adapter {
     });
   }
   /**
-   * Is called when adapter shuts down - callback has to be called under any circumstances!
+   * Wird aufgerufen, wenn der Adapter beendet wird (z.B. Neustart oder Update)
    *
-   * @param callback - Callback function
+   * @param callback - Callback-Funktion, die aufgerufen wird, wenn das Beenden abgeschlossen ist
    */
   onUnload(callback) {
     try {
       if (this.pollingInterval) {
         clearInterval(this.pollingInterval);
+        this.pollingInterval = void 0;
+        this.log.info("Polling-Intervall erfolgreich gestoppt.");
       }
+      if (this.pump && typeof this.pump.disconnect === "function") {
+        this.pump.disconnect();
+      }
+      this.log.info("Adapter wurde sauber beendet.");
       callback();
-    } catch (error) {
-      this.log.error(`Error during unloading: ${error.message}`);
+    } catch (err) {
+      this.log.error(`Fehler beim Beenden des Adapters: ${err.message}`);
       callback();
     }
   }

@@ -12,6 +12,7 @@ import { STATE_MAPPING } from "./stateMapping";
 class Lwd50a extends utils.Adapter {
 	private pollingInterval?: NodeJS.Timeout;
 	private pump: any;
+
 	public constructor(options: Partial<utils.AdapterOptions> = {}) {
 		super({
 			...options,
@@ -41,10 +42,25 @@ class Lwd50a extends utils.Adapter {
 		// Erste Abfrage sofort starten
 		this.updateData();
 
-		// Abfrage alle 30 Sekunden (30.000 Millisekunden) wiederholen
+		// Hole das Intervall aus der Konfiguration (Standard: 30 Sekunden)
+		// WICHTIG: setInterval benötigt Millisekunden, daher * 1000
+		let intervalSeconds = this.config.interval || 30;
+
+		// Sicherheitssperre: Niemals öfter als alle 10 Sekunden abfragen,
+		// um die Steuerung der Luxtronik nicht zum Absturz zu bringen!
+		if (intervalSeconds < 10) {
+			intervalSeconds = 10;
+			this.log.warn("Eingestelltes Intervall war zu kurz. Wurde zum Schutz auf 10 Sekunden korrigiert.");
+		}
+
+		this.log.info(`Starte Polling-Intervall. Lese Daten alle ${intervalSeconds} Sekunden aus.`);
+
 		this.pollingInterval = setInterval(() => {
+			this.log.debug("Polling ausgelöst: Hole frische Daten von der Wärmepumpe...");
+
+			// Hier rufst du einfach deine bestehende Auslese-Funktion auf
 			this.updateData();
-		}, 30000);
+		}, intervalSeconds * 1000);
 
 		// The adapters config (in the instance object everything under the attribute "native") is accessible via
 		// this.config:
@@ -240,21 +256,30 @@ class Lwd50a extends utils.Adapter {
 			}
 		});
 	}
+
 	/**
-	 * Is called when adapter shuts down - callback has to be called under any circumstances!
+	 * Wird aufgerufen, wenn der Adapter beendet wird (z.B. Neustart oder Update)
 	 *
-	 * @param callback - Callback function
+	 * @param callback - Callback-Funktion, die aufgerufen wird, wenn das Beenden abgeschlossen ist
 	 */
 	private onUnload(callback: () => void): void {
 		try {
-			// Timer stoppen, um Memory Leaks zu vermeiden
+			// 1. Intervall stoppen! Ganz wichtig!
 			if (this.pollingInterval) {
 				clearInterval(this.pollingInterval);
+				this.pollingInterval = undefined;
+				this.log.info("Polling-Intervall erfolgreich gestoppt.");
 			}
 
+			// 2. Verbindung zur Pumpe sicher trennen (falls die Bibliothek das unterstützt)
+			if (this.pump && typeof this.pump.disconnect === "function") {
+				this.pump.disconnect();
+			}
+
+			this.log.info("Adapter wurde sauber beendet.");
 			callback();
-		} catch (error) {
-			this.log.error(`Error during unloading: ${(error as Error).message}`);
+		} catch (err) {
+			this.log.error(`Fehler beim Beenden des Adapters: ${(err as Error).message}`);
 			callback();
 		}
 	}
