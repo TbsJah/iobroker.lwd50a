@@ -145,10 +145,13 @@ For later updates:
 
 ## Changelog
 
+### **WORK IN PROGRESS**
+
+- Zip aktivierbar
+
 ### 0.1.4 (2026-05-28)
 
 - Mapping erweitert
-- Zip aktivierbar
 
 ### 0.1.4-alpha.0 (2026-05-22)
 
