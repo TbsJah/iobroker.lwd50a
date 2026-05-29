@@ -269,7 +269,7 @@ class Lwd50a extends utils.Adapter {
 	 * @param id - State ID
 	 * @param state - State object
 	 */
-	private onStateChange(id: string, state: ioBroker.State | null | undefined): void {
+	private async onStateChange(id: string, state: ioBroker.State | null | undefined): Promise<void> {
 		if (!state) {
 			this.log.info(`State ${id} wurde gelöscht.`);
 			return;
@@ -297,52 +297,47 @@ class Lwd50a extends utils.Adapter {
 		}
 		// --- NEUER KOMBI-BEFEHL (MAKRO FÜR ZIP) ---
 		if (mappingKey === "Activate_Zip") {
-			// Prüfen, ob der Schalter auf EIN/1 gesetzt wurde
-			if (
-				state.val === 1 ||
-				state.val === true ||
-				state.val === "1" ||
-				String(state.val).toLowerCase() === "ein"
-			) {
-				this.log.info("Makro gestartet: Aktiviere ZIP Entlüftung (Schritt 1 von 2)...");
+			// 1. Den aktuellen echten Zustand der ZIP-Pumpe aus dem ioBroker auslesen
+			const zipOutState = await this.getStateAsync("Informationen.Ausgaenge.ZIPout");
+			const isCurrentlyRunning = zipOutState ? zipOutState.val === 1 || zipOutState.val === true : false;
 
-				// Schritt 1: hotWaterCircPumpDeaerate auf 1 setzen
-				this.pump.write("hotWaterCircPumpDeaerate", 1, async (err1: any) => {
-					if (err1) {
-						this.log.error(`Makro Fehler bei Schritt 1: ${err1.message}`);
+			// 2. Zielwert bestimmen: Wenn sie läuft -> ausschalten (0). Wenn sie steht -> einschalten (1).
+			const targetVal = isCurrentlyRunning ? 0 : 1;
+			const actionText = targetVal === 1 ? "Aktiviere" : "Deaktiviere";
+
+			this.log.info(
+				`Makro gestartet: ${actionText} ZIP Entlüftung basierend auf ZIPout (Ziel-Status: ${targetVal})...`,
+			);
+
+			// Schritt 1: runDeaerate setzen
+			this.pump.write("runDeaerate", targetVal, async (err1: any) => {
+				if (err1) {
+					this.log.error(`Makro Fehler bei Schritt 1 (runDeaerate): ${err1.message}`);
+					return;
+				}
+
+				// 1 Sekunde Gedenkpause für die Luxtronik-Platine
+				await new Promise(resolve => setTimeout(resolve, 1000));
+				this.log.info(`Makro: Schritt 2 von 2 wird ausgeführt (hotWaterCircPumpDeaerate -> ${targetVal})...`);
+
+				// Schritt 2: hotWaterCircPumpDeaerate setzen
+				this.pump.write("hotWaterCircPumpDeaerate", targetVal, async (err2: any) => {
+					if (err2) {
+						this.log.error(`Makro Fehler bei Schritt 2 (hotWaterCircPumpDeaerate): ${err2.message}`);
 						return;
 					}
 
-					// 1 Sekunde warten, damit die Steuerung den Speicher sauber umschalten kann
-					await new Promise(resolve => setTimeout(resolve, 1000));
-					this.log.info("Makro: ZIP gewählt. Starte Entlüftung (Schritt 2 von 2)...");
+					this.log.info(`Makro erfolgreich: ZIP Entlüftungsprogramm wurde auf ${targetVal} gesetzt.`);
 
-					// Schritt 2: runDeaerate auf 1 setzen
-					this.pump.write("runDeaerate", 1, async (err2: any) => {
-						if (err2) {
-							this.log.error(`Makro Fehler bei Schritt 2: ${err2.message}`);
-							return;
-						}
+					// 3. Den virtuellen Schalter im ioBroker sauber mit dem echten Zielwert bestätigen
+					await this.setState(id, { val: targetVal, ack: true });
 
-						this.log.info("Makro erfolgreich: ZIP Entlüftungsprogramm läuft!");
-
-						// Virtuellen Schalter im ioBroker grün/bestätigt schalten
-						await this.setState(id, { val: state.val, ack: true });
-
-						// EXTRA-TIPP: Nach 4 Sekunden den Schalter optisch wieder auf "AUS" springen lassen.
-						// Dadurch verhält er sich wie ein Taster und du kannst ihn später erneut drücken!
-						setTimeout(() => {
-							this.setState(id, { val: 0, ack: true }).catch(err => {
-								this.log.error(`Fehler beim automatischen Zurücksetzen des Tasters: ${err}`);
-							});
-						}, 4000);
-						this.updateData();
-					});
+					// Ausleseschleife triggern, damit alle Werte sofort synchron springen
+					this.updateData();
 				});
-			}
+			});
 
-			// WICHTIG: Nach Ausführung des Makros die onStateChange Funktion hier beenden.
-			// Ansonsten würde der Code unten versuchen, "Activate_Zip" direkt an die Pumpe zu schicken!
+			// Funktion beenden, damit kein normaler Schreibbefehl hinterhergefeuert wird
 			return;
 		}
 

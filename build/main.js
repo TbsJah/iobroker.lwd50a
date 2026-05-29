@@ -218,7 +218,7 @@ class Lwd50a extends utils.Adapter {
    * @param id - State ID
    * @param state - State object
    */
-  onStateChange(id, state) {
+  async onStateChange(id, state) {
     if (!state) {
       this.log.info(`State ${id} wurde gel\xF6scht.`);
       return;
@@ -239,31 +239,30 @@ class Lwd50a extends utils.Adapter {
       return;
     }
     if (mappingKey === "Activate_Zip") {
-      if (state.val === 1 || state.val === true || state.val === "1" || String(state.val).toLowerCase() === "ein") {
-        this.log.info("Makro gestartet: Aktiviere ZIP Entl\xFCftung (Schritt 1 von 2)...");
-        this.pump.write("hotWaterCircPumpDeaerate", 1, async (err1) => {
-          if (err1) {
-            this.log.error(`Makro Fehler bei Schritt 1: ${err1.message}`);
+      const zipOutState = await this.getStateAsync("Informationen.Ausgaenge.ZIPout");
+      const isCurrentlyRunning = zipOutState ? zipOutState.val === 1 || zipOutState.val === true : false;
+      const targetVal = isCurrentlyRunning ? 0 : 1;
+      const actionText = targetVal === 1 ? "Aktiviere" : "Deaktiviere";
+      this.log.info(
+        `Makro gestartet: ${actionText} ZIP Entl\xFCftung basierend auf ZIPout (Ziel-Status: ${targetVal})...`
+      );
+      this.pump.write("runDeaerate", targetVal, async (err1) => {
+        if (err1) {
+          this.log.error(`Makro Fehler bei Schritt 1 (runDeaerate): ${err1.message}`);
+          return;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 1e3));
+        this.log.info(`Makro: Schritt 2 von 2 wird ausgef\xFChrt (hotWaterCircPumpDeaerate -> ${targetVal})...`);
+        this.pump.write("hotWaterCircPumpDeaerate", targetVal, async (err2) => {
+          if (err2) {
+            this.log.error(`Makro Fehler bei Schritt 2 (hotWaterCircPumpDeaerate): ${err2.message}`);
             return;
           }
-          await new Promise((resolve) => setTimeout(resolve, 1e3));
-          this.log.info("Makro: ZIP gew\xE4hlt. Starte Entl\xFCftung (Schritt 2 von 2)...");
-          this.pump.write("runDeaerate", 1, async (err2) => {
-            if (err2) {
-              this.log.error(`Makro Fehler bei Schritt 2: ${err2.message}`);
-              return;
-            }
-            this.log.info("Makro erfolgreich: ZIP Entl\xFCftungsprogramm l\xE4uft!");
-            await this.setState(id, { val: state.val, ack: true });
-            setTimeout(() => {
-              this.setState(id, { val: 0, ack: true }).catch((err) => {
-                this.log.error(`Fehler beim automatischen Zur\xFCcksetzen des Tasters: ${err}`);
-              });
-            }, 4e3);
-            this.updateData();
-          });
+          this.log.info(`Makro erfolgreich: ZIP Entl\xFCftungsprogramm wurde auf ${targetVal} gesetzt.`);
+          await this.setState(id, { val: targetVal, ack: true });
+          this.updateData();
         });
-      }
+      });
       return;
     }
     if (typeof state.val === "number") {

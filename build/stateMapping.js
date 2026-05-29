@@ -336,38 +336,37 @@ const STATE_MAPPING = {
   runDeaerate: {
     folder: "Einstellungen.Spezial",
     name: "Entl\xFCftungsprogramm starten",
-    role: "switch",
-    type: "number",
+    role: "indicator",
+    type: "boolean",
     write: true,
     luxWriteId: "runDeaerate",
-    states: { 0: "AUS", 1: "EIN" }
+    states: { 0: "Aus", 1: "Ein" }
   },
   hotWaterCircPumpDeaerate: {
     folder: "Einstellungen.Spezial",
     name: "Zirkulationspumpe entl\xFCften",
-    role: "switch",
+    role: "value",
     type: "number",
+    states: { 0: "Aus", 1: "Ein" },
     write: true,
-    luxWriteId: "hotWaterCircPumpDeaerate",
-    states: { 0: "AUS", 1: "EIN" }
+    luxWriteId: "hotWaterCircPumpDeaerate"
   },
   solarPumpDeaerate: {
     folder: "Einstellungen.Spezial",
     name: "Solarpumpe entl\xFCften",
-    role: "switch",
+    role: "value",
     type: "number",
+    states: { 0: "Aus", 1: "Ein" },
     write: true,
-    luxWriteId: "solarPumpDeaerate",
-    states: { 0: "AUS", 1: "EIN" }
+    luxWriteId: "solarPumpDeaerate"
   },
   // --- ENTLÜFTUNG ---
   Activate_Zip: {
     folder: "Einstellungen.Spezial",
     name: "Makro: ZIP Entl\xFCftung starten",
-    role: "switch",
+    role: "value",
     type: "number",
-    write: true,
-    states: { 0: "AUS", 1: "EIN" }
+    states: { 0: "Aus", 1: "Ein" }
     // KEINE luxWriteId, da dies ein rein virtueller Schalter im Adapter ist!
   },
   // ==========================================
@@ -545,42 +544,42 @@ const STATE_MAPPING = {
     name: "Abtau-Endeschalter ASD",
     role: "value",
     type: "number",
-    states: { 0: "AUS", 1: "EIN" }
+    states: { 0: "Aus", 1: "Ein" }
   },
   BWTin: {
     folder: "Informationen.Eingaenge",
     name: "Brauchwasserthermostat BWT",
     role: "value",
     type: "number",
-    states: { 0: "AUS", 1: "EIN" }
+    states: { 0: "Aus", 1: "Ein" }
   },
   EVUin: {
     folder: "Informationen.Eingaenge",
     name: "EVU-Sperre",
     role: "value",
     type: "number",
-    states: { 0: "AUS", 1: "EIN" }
+    states: { 0: "Aus", 1: "Ein" }
   },
   HDin: {
     folder: "Informationen.Eingaenge",
     name: "Hochdruckw\xE4chter HD",
     role: "value",
     type: "number",
-    states: { 0: "AUS", 1: "EIN" }
+    states: { 0: "Aus", 1: "Ein" }
   },
   MOTin: {
     folder: "Informationen.Eingaenge",
     name: "Motorschutz MOT",
     role: "value",
     type: "number",
-    states: { 0: "AUS", 1: "EIN" }
+    states: { 0: "Aus", 1: "Ein" }
   },
   NDin: {
     folder: "Informationen.Eingaenge",
     name: "Niederdruckw\xE4chter ND",
     role: "value",
     type: "number",
-    states: { 0: "AUS", 1: "EIN" }
+    states: { 0: "Aus", 1: "Ein" }
   },
   NDin_pressure: {
     folder: "Informationen.Eingaenge",
@@ -603,14 +602,14 @@ const STATE_MAPPING = {
     name: "Externer Druckw\xE4chter PEX",
     role: "value",
     type: "number",
-    states: { 0: "AUS", 1: "EIN" }
+    states: { 0: "Aus", 1: "Ein" }
   },
   SWTin: {
     folder: "Informationen.Eingaenge",
     name: "Schwimmbadthermostat SWT",
     role: "value",
     type: "number",
-    states: { 0: "AUS", 1: "EIN" }
+    states: { 0: "Aus", 1: "Ein" }
   },
   AnalogIn: {
     folder: "Informationen.Eingaenge",
@@ -641,14 +640,14 @@ const STATE_MAPPING = {
     name: "Eingang SAX",
     role: "value",
     type: "number",
-    states: { 0: "AUS", 1: "EIN" }
+    states: { 0: "Aus", 1: "Ein" }
   },
   SPLin: {
     folder: "Informationen.Eingaenge",
     name: "Eingang SPL",
     role: "value",
     type: "number",
-    states: { 0: "AUS", 1: "EIN" }
+    states: { 0: "Aus", 1: "Ein" }
   },
   // ==========================================
   // INFORMATIONEN: AUSGÄNGE (Aaktoren / Relais)
