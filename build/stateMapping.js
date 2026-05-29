@@ -79,7 +79,7 @@ const STATE_MAPPING = {
     unit: "K",
     write: true,
     luxWriteId: "return_temperature_hysteresis",
-    factor: 10,
+    factor: 1,
     min: 1,
     max: 5
   },
@@ -103,7 +103,7 @@ const STATE_MAPPING = {
     unit: "K",
     write: true,
     luxWriteId: "hotwater_temperature_hysteresis",
-    factor: 10,
+    factor: 1,
     min: 1,
     max: 15
   },
@@ -129,8 +129,8 @@ const STATE_MAPPING = {
     write: true,
     luxWriteId: "mk1_curve_parallel_offset",
     factor: 1,
-    min: -5,
-    max: 5
+    min: 20,
+    max: 50
   },
   deltaMk1Reduction: {
     folder: "Einstellungen.Mischkreis1",
