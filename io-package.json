@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "lwd50a",
-    "version": "0.1.4",
+    "version": "0.2.0",
     "news": {
+      "0.2.0": {
+        "en": "Zip aktivierbar",
+        "de": "Das ist nicht möglich",
+        "ru": "Зип Активьербар",
+        "pt": "Zip aktivierbar",
+        "nl": "Zip aktivierbar",
+        "fr": "Barre d'accès zippée",
+        "it": "Zip aktivierbar",
+        "es": "Zip aktivierbar",
+        "pl": "Zip aktivierbar",
+        "uk": "Блискавка Aktivierbar",
+        "zh-cn": "西伯利亚语 aktivier 栏"
+      },
       "0.1.4": {
         "en": "work",
         "de": "arbeit",
@@ -80,19 +93,6 @@
         "pl": "Aktualizacje dotyczące rozwoju wewnętrznego",
         "uk": "Оновлення внутрішнього розвитку",
         "zh-cn": "内部发展最新情况"
-      },
-      "0.0.2": {
-        "en": "initial release",
-        "de": "erstausstrahlung",
-        "ru": "первоначальное освобождение",
-        "pt": "libertação inicial",
-        "nl": "eerste release",
-        "fr": "libération initiale",
-        "it": "rilascio iniziale",
-        "es": "liberación inicial",
-        "pl": "początkowe zwolnienie",
-        "uk": "початковий реліз",
-        "zh-cn": "初步释放"
       }
     },
     "main": "build/main.js",

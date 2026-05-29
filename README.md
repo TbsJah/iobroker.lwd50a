@@ -144,8 +144,7 @@ For later updates:
    //- Test
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 0.2.0 (2026-05-29)
 
 - Zip aktivierbar
 
