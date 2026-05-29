@@ -8,7 +8,8 @@
 			"items": {
 				"host": {
 					"type": "text",
-					"label": "Wärmepumpen IP-Adresse"
+					"label": "Wärmepumpen IP-Adresse",
+					"default": "192.168.178.81"
 				},
 				"port": {
 					"type": "number",

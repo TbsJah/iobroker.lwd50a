@@ -40,8 +40,8 @@ class Lwd50a extends utils.Adapter {
    * Is called when databases are connected and adapter received configuration.
    */
   async onReady() {
-    const ip = "192.168.178.81";
-    const port = 8889;
+    const ip = this.config.host;
+    const port = this.config.port || 8889;
     this.log.info(`Verbinde mit W\xE4rmepumpe auf ${ip}:${port}...`);
     this.pump = new luxtronik.createConnection(ip, port);
     this.updateData();

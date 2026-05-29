@@ -31,8 +31,8 @@ class Lwd50a extends utils.Adapter {
 	private async onReady(): Promise<void> {
 		// Initialize your adapter here
 
-		const ip = "192.168.178.81";
-		const port = 8889;
+		const ip = this.config.host;
+		const port = this.config.port || 8889;
 
 		this.log.info(`Verbinde mit Wärmepumpe auf ${ip}:${port}...`);
 
