@@ -144,9 +144,11 @@ For later updates:
    //- Test
 
 ## Changelog
+
 ### 0.1.4 (2026-05-28)
 
-- work
+- Mapping erweitert
+- Zip aktivierbar
 
 ### 0.1.4-alpha.0 (2026-05-22)
 
