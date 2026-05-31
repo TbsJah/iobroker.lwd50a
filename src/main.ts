@@ -12,6 +12,7 @@ import { STATE_MAPPING } from "./stateMapping";
 class Lwd50a extends utils.Adapter {
 	private pollingInterval?: NodeJS.Timeout;
 	private pump: any;
+	private createdStates = new Set<string>();
 
 	public constructor(options: Partial<utils.AdapterOptions> = {}) {
 		super({
@@ -98,13 +99,8 @@ class Lwd50a extends utils.Adapter {
 			if (err) {
 				// NEU: Prüfen, ob die Wärmepumpe beschäftigt ("busy") ist
 				if (err.message && err.message.toLowerCase().includes("busy")) {
-					this.log.warn("Wärmepumpe ist ausgelastet (busy). Erneuter Versuch in 15 Sekunden...");
-
-					setTimeout(() => {
-						this.updateData();
-					}, 15000);
-
-					return; // Wichtig: Methode hier abbrechen, da keine Daten da sind
+					this.log.warn("Wärmepumpe ist ausgelastet (busy). Überspringe diesen Abfrage-Zyklus.");
+					return; // Das nächste normale Intervall holt die Daten wieder!
 				}
 
 				// Normaler Verbindungsfehler
@@ -179,38 +175,44 @@ class Lwd50a extends utils.Adapter {
 						}
 						// -------------------------------------------------
 
-						// 1. Zuerst den Ordner (Channel) anlegen
-						await this.setObjectNotExists(folderId, {
-							type: "channel",
-							common: {
-								name: folderId.charAt(0).toUpperCase() + folderId.slice(1),
-							},
-							native: {},
-						});
+						// Prüfen, ob wir diesen Datenpunkt in dieser Sitzung schon angelegt haben
+						if (!this.createdStates.has(stateId)) {
+							// 1. Zuerst den Ordner (Channel) anlegen
+							await this.setObjectNotExists(folderId, {
+								type: "channel",
+								common: {
+									name: folderId.charAt(0).toUpperCase() + folderId.slice(1),
+								},
+								native: {},
+							});
 
-						// 2. Dann den eigentlichen Datenpunkt anlegen
-						await this.setObjectNotExists(stateId, {
-							type: "state",
-							common: {
-								name: definition.name,
-								type: definition.type,
-								role: definition.role,
-								unit: definition.unit,
-								read: true,
-								write: definition.write || false,
-								min: definition.min,
-								max: definition.max,
-								states: definition.states,
-							},
-							native: {},
-						});
+							// 2. Dann den eigentlichen Datenpunkt anlegen
+							await this.setObjectNotExists(stateId, {
+								type: "state",
+								common: {
+									name: definition.name,
+									type: definition.type,
+									role: definition.role,
+									unit: definition.unit,
+									read: true,
+									write: definition.write || false,
+									min: definition.min,
+									max: definition.max,
+									states: definition.states,
+								},
+								native: {},
+							});
 
-						// 3. Wenn das Objekt beschreibbar ist, abonnieren
-						if (definition.write) {
-							await this.subscribeStatesAsync(stateId);
+							// 3. Wenn das Objekt beschreibbar ist, abonnieren
+							if (definition.write) {
+								await this.subscribeStatesAsync(stateId);
+							}
+
+							// 4. Im Gedächtnis abspeichern, damit es beim nächsten Intervall übersprungen wird!
+							this.createdStates.add(stateId);
 						}
 
-						// 4. Zuletzt den Wert in den Datenpunkt schreiben
+						// 5. Zuletzt den Wert in den Datenpunkt schreiben (Das passiert IMMER!)
 						await this.setState(stateId, finalValue as any, true);
 					}
 				}
@@ -361,7 +363,6 @@ class Lwd50a extends utils.Adapter {
 			return;
 		}
 
-		this.log.info(`Sende an Luxtronik: ${definition.luxWriteId} = ${state.val}`);
 		// Callback wird "async", damit wir darin await nutzen können
 		// 1. Umrechnung: Falls ein Faktor definiert ist, den ioBroker-Wert wieder für die Pumpe hochrechnen!
 		let valueToWrite = state.val as number;

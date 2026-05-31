@@ -27,6 +27,7 @@ var import_stateMapping = require("./stateMapping");
 class Lwd50a extends utils.Adapter {
   pollingInterval;
   pump;
+  createdStates = /* @__PURE__ */ new Set();
   constructor(options = {}) {
     super({
       ...options,
@@ -86,10 +87,7 @@ class Lwd50a extends utils.Adapter {
     this.pump.read(async (err, data) => {
       if (err) {
         if (err.message && err.message.toLowerCase().includes("busy")) {
-          this.log.warn("W\xE4rmepumpe ist ausgelastet (busy). Erneuter Versuch in 15 Sekunden...");
-          setTimeout(() => {
-            this.updateData();
-          }, 15e3);
+          this.log.warn("W\xE4rmepumpe ist ausgelastet (busy). \xDCberspringe diesen Abfrage-Zyklus.");
           return;
         }
         this.log.error(`Verbindungsfehler beim Einlesen der Daten: ${err.message}`);
@@ -142,30 +140,33 @@ class Lwd50a extends utils.Adapter {
             if (typeof finalValue === "number" && !isNaN(finalValue) && definition.factor) {
               finalValue = finalValue / definition.factor;
             }
-            await this.setObjectNotExists(folderId, {
-              type: "channel",
-              common: {
-                name: folderId.charAt(0).toUpperCase() + folderId.slice(1)
-              },
-              native: {}
-            });
-            await this.setObjectNotExists(stateId, {
-              type: "state",
-              common: {
-                name: definition.name,
-                type: definition.type,
-                role: definition.role,
-                unit: definition.unit,
-                read: true,
-                write: definition.write || false,
-                min: definition.min,
-                max: definition.max,
-                states: definition.states
-              },
-              native: {}
-            });
-            if (definition.write) {
-              await this.subscribeStatesAsync(stateId);
+            if (!this.createdStates.has(stateId)) {
+              await this.setObjectNotExists(folderId, {
+                type: "channel",
+                common: {
+                  name: folderId.charAt(0).toUpperCase() + folderId.slice(1)
+                },
+                native: {}
+              });
+              await this.setObjectNotExists(stateId, {
+                type: "state",
+                common: {
+                  name: definition.name,
+                  type: definition.type,
+                  role: definition.role,
+                  unit: definition.unit,
+                  read: true,
+                  write: definition.write || false,
+                  min: definition.min,
+                  max: definition.max,
+                  states: definition.states
+                },
+                native: {}
+              });
+              if (definition.write) {
+                await this.subscribeStatesAsync(stateId);
+              }
+              this.createdStates.add(stateId);
             }
             await this.setState(stateId, finalValue, true);
           }
@@ -288,7 +289,6 @@ class Lwd50a extends utils.Adapter {
       this.log.error("Schreiben abgebrochen: Keine aktive Verbindung zur W\xE4rmepumpe vorhanden.");
       return;
     }
-    this.log.info(`Sende an Luxtronik: ${definition.luxWriteId} = ${state.val}`);
     let valueToWrite = state.val;
     if (definition.factor && typeof state.val === "number") {
       valueToWrite = state.val * definition.factor;
