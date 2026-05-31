@@ -290,6 +290,7 @@ class Lwd50a extends utils.Adapter {
 
 		this.log.info(mappingKey);
 		const definition = STATE_MAPPING[mappingKey];
+		this.log.info(`Wert geändert für ${mappingKey}: ${JSON.stringify(definition)}`);
 
 		// 1. Schritt: Existiert die Definition überhaupt im Mapping?
 		if (!definition) {

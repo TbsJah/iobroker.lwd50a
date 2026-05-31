@@ -234,6 +234,7 @@ class Lwd50a extends utils.Adapter {
     }
     this.log.info(mappingKey);
     const definition = import_stateMapping.STATE_MAPPING[mappingKey];
+    this.log.info(`Wert ge\xE4ndert f\xFCr ${mappingKey}: ${JSON.stringify(definition)}`);
     if (!definition) {
       this.log.warn(`Kein Mapping f\xFCr ${mappingKey} gefunden.`);
       return;
