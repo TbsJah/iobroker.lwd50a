@@ -62,6 +62,7 @@ class Lwd50a extends utils.Adapter {
         native: {}
       });
       await this.setState(`${zipDef.folder}.Activate_Zip`, { val: 0, ack: true });
+      await this.subscribeStatesAsync(`${zipDef.folder}.Activate_Zip`);
     }
     let intervalSeconds = this.config.interval || 30;
     if (intervalSeconds < 10) {

@@ -61,6 +61,7 @@ class Lwd50a extends utils.Adapter {
 			// Optional: Den Status direkt beim Start initial auf 0 (Aus) setzen,
 			// damit er nicht unbestätigt (null) bleibt.
 			await this.setState(`${zipDef.folder}.Activate_Zip`, { val: 0, ack: true });
+			await this.subscribeStatesAsync(`${zipDef.folder}.Activate_Zip`);
 		}
 
 		// Hole das Intervall aus der Konfiguration (Standard: 30 Sekunden)
