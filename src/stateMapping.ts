@@ -1578,4 +1578,28 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "%",
 	},
+
+	// ==========================================
+	// EINSTELLUNGEN: SYSTEM-EINSTELLUNGEN
+	// ==========================================
+	pump_optimization: {
+		folder: "Einstellungen.System-Einstellung",
+		name: "Pumpenoptimierung",
+		role: "switch",
+		type: "number", // Luxtronik erwartet hier meist 0 (Aus) oder 1 (Ein)
+		write: true,
+		luxWriteId: "pump_optimization", // Der exakte ID-Name, den die luxtronik2-Bibliothek erwartet
+		states: { 0: "Aus", 1: "Ein" },
+	},
+	pump_optimization_time: {
+		folder: "Einstellungen.System-Einstellung",
+		name: "Pumpenoptimierung Zeit",
+		role: "level.timer",
+		type: "number",
+		unit: "min",
+		write: true,
+		luxWriteId: "pump_optimization_time",
+		min: 5,
+		max: 180,
+	},
 };
