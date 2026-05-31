@@ -54,7 +54,7 @@ class Lwd50a extends utils.Adapter {
           type: zipDef.type,
           role: zipDef.role,
           read: true,
-          write: zipDef.write || false,
+          write: true,
           def: 0,
           // Standardwert auf AUS
           states: zipDef.states
@@ -239,6 +239,7 @@ class Lwd50a extends utils.Adapter {
       return;
     }
     if (mappingKey === "Activate_Zip") {
+      this.log.info(`ZIP`);
       const zipOutState = await this.getStateAsync("Informationen.Ausgaenge.ZIPout");
       const isCurrentlyRunning = zipOutState ? zipOutState.val === 1 || zipOutState.val === true : false;
       const targetVal = isCurrentlyRunning ? 0 : 1;

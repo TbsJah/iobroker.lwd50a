@@ -384,6 +384,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "Makro: ZIP Entlüftung starten",
 		role: "value",
 		type: "number",
+		write: true,
 		states: { 0: "Aus", 1: "Ein" },
 		// KEINE luxWriteId, da dies ein rein virtueller Schalter im Adapter ist!
 	},
