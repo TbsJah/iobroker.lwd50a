@@ -291,19 +291,17 @@ class Lwd50a extends utils.Adapter {
 		this.log.info(mappingKey);
 		const definition = STATE_MAPPING[mappingKey];
 
-		if (!definition || !definition.luxWriteId || definition.write !== true) {
-			this.log.warn(`Kein Schreib-Mapping für ${mappingKey} gefunden.`);
+		// 1. Schritt: Existiert die Definition überhaupt im Mapping?
+		if (!definition) {
+			this.log.warn(`Kein Mapping für ${mappingKey} gefunden.`);
 			return;
 		}
-		// --- NEUER KOMBI-BEFEHL (MAKRO FÜR ZIP) ---
-		if (mappingKey === "Activate_Zip") {
-			this.log.info(`ZIP`);
 
-			// 1. Den aktuellen echten Zustand der ZIP-Pumpe aus dem ioBroker auslesen
+		// 2. Schritt: Virtuelle Makros abfangen (bevor luxWriteId geprüft wird!)
+		if (mappingKey === "Activate_Zip") {
 			const zipOutState = await this.getStateAsync("Informationen.Ausgaenge.ZIPout");
 			const isCurrentlyRunning = zipOutState ? zipOutState.val === 1 || zipOutState.val === true : false;
 
-			// 2. Zielwert bestimmen: Wenn sie läuft -> ausschalten (0). Wenn sie steht -> einschalten (1).
 			const targetVal = isCurrentlyRunning ? 0 : 1;
 			const actionText = targetVal === 1 ? "Aktiviere" : "Deaktiviere";
 
@@ -311,18 +309,13 @@ class Lwd50a extends utils.Adapter {
 				`Makro gestartet: ${actionText} ZIP Entlüftung basierend auf ZIPout (Ziel-Status: ${targetVal})...`,
 			);
 
-			// Schritt 1: runDeaerate setzen
 			this.pump.write("runDeaerate", targetVal, async (err1: any) => {
 				if (err1) {
 					this.log.error(`Makro Fehler bei Schritt 1 (runDeaerate): ${err1.message}`);
 					return;
 				}
 
-				// 1 Sekunde Gedenkpause für die Luxtronik-Platine
 				await new Promise(resolve => setTimeout(resolve, 1000));
-				this.log.info(`Makro: Schritt 2 von 2 wird ausgeführt (hotWaterCircPumpDeaerate -> ${targetVal})...`);
-
-				// Schritt 2: hotWaterCircPumpDeaerate setzen
 				this.pump.write("hotWaterCircPumpDeaerate", targetVal, async (err2: any) => {
 					if (err2) {
 						this.log.error(`Makro Fehler bei Schritt 2 (hotWaterCircPumpDeaerate): ${err2.message}`);
@@ -330,16 +323,18 @@ class Lwd50a extends utils.Adapter {
 					}
 
 					this.log.info(`Makro erfolgreich: ZIP Entlüftungsprogramm wurde auf ${targetVal} gesetzt.`);
-
-					// 3. Den virtuellen Schalter im ioBroker sauber mit dem echten Zielwert bestätigen
 					await this.setState(id, { val: targetVal, ack: true });
-
-					// Ausleseschleife triggern, damit alle Werte sofort synchron springen
 					this.updateData();
 				});
 			});
 
-			// Funktion beenden, damit kein normaler Schreibbefehl hinterhergefeuert wird
+			// Ganz wichtig: return hier stehen lassen, damit der normale Schreibcode übersprungen wird!
+			return;
+		}
+
+		// 3. Schritt: Strenge Prüfung für alle NORMALEN Schreib-Datenpunkte
+		if (!definition.luxWriteId || definition.write !== true) {
+			this.log.warn(`Kein Schreib-Mapping für ${mappingKey} gefunden.`);
 			return;
 		}
 

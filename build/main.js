@@ -234,12 +234,11 @@ class Lwd50a extends utils.Adapter {
     }
     this.log.info(mappingKey);
     const definition = import_stateMapping.STATE_MAPPING[mappingKey];
-    if (!definition || !definition.luxWriteId || definition.write !== true) {
-      this.log.warn(`Kein Schreib-Mapping f\xFCr ${mappingKey} gefunden.`);
+    if (!definition) {
+      this.log.warn(`Kein Mapping f\xFCr ${mappingKey} gefunden.`);
       return;
     }
     if (mappingKey === "Activate_Zip") {
-      this.log.info(`ZIP`);
       const zipOutState = await this.getStateAsync("Informationen.Ausgaenge.ZIPout");
       const isCurrentlyRunning = zipOutState ? zipOutState.val === 1 || zipOutState.val === true : false;
       const targetVal = isCurrentlyRunning ? 0 : 1;
@@ -253,7 +252,6 @@ class Lwd50a extends utils.Adapter {
           return;
         }
         await new Promise((resolve) => setTimeout(resolve, 1e3));
-        this.log.info(`Makro: Schritt 2 von 2 wird ausgef\xFChrt (hotWaterCircPumpDeaerate -> ${targetVal})...`);
         this.pump.write("hotWaterCircPumpDeaerate", targetVal, async (err2) => {
           if (err2) {
             this.log.error(`Makro Fehler bei Schritt 2 (hotWaterCircPumpDeaerate): ${err2.message}`);
@@ -264,6 +262,10 @@ class Lwd50a extends utils.Adapter {
           this.updateData();
         });
       });
+      return;
+    }
+    if (!definition.luxWriteId || definition.write !== true) {
+      this.log.warn(`Kein Schreib-Mapping f\xFCr ${mappingKey} gefunden.`);
       return;
     }
     if (typeof state.val === "number") {
