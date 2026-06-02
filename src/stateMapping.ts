@@ -390,6 +390,29 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 	},
 
 	// ==========================================
+	// EINSTELLUNGEN: SPEZIFISCHE PARAMETER-IDs
+	// ==========================================
+	thresholdHeatingLimit: {
+		folder: "Einstellungen.System-Einstellung",
+		name: "Parameter 700 (ID_Einst_Heizgrenze_Temp)",
+		role: "value",
+		type: "number",
+		write: true,
+		luxWriteId: "thresholdHeatingLimit",
+		unit: "°C",
+		factor: 1,
+	},
+	heatingLimit: {
+		folder: "Einstellungen.System-Einstellung",
+		name: "Parameter 699 (ID_Einst_Heizgrenze)",
+		write: true,
+		role: "indicator",
+		type: "boolean",
+		luxWriteId: "heatingLimit",
+		states: { 0: "Aus", 1: "Ein" },
+	},
+
+	// ==========================================
 	// INFORMATIONEN: TEMPERATUREN
 	// ==========================================
 	temperature_supply: {
@@ -1577,52 +1600,5 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		unit: "%",
-	},
-
-	// ==========================================
-	// EINSTELLUNGEN: SYSTEM-EINSTELLUNGEN
-	// ==========================================
-	pump_optimization: {
-		folder: "Einstellungen.System-Einstellung",
-		name: "Pumpenoptimierung",
-		role: "switch",
-		type: "number", // Luxtronik erwartet hier meist 0 (Aus) oder 1 (Ein)
-		write: true,
-		luxWriteId: "pump_optimization", // Der exakte ID-Name, den die luxtronik2-Bibliothek erwartet
-		states: { 0: "Aus", 1: "Ein" },
-	},
-	pump_optimization_time: {
-		folder: "Einstellungen.System-Einstellung",
-		name: "Pumpenoptimierung Zeit",
-		role: "level.timer",
-		type: "number",
-		unit: "min",
-		write: true,
-		luxWriteId: "pump_optimization_time",
-		min: 5,
-		max: 180,
-	},
-
-	// ==========================================
-	// EINSTELLUNGEN: SPEZIFISCHE PARAMETER-IDs
-	// ==========================================
-	thresholdHeatingLimit: {
-		folder: "Einstellungen.System-Einstellung",
-		name: "Parameter 700 (ID_Einst_Heizgrenze_Temp)",
-		role: "value",
-		type: "number",
-		write: true,
-		luxWriteId: "thresholdHeatingLimit",
-		unit: "°C",
-		factor: 10,
-	},
-	heatingLimit: {
-		folder: "Einstellungen.System-Einstellung",
-		name: "Parameter 699 (ID_Einst_Heizgrenze)",
-		write: true,
-		role: "switch",
-		type: "number", // Luxtronik erwartet hier meist 0 (Aus) oder 1 (Ein)
-		luxWriteId: "heatingLimit",
-		states: { 0: "Aus", 1: "Ein" },
 	},
 };
