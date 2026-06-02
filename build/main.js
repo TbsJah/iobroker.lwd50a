@@ -66,6 +66,20 @@ class Lwd50a extends utils.Adapter {
       await this.setState(`${zipDef.folder}.Activate_Zip`, { val: 0, ack: true });
       await this.subscribeStatesAsync(`${zipDef.folder}.Activate_Zip`);
     }
+    const paramId = 700;
+    this.log.info(`Sende RAW an Luxtronik via Bibliothek: ID ${paramId} = ${15}`);
+    this.pump.writeRaw(paramId, 15, (err, data) => {
+      if (err) {
+        this.log.error(`Raw-Write fehlgeschlagen f\xFCr ID ${paramId}: ${err.message}`);
+        return;
+      }
+      this.log.info(`Raw-Write erfolgreich auf ${15} gesetzt! Pumpe antwortet: ${JSON.stringify(data)}`);
+      try {
+        this.updateData();
+      } catch (setStateErr) {
+        this.log.error(`Fehler beim Best\xE4tigen des Status im ioBroker: ${setStateErr.message}`);
+      }
+    });
     let intervalSeconds = this.config.interval || 30;
     if (intervalSeconds < 10) {
       intervalSeconds = 10;
@@ -147,7 +161,6 @@ class Lwd50a extends utils.Adapter {
         return;
       }
       try {
-        this.log.debug(`Anzahl empfangener Werte: ${data.values.count}`);
         const allIncomingData = {
           ...data.values,
           ...data.parameters

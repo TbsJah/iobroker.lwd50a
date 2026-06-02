@@ -387,8 +387,8 @@ const STATE_MAPPING = {
     folder: "Einstellungen.System-Einstellung",
     name: "Parameter 699 (ID_Einst_Heizgrenze)",
     write: true,
-    role: "indicator",
-    type: "boolean",
+    role: "value",
+    type: "number",
     luxWriteId: "heatingLimit",
     states: { 0: "Aus", 1: "Ein" }
   },
