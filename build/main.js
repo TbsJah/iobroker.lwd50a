@@ -46,7 +46,6 @@ class Lwd50a extends utils.Adapter {
     const port = this.config.port || 8889;
     this.log.info(`Verbinde mit W\xE4rmepumpe auf ${ip}:${port}...`);
     this.pump = new luxtronik.createConnection(ip, port);
-    this.updateData();
     const zipDef = import_stateMapping.STATE_MAPPING.Activate_Zip;
     if (zipDef) {
       await this.setObjectNotExistsAsync(`${zipDef.folder}.Activate_Zip`, {
@@ -72,10 +71,6 @@ class Lwd50a extends utils.Adapter {
       this.log.warn("Eingestelltes Intervall war zu kurz. Wurde zum Schutz auf 10 Sekunden korrigiert.");
     }
     this.log.info(`Starte Polling-Intervall. Lese Daten alle ${intervalSeconds} Sekunden aus.`);
-    this.pollingInterval = setInterval(() => {
-      this.log.debug("Polling ausgel\xF6st: Hole frische Daten von der W\xE4rmepumpe...");
-      this.updateData();
-    }, intervalSeconds * 1e3);
     setTimeout(async () => {
       try {
         this.log.info("Starte Test-Abfrage f\xFCr Parameter 699...");

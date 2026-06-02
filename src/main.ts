@@ -42,7 +42,7 @@ class Lwd50a extends utils.Adapter {
 		this.pump = new luxtronik.createConnection(ip, port);
 
 		// Erste Abfrage sofort starten
-		this.updateData();
+		//this.updateData();
 
 		// --- VIRTUELLE DATENPUNKTE ANLEGEN ---
 		const zipDef = STATE_MAPPING.Activate_Zip;
@@ -79,12 +79,12 @@ class Lwd50a extends utils.Adapter {
 
 		this.log.info(`Starte Polling-Intervall. Lese Daten alle ${intervalSeconds} Sekunden aus.`);
 
-		this.pollingInterval = setInterval(() => {
-			this.log.debug("Polling ausgelöst: Hole frische Daten von der Wärmepumpe...");
+		// this.pollingInterval = setInterval(() => {
+		// 	this.log.debug("Polling ausgelöst: Hole frische Daten von der Wärmepumpe...");
 
-			// Hier rufst du einfach deine bestehende Auslese-Funktion auf
-			this.updateData();
-		}, intervalSeconds * 1000);
+		// 	// Hier rufst du einfach deine bestehende Auslese-Funktion auf
+		// 	this.updateData();
+		// }, intervalSeconds * 1000);
 
 		// --- TEST: ROHEN PARAMETER AUSLESEN ---
 		// Wir warten 5 Sekunden nach dem Adapterstart, damit die Pumpe nicht überlastet wird
