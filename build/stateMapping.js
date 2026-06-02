@@ -1575,6 +1575,18 @@ const STATE_MAPPING = {
     luxWriteId: "pump_optimization_time",
     min: 5,
     max: 180
+  },
+  // ==========================================
+  // EINSTELLUNGEN: SPEZIFISCHE PARAMETER-IDs
+  // ==========================================
+  700: {
+    folder: "Einstellungen.System-Einstellung",
+    name: "Parameter 700 (ID_Einst_Heizgrenze_Temp)",
+    role: "value",
+    type: "number",
+    write: true,
+    luxWriteId: "700"
+    // Die luxtronik2 Bibliothek versteht die rohe ID zum Schreiben!
   }
 };
 // Annotate the CommonJS export names for ESM import in node:
