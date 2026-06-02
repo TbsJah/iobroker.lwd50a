@@ -7,6 +7,7 @@
 import * as utils from "@iobroker/adapter-core";
 import * as luxtronik from "luxtronik2";
 // Importiere dein neues Mapping-Objekt
+import * as net from "net";
 import { STATE_MAPPING } from "./stateMapping";
 
 class Lwd50a extends utils.Adapter {
@@ -84,6 +85,94 @@ class Lwd50a extends utils.Adapter {
 			// Hier rufst du einfach deine bestehende Auslese-Funktion auf
 			this.updateData();
 		}, intervalSeconds * 1000);
+
+		// --- TEST: ROHEN PARAMETER AUSLESEN ---
+		// Wir warten 5 Sekunden nach dem Adapterstart, damit die erste reguläre Abfrage durch ist
+		setTimeout(async () => {
+			try {
+				this.log.info("Starte Test-Abfrage für Parameter 700...");
+				// Hier kannst du die ID 699 (oder jede andere) gefahrlos eintragen:
+				const testValue = await this.readRawParameter(700);
+
+				// Falls du später prüfen willst, ob der Wert sich ändert, wenn du etwas in der App umstellst:
+				this.log.info(
+					`Der ausgelesene Wert ${testValue} bedeutet vermutlich: ${testValue === 1 ? "EIN" : "AUS"}`,
+				);
+			} catch {
+				this.log.error("Test-Abfrage fehlgeschlagen.");
+			}
+		}, 5000);
+	}
+
+	/**
+	 * Sendet rohe Parameter-IDs direkt per TCP an die Luxtronik-Steuerung,
+	 * ohne die luxtronik2-Bibliothek zu nutzen.
+	 *
+	 * @param parameterId Die numerische ID des Luxtronik-Parameters (z. B. 699)
+	 * @returns Ein Promise, das erfüllt wird, wenn der Schreibvorgang erfolgreich war
+	 */
+	private readRawParameter(parameterId: number): Promise<number> {
+		return new Promise((resolve, reject) => {
+			const client = new net.Socket();
+			const host = this.config.host;
+			const port = this.config.port || 8889;
+
+			let responseData = Buffer.alloc(0);
+
+			client.connect(port, host, () => {
+				this.log.info(`[RAW READ] Verbunden. Frage rohen Parameter ${parameterId} ab...`);
+
+				// Befehl 3004 = "Lese alle Parameter"
+				const buffer = Buffer.alloc(8);
+				buffer.writeInt32BE(3004, 0); // 1. Zahl: Kommando (4 Bytes)
+				buffer.writeInt32BE(0, 4); // 2. Zahl: Dummy (4 Bytes)
+				client.write(buffer);
+			});
+
+			// Wenn die Pumpe antwortet (Achtung: Die Daten kommen oft in mehreren kleinen Häppchen!)
+			client.on("data", (chunk: Buffer) => {
+				// Puzzleteile zusammensetzen
+				responseData = Buffer.concat([responseData, chunk]);
+
+				// Berechnen, ab welchem Byte unser gesuchter Wert liegt:
+				// 8 Bytes (für Kommando und Länge) + (Parameter-ID * 4 Bytes)
+				const valueOffset = 8 + parameterId * 4;
+
+				// Wir brauchen mindestens diese Startposition + 4 Bytes für den Wert selbst
+				const requiredLength = valueOffset + 4;
+
+				// Haben wir schon genug Daten empfangen, um diesen Parameter zu lesen?
+				if (responseData.length >= requiredLength) {
+					const responseCommand = responseData.readInt32BE(0);
+
+					if (responseCommand === 3004) {
+						// Exakt unseren einen Wert aus dem Datenstrom fischen!
+						const value = responseData.readInt32BE(valueOffset);
+
+						this.log.info(
+							`✅ [RAW READ] Parameter ${parameterId} erfolgreich ausgelesen! Der Wert ist: ${value}`,
+						);
+
+						client.destroy(); // Verbindung sofort wieder trennen
+						resolve(value);
+					}
+				}
+			});
+
+			client.on("error", (err: Error) => {
+				this.log.error(`[RAW READ] Netzwerkfehler: ${err.message}`);
+				client.destroy();
+				reject(err);
+			});
+
+			// Sicherheits-Timeout nach 5 Sekunden
+			client.setTimeout(5000);
+			client.on("timeout", () => {
+				this.log.error(`[RAW READ] Timeout. Wärmepumpe hat nicht schnell genug geantwortet.`);
+				client.destroy();
+				reject(new Error("Timeout"));
+			});
+		});
 	}
 
 	/**

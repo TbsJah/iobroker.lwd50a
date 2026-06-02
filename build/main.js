@@ -23,6 +23,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 ));
 var utils = __toESM(require("@iobroker/adapter-core"));
 var luxtronik = __toESM(require("luxtronik2"));
+var net = __toESM(require("net"));
 var import_stateMapping = require("./stateMapping");
 class Lwd50a extends utils.Adapter {
   pollingInterval;
@@ -75,6 +76,66 @@ class Lwd50a extends utils.Adapter {
       this.log.debug("Polling ausgel\xF6st: Hole frische Daten von der W\xE4rmepumpe...");
       this.updateData();
     }, intervalSeconds * 1e3);
+    setTimeout(async () => {
+      try {
+        this.log.info("Starte Test-Abfrage f\xFCr Parameter 700...");
+        const testValue = await this.readRawParameter(700);
+        this.log.info(
+          `Der ausgelesene Wert ${testValue} bedeutet vermutlich: ${testValue === 1 ? "EIN" : "AUS"}`
+        );
+      } catch {
+        this.log.error("Test-Abfrage fehlgeschlagen.");
+      }
+    }, 5e3);
+  }
+  /**
+   * Sendet rohe Parameter-IDs direkt per TCP an die Luxtronik-Steuerung,
+   * ohne die luxtronik2-Bibliothek zu nutzen.
+   *
+   * @param parameterId Die numerische ID des Luxtronik-Parameters (z. B. 699)
+   * @returns Ein Promise, das erfüllt wird, wenn der Schreibvorgang erfolgreich war
+   */
+  readRawParameter(parameterId) {
+    return new Promise((resolve, reject) => {
+      const client = new net.Socket();
+      const host = this.config.host;
+      const port = this.config.port || 8889;
+      let responseData = Buffer.alloc(0);
+      client.connect(port, host, () => {
+        this.log.info(`[RAW READ] Verbunden. Frage rohen Parameter ${parameterId} ab...`);
+        const buffer = Buffer.alloc(8);
+        buffer.writeInt32BE(3004, 0);
+        buffer.writeInt32BE(0, 4);
+        client.write(buffer);
+      });
+      client.on("data", (chunk) => {
+        responseData = Buffer.concat([responseData, chunk]);
+        const valueOffset = 8 + parameterId * 4;
+        const requiredLength = valueOffset + 4;
+        if (responseData.length >= requiredLength) {
+          const responseCommand = responseData.readInt32BE(0);
+          if (responseCommand === 3004) {
+            const value = responseData.readInt32BE(valueOffset);
+            this.log.info(
+              `\u2705 [RAW READ] Parameter ${parameterId} erfolgreich ausgelesen! Der Wert ist: ${value}`
+            );
+            client.destroy();
+            resolve(value);
+          }
+        }
+      });
+      client.on("error", (err) => {
+        this.log.error(`[RAW READ] Netzwerkfehler: ${err.message}`);
+        client.destroy();
+        reject(err);
+      });
+      client.setTimeout(5e3);
+      client.on("timeout", () => {
+        this.log.error(`[RAW READ] Timeout. W\xE4rmepumpe hat nicht schnell genug geantwortet.`);
+        client.destroy();
+        reject(new Error("Timeout"));
+      });
+    });
   }
   /**
    * Holt die Daten von der Wärmepumpe und schreibt sie in ioBroker
