@@ -73,30 +73,66 @@ class Lwd50a extends utils.Adapter {
     this.log.info(`Starte Polling-Intervall. Lese Daten alle ${intervalSeconds} Sekunden aus.`);
     setTimeout(async () => {
       try {
-        this.log.info("Starte Test-Abfrage f\xFCr Befehl 3003, Index 207...");
-        const testValue = await this.readRaw(3003, 700);
-        this.log.info(`\u2705 ERFOLG! Der Wert von 3003 / 700 ist: ${testValue}`);
+        const TITLES_3003 = {
+          10: "Temperatur Vorlauf",
+          11: "Temperatur R\xFCcklauf",
+          12: "Temperatur R\xFCcklauf Soll",
+          13: "Temperatur Heissgas",
+          14: "Temperatur Aussen",
+          15: "Temperatur Brauchwasser Ist",
+          16: "Temperatur Brauchwasser Soll",
+          17: "Temperatur W\xE4rmequelle Ein",
+          18: "Temperatur W\xE4rmequelle Aus",
+          // Hier kannst du beliebig viele hinzufügen...
+          207: "Status / Unbekannt 207"
+          // Trage hier ein, was 207 laut deiner Recherche ist
+        };
+        const TITLES_3004 = {
+          1: "Heizkurve Abstand",
+          2: "Heizkurve Endpunkt",
+          3: "Heizkurve Parallelverschiebung",
+          4: "Heizkurve Nachtabsenkung",
+          // ...
+          699: "Pumpenoptimierung"
+          // (Oder wie auch immer es exakt heißt)
+        };
+        const COMMAND = 3003;
+        const DICTIONARY = COMMAND === 3003 ? TITLES_3003 : TITLES_3004;
+        this.log.info(`Lade komplette Liste f\xFCr Befehl ${COMMAND}...`);
+        const allValues = await this.readAllRaw(COMMAND);
+        this.log.info(`\u2705 ERFOLG! Liste ${COMMAND} hat ${allValues.length} Werte geliefert. Starte Ausgabe...`);
+        let foundValues = 0;
+        for (let i = 0; i < allValues.length; i++) {
+          const val = allValues[i];
+          if (val !== 0 || DICTIONARY[i] !== void 0) {
+            const title = DICTIONARY[i] ? DICTIONARY[i] : "Unbekannt";
+            const marker = DICTIONARY[i] ? "\u2B50" : "  ";
+            this.log.info(
+              `${marker} [Index ${i.toString().padStart(3, " ")}] ${title.padEnd(35, " ")} = ${val}`
+            );
+            foundValues++;
+          }
+        }
+        this.log.info(`Smart Log beendet: ${foundValues} relevante Werte gefunden.`);
       } catch (error) {
-        this.log.error(`Test-Abfrage fehlgeschlagen: ${error.message}`);
+        this.log.error(`Listen-Abfrage fehlgeschlagen: ${error.message}`);
       }
     }, 8e3);
   }
   /**
-   * Liest einen rohen Wert (Parameter oder Messwert) direkt per TCP aus.
+   * Liest die komplette Liste (alle Parameter oder alle Messwerte) per TCP aus.
    *
    * @param command 3003 (Messwerte) oder 3004 (Parameter)
-   * @param command
-   * @param index Die numerische ID / der Index in der Liste (z. B. 207)
-   * @returns Ein Promise mit dem ausgelesenen Wert
+   * @returns Ein Promise, das ein Array mit allen Werten zurückgibt
    */
-  readRaw(command, index) {
+  readAllRaw(command) {
     return new Promise((resolve, reject) => {
       const client = new net.Socket();
       const host = this.config.host;
       const port = this.config.port || 8888;
       let responseData = Buffer.alloc(0);
       client.connect(port, host, () => {
-        this.log.info(`[RAW READ] Verbunden! Frage Liste ${command}, Index ${index} ab...`);
+        this.log.info(`[RAW READ ALL] Fordere komplette Liste ${command} an...`);
         const buffer = Buffer.alloc(8);
         buffer.writeInt32BE(command, 0);
         buffer.writeInt32BE(0, 4);
@@ -104,13 +140,20 @@ class Lwd50a extends utils.Adapter {
       });
       client.on("data", (chunk) => {
         responseData = Buffer.concat([responseData, chunk]);
-        const valueOffset = 12 + index * 4;
-        if (responseData.length >= valueOffset + 4) {
+        if (responseData.length >= 12) {
           const responseCommand = responseData.readInt32BE(0);
           if (responseCommand === command) {
-            const value = responseData.readInt32BE(valueOffset);
-            client.destroy();
-            resolve(value);
+            const totalItems = responseData.readInt32BE(8);
+            const totalRequiredLength = 12 + totalItems * 4;
+            if (responseData.length >= totalRequiredLength) {
+              const allValues = [];
+              for (let i = 0; i < totalItems; i++) {
+                const valueOffset = 12 + i * 4;
+                allValues.push(responseData.readInt32BE(valueOffset));
+              }
+              client.destroy();
+              resolve(allValues);
+            }
           }
         }
       });
@@ -118,10 +161,10 @@ class Lwd50a extends utils.Adapter {
         client.destroy();
         reject(err);
       });
-      client.setTimeout(5e3);
+      client.setTimeout(8e3);
       client.on("timeout", () => {
         client.destroy();
-        reject(new Error("Timeout beim Auslesen."));
+        reject(new Error(`Timeout beim Auslesen der kompletten Liste ${command}.`));
       });
     });
   }

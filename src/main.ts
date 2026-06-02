@@ -86,59 +86,129 @@ class Lwd50a extends utils.Adapter {
 		// 	this.updateData();
 		// }, intervalSeconds * 1000);
 
-		// --- TEST: ROHEN WERT AUSLESEN ---
+		// --- TEST: ALLE WERTE MIT BOUNIS TITELN INS LOG AUSGEBEN ---
 		setTimeout(async () => {
 			try {
-				this.log.info("Starte Test-Abfrage für Befehl 3003, Index 207...");
+				// ==========================================
+				// 1. UNSER WÖRTERBUCH (Auszug aus Bounis Doku)
+				// ==========================================
 
-				// Erster Parameter: 3003 (Values), Zweiter Parameter: 207 (Index)
-				const testValue = await this.readRaw(3003, 700);
+				// Bezeichnungen für 3003 (Messwerte / Calculated)
+				const TITLES_3003: Record<number, string> = {
+					10: "Temperatur Vorlauf",
+					11: "Temperatur Rücklauf",
+					12: "Temperatur Rücklauf Soll",
+					13: "Temperatur Heissgas",
+					14: "Temperatur Aussen",
+					15: "Temperatur Brauchwasser Ist",
+					16: "Temperatur Brauchwasser Soll",
+					17: "Temperatur Wärmequelle Ein",
+					18: "Temperatur Wärmequelle Aus",
+					// Hier kannst du beliebig viele hinzufügen...
+					207: "Status / Unbekannt 207", // Trage hier ein, was 207 laut deiner Recherche ist
+				};
 
-				this.log.info(`✅ ERFOLG! Der Wert von 3003 / 700 ist: ${testValue}`);
+				// Bezeichnungen für 3004 (Parameter / Settings)
+				const TITLES_3004: Record<number, string> = {
+					1: "Heizkurve Abstand",
+					2: "Heizkurve Endpunkt",
+					3: "Heizkurve Parallelverschiebung",
+					4: "Heizkurve Nachtabsenkung",
+					// ...
+					699: "Pumpenoptimierung", // (Oder wie auch immer es exakt heißt)
+				};
+
+				// ==========================================
+				// 2. DAS AUSLESEN UND ÜBERSETZEN
+				// ==========================================
+
+				// Welchen Datensatz wollen wir testen? (3003 oder 3004)
+				const COMMAND = 3003;
+				// Welches Wörterbuch gehört dazu?
+				const DICTIONARY = COMMAND === 3003 ? TITLES_3003 : TITLES_3004;
+
+				this.log.info(`Lade komplette Liste für Befehl ${COMMAND}...`);
+				const allValues = await this.readAllRaw(COMMAND);
+
+				this.log.info(`✅ ERFOLG! Liste ${COMMAND} hat ${allValues.length} Werte geliefert. Starte Ausgabe...`);
+
+				let foundValues = 0;
+				for (let i = 0; i < allValues.length; i++) {
+					const val = allValues[i];
+
+					// Wir filtern wieder alle Nullen raus, ABER wenn wir dem Index
+					// extra einen Namen im Wörterbuch gegeben haben, zeigen wir ihn IMMER an!
+					if (val !== 0 || DICTIONARY[i] !== undefined) {
+						// Titel aus dem Wörterbuch holen, falls nicht vorhanden "Unbekannt" nutzen
+						const title = DICTIONARY[i] ? DICTIONARY[i] : "Unbekannt";
+
+						// Einen kleinen optischen Trick für die Ausgabe:
+						// Wenn der Wert bekannt ist, bekommt er ein Sternchen, damit er auffällt!
+						const marker = DICTIONARY[i] ? "⭐" : "  ";
+
+						this.log.info(
+							`${marker} [Index ${i.toString().padStart(3, " ")}] ${title.padEnd(35, " ")} = ${val}`,
+						);
+						foundValues++;
+					}
+				}
+				this.log.info(`Smart Log beendet: ${foundValues} relevante Werte gefunden.`);
 			} catch (error: any) {
-				this.log.error(`Test-Abfrage fehlgeschlagen: ${error.message}`);
+				this.log.error(`Listen-Abfrage fehlgeschlagen: ${error.message}`);
 			}
 		}, 8000);
 	}
 
 	/**
-	 * Liest einen rohen Wert (Parameter oder Messwert) direkt per TCP aus.
+	 * Liest die komplette Liste (alle Parameter oder alle Messwerte) per TCP aus.
 	 *
 	 * @param command 3003 (Messwerte) oder 3004 (Parameter)
-	 * @param command
-	 * @param index Die numerische ID / der Index in der Liste (z. B. 207)
-	 * @returns Ein Promise mit dem ausgelesenen Wert
+	 * @returns Ein Promise, das ein Array mit allen Werten zurückgibt
 	 */
-	private readRaw(command: number, index: number): Promise<number> {
+	private readAllRaw(command: number): Promise<number[]> {
 		return new Promise((resolve, reject) => {
 			const client = new net.Socket();
 			const host = this.config.host;
-			// TIPP: Wenn 8889 vorhin ein Timeout war, testen wir hier direkt Port 8888!
-			const port = this.config.port || 8888;
+			const port = this.config.port || 8888; // Je nachdem, welcher Port bei dir klappt
 
 			let responseData = Buffer.alloc(0);
 
 			client.connect(port, host, () => {
-				this.log.info(`[RAW READ] Verbunden! Frage Liste ${command}, Index ${index} ab...`);
+				this.log.info(`[RAW READ ALL] Fordere komplette Liste ${command} an...`);
 
 				const buffer = Buffer.alloc(8);
-				buffer.writeInt32BE(command, 0); // Flexibler Befehl (3003 oder 3004)
-				buffer.writeInt32BE(0, 4); // Dummy
+				buffer.writeInt32BE(command, 0);
+				buffer.writeInt32BE(0, 4);
 				client.write(buffer);
 			});
 
 			client.on("data", (chunk: Buffer) => {
 				responseData = Buffer.concat([responseData, chunk]);
 
-				const valueOffset = 12 + index * 4;
-
-				if (responseData.length >= valueOffset + 4) {
+				// Wir brauchen mindestens 12 Bytes, um den Header (inkl. Länge) lesen zu können
+				if (responseData.length >= 12) {
 					const responseCommand = responseData.readInt32BE(0);
 
 					if (responseCommand === command) {
-						const value = responseData.readInt32BE(valueOffset);
-						client.destroy();
-						resolve(value);
+						// Byte 8-11 verrät uns, wie viele Werte die Anlage uns gerade schickt!
+						const totalItems = responseData.readInt32BE(8);
+
+						// Header (12) + (Anzahl Werte * 4 Bytes)
+						const totalRequiredLength = 12 + totalItems * 4;
+
+						// Haben wir das komplette Datenpaket empfangen?
+						if (responseData.length >= totalRequiredLength) {
+							const allValues: number[] = [];
+
+							// In einer Schleife alle Werte auslesen und ins Array packen
+							for (let i = 0; i < totalItems; i++) {
+								const valueOffset = 12 + i * 4;
+								allValues.push(responseData.readInt32BE(valueOffset));
+							}
+
+							client.destroy();
+							resolve(allValues);
+						}
 					}
 				}
 			});
@@ -148,14 +218,13 @@ class Lwd50a extends utils.Adapter {
 				reject(err);
 			});
 
-			client.setTimeout(5000);
+			client.setTimeout(8000); // Etwas mehr Zeit geben für den riesigen Datenblock
 			client.on("timeout", () => {
 				client.destroy();
-				reject(new Error("Timeout beim Auslesen."));
+				reject(new Error(`Timeout beim Auslesen der kompletten Liste ${command}.`));
 			});
 		});
 	}
-
 	/**
 	 * Holt die Daten von der Wärmepumpe und schreibt sie in ioBroker
 	 */
