@@ -246,6 +246,7 @@ class Lwd50a extends utils.Adapter {
 			try {
 				// Wir kombinieren values und parameters in ein einziges Objekt,
 				// damit wir beide Bereiche in einer einzigen Schleife durchlaufen können.
+				this.log.debug(`Anzahl empfangener Werte: ${data.values.count}`);
 				const allIncomingData = {
 					...data.values,
 					...data.parameters,

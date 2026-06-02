@@ -1579,7 +1579,7 @@ const STATE_MAPPING = {
   // ==========================================
   // EINSTELLUNGEN: SPEZIFISCHE PARAMETER-IDs
   // ==========================================
-  Heizgrenze_Temp: {
+  thresholdHeatingLimit: {
     folder: "Einstellungen.System-Einstellung",
     name: "Parameter 700 (ID_Einst_Heizgrenze_Temp)",
     role: "value",
@@ -1589,7 +1589,7 @@ const STATE_MAPPING = {
     unit: "\xB0C",
     factor: 10
   },
-  Heizgrenze: {
+  heatingLimit: {
     folder: "Einstellungen.System-Einstellung",
     name: "Parameter 699 (ID_Einst_Heizgrenze)",
     write: true,

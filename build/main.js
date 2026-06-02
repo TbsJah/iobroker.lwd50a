@@ -147,6 +147,7 @@ class Lwd50a extends utils.Adapter {
         return;
       }
       try {
+        this.log.debug(`Anzahl empfangener Werte: ${data.values.count}`);
         const allIncomingData = {
           ...data.values,
           ...data.parameters
