@@ -1579,14 +1579,25 @@ const STATE_MAPPING = {
   // ==========================================
   // EINSTELLUNGEN: SPEZIFISCHE PARAMETER-IDs
   // ==========================================
-  700: {
+  Heizgrenze_Temp: {
     folder: "Einstellungen.System-Einstellung",
     name: "Parameter 700 (ID_Einst_Heizgrenze_Temp)",
     role: "value",
     type: "number",
     write: true,
-    luxWriteId: "700"
-    // Die luxtronik2 Bibliothek versteht die rohe ID zum Schreiben!
+    luxWriteId: "thresholdHeatingLimit",
+    unit: "\xB0C",
+    factor: 10
+  },
+  Heizgrenze: {
+    folder: "Einstellungen.System-Einstellung",
+    name: "Parameter 699 (ID_Einst_Heizgrenze)",
+    write: true,
+    role: "switch",
+    type: "number",
+    // Luxtronik erwartet hier meist 0 (Aus) oder 1 (Ein)
+    luxWriteId: "heatingLimit",
+    states: { 0: "Aus", 1: "Ein" }
   }
 };
 // Annotate the CommonJS export names for ESM import in node:
