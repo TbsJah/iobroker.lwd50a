@@ -379,9 +379,9 @@ const STATE_MAPPING = {
     role: "value",
     type: "number",
     write: true,
-    luxWriteId: "thresholdHeatingLimit",
+    luxWriteId: "700",
     unit: "\xB0C",
-    factor: 1
+    factor: 10
   },
   heatingLimit: {
     folder: "Einstellungen.System-Einstellung",
@@ -389,7 +389,7 @@ const STATE_MAPPING = {
     write: true,
     role: "value",
     type: "number",
-    luxWriteId: "heatingLimit",
+    luxWriteId: "699",
     states: { 0: "Aus", 1: "Ein" }
   },
   // ==========================================

@@ -398,9 +398,9 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		write: true,
-		luxWriteId: "thresholdHeatingLimit",
+		luxWriteId: "700",
 		unit: "°C",
-		factor: 1,
+		factor: 10,
 	},
 	heatingLimit: {
 		folder: "Einstellungen.System-Einstellung",
@@ -408,7 +408,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		write: true,
 		role: "value",
 		type: "number",
-		luxWriteId: "heatingLimit",
+		luxWriteId: "699",
 		states: { 0: "Aus", 1: "Ein" },
 	},
 

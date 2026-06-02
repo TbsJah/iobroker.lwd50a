@@ -66,26 +66,26 @@ class Lwd50a extends utils.Adapter {
 			await this.subscribeStatesAsync(`${zipDef.folder}.Activate_Zip`);
 		}
 
-		const paramId = 700;
-		this.log.info(`Sende RAW an Luxtronik via Bibliothek: ID ${paramId} = ${15}`);
+		// const paramId = 700;
+		// this.log.info(`Sende RAW an Luxtronik via Bibliothek: ID ${paramId} = ${15}`);
 
-		// WICHTIG: Da writeRaw in den offiziellen TypeScript-Typen (types.d.ts) der
-		// Bibliothek wahrscheinlich nicht dokumentiert ist, tricksen wir TypeScript
-		// mit "as any" kurz aus, damit es keine rote Fehlerlinie wirft!
-		this.pump.writeRaw(paramId, 15, (err: any, data: any) => {
-			if (err) {
-				this.log.error(`Raw-Write fehlgeschlagen für ID ${paramId}: ${err.message}`);
-				return;
-			}
+		// // WICHTIG: Da writeRaw in den offiziellen TypeScript-Typen (types.d.ts) der
+		// // Bibliothek wahrscheinlich nicht dokumentiert ist, tricksen wir TypeScript
+		// // mit "as any" kurz aus, damit es keine rote Fehlerlinie wirft!
+		// this.pump.writeRaw(paramId, 15, (err: any, data: any) => {
+		// 	if (err) {
+		// 		this.log.error(`Raw-Write fehlgeschlagen für ID ${paramId}: ${err.message}`);
+		// 		return;
+		// 	}
 
-			this.log.info(`Raw-Write erfolgreich auf ${15} gesetzt! Pumpe antwortet: ${JSON.stringify(data)}`);
-			try {
-				// 3. Werte neu abfragen
-				this.updateData();
-			} catch (setStateErr: any) {
-				this.log.error(`Fehler beim Bestätigen des Status im ioBroker: ${setStateErr.message}`);
-			}
-		});
+		// 	this.log.info(`Raw-Write erfolgreich auf ${15} gesetzt! Pumpe antwortet: ${JSON.stringify(data)}`);
+		// 	try {
+		// 		// 3. Werte neu abfragen
+		// 		this.updateData();
+		// 	} catch (setStateErr: any) {
+		// 		this.log.error(`Fehler beim Bestätigen des Status im ioBroker: ${setStateErr.message}`);
+		// 	}
+		// });
 
 		// Hole das Intervall aus der Konfiguration (Standard: 30 Sekunden)
 		// WICHTIG: setInterval benötigt Millisekunden, daher * 1000
