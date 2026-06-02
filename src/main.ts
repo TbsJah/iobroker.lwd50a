@@ -42,7 +42,7 @@ class Lwd50a extends utils.Adapter {
 		this.pump = new luxtronik.createConnection(ip, port);
 
 		// Erste Abfrage sofort starten
-		//this.updateData();
+		this.updateData();
 
 		// --- VIRTUELLE DATENPUNKTE ANLEGEN ---
 		const zipDef = STATE_MAPPING.Activate_Zip;
@@ -79,75 +79,75 @@ class Lwd50a extends utils.Adapter {
 
 		this.log.info(`Starte Polling-Intervall. Lese Daten alle ${intervalSeconds} Sekunden aus.`);
 
-		// this.pollingInterval = setInterval(() => {
-		// 	this.log.debug("Polling ausgelöst: Hole frische Daten von der Wärmepumpe...");
+		this.pollingInterval = setInterval(() => {
+			this.log.debug("Polling ausgelöst: Hole frische Daten von der Wärmepumpe...");
 
-		// 	// Hier rufst du einfach deine bestehende Auslese-Funktion auf
-		// 	this.updateData();
-		// }, intervalSeconds * 1000);
+			// Hier rufst du einfach deine bestehende Auslese-Funktion auf
+			this.updateData();
+		}, intervalSeconds * 1000);
 
 		// --- TEST: ALLE WERTE MIT BOUNIS TITELN INS LOG AUSGEBEN ---
-		setTimeout(async () => {
-			try {
-				// ==========================================
-				// 1. UNSER WÖRTERBUCH (Korrigierte Zuordnung)
-				// ==========================================
+		// setTimeout(async () => {
+		// 	try {
+		// 		// ==========================================
+		// 		// 1. UNSER WÖRTERBUCH (Korrigierte Zuordnung)
+		// 		// ==========================================
 
-				// 3004 = MESSWERTE (Calculated - Read Only)
-				const TITLES_3004: Record<number, string> = {
-					10: "Temperatur Vorlauf",
-					11: "Temperatur Rücklauf",
-					12: "Temperatur Rücklauf Soll",
-					13: "Temperatur Heissgas",
-					14: "Temperatur Aussen",
-					15: "Temperatur Brauchwasser Ist",
-					16: "Temperatur Brauchwasser Soll",
-					17: "Temperatur Wärmequelle Ein",
-					18: "Temperatur Wärmequelle Aus",
-				};
+		// 		// 3004 = MESSWERTE (Calculated - Read Only)
+		// 		const TITLES_3004: Record<number, string> = {
+		// 			10: "Temperatur Vorlauf",
+		// 			11: "Temperatur Rücklauf",
+		// 			12: "Temperatur Rücklauf Soll",
+		// 			13: "Temperatur Heissgas",
+		// 			14: "Temperatur Aussen",
+		// 			15: "Temperatur Brauchwasser Ist",
+		// 			16: "Temperatur Brauchwasser Soll",
+		// 			17: "Temperatur Wärmequelle Ein",
+		// 			18: "Temperatur Wärmequelle Aus",
+		// 		};
 
-				// 3003 = PARAMETER (Settings - Lese- und Schreibbar)
-				const TITLES_3003: Record<number, string> = {
-					1: "Heizkurve Abstand",
-					2: "Heizkurve Endpunkt",
-					3: "Heizkurve Parallelverschiebung",
-					4: "Heizkurve Nachtabsenkung",
-					207: "Dein gesuchter Wert (207)",
-					699: "Pumpenoptimierung",
-				};
+		// 		// 3003 = PARAMETER (Settings - Lese- und Schreibbar)
+		// 		const TITLES_3003: Record<number, string> = {
+		// 			1: "Heizkurve Abstand",
+		// 			2: "Heizkurve Endpunkt",
+		// 			3: "Heizkurve Parallelverschiebung",
+		// 			4: "Heizkurve Nachtabsenkung",
+		// 			207: "Dein gesuchter Wert (207)",
+		// 			699: "Pumpenoptimierung",
+		// 		};
 
-				// ==========================================
-				// 2. DAS AUSLESEN UND ÜBERSETZEN
-				// ==========================================
+		// 		// ==========================================
+		// 		// 2. DAS AUSLESEN UND ÜBERSETZEN
+		// 		// ==========================================
 
-				// Ändere dies auf 3003 (Parameter) oder 3004 (Messwerte)
-				const COMMAND = 3003;
-				const DICTIONARY = COMMAND === 3003 ? TITLES_3003 : TITLES_3004;
+		// 		// Ändere dies auf 3003 (Parameter) oder 3004 (Messwerte)
+		// 		const COMMAND = 3003;
+		// 		const DICTIONARY = COMMAND === 3003 ? TITLES_3003 : TITLES_3004;
 
-				this.log.info(`Lade komplette Liste für Befehl ${COMMAND}...`);
-				const allValues = await this.readAllRaw(COMMAND);
+		// 		this.log.info(`Lade komplette Liste für Befehl ${COMMAND}...`);
+		// 		const allValues = await this.readAllRaw(COMMAND);
 
-				this.log.info(`✅ ERFOLG! Liste ${COMMAND} hat ${allValues.length} Werte geliefert. Starte Ausgabe...`);
+		// 		this.log.info(`✅ ERFOLG! Liste ${COMMAND} hat ${allValues.length} Werte geliefert. Starte Ausgabe...`);
 
-				let foundValues = 0;
-				for (let i = 0; i < allValues.length; i++) {
-					const val = allValues[i];
+		// 		let foundValues = 0;
+		// 		for (let i = 0; i < allValues.length; i++) {
+		// 			const val = allValues[i];
 
-					if (val !== 0 || DICTIONARY[i] !== undefined) {
-						const title = DICTIONARY[i] ? DICTIONARY[i] : "Unbekannt";
-						const marker = DICTIONARY[i] ? "⭐" : "  ";
+		// 			if (val !== 0 || DICTIONARY[i] !== undefined) {
+		// 				const title = DICTIONARY[i] ? DICTIONARY[i] : "Unbekannt";
+		// 				const marker = DICTIONARY[i] ? "⭐" : "  ";
 
-						this.log.info(
-							`${marker} [Index ${i.toString().padStart(3, " ")}] ${title.padEnd(35, " ")} = ${val}`,
-						);
-						foundValues++;
-					}
-				}
-				this.log.info(`Smart Log beendet: ${foundValues} relevante Werte gefunden.`);
-			} catch (error: any) {
-				this.log.error(`Listen-Abfrage fehlgeschlagen: ${error.message}`);
-			}
-		}, 8000);
+		// 				this.log.info(
+		// 					`${marker} [Index ${i.toString().padStart(3, " ")}] ${title.padEnd(35, " ")} = ${val}`,
+		// 				);
+		// 				foundValues++;
+		// 			}
+		// 		}
+		// 		this.log.info(`Smart Log beendet: ${foundValues} relevante Werte gefunden.`);
+		// 	} catch (error: any) {
+		// 		this.log.error(`Listen-Abfrage fehlgeschlagen: ${error.message}`);
+		// 	}
+		// }, 8000);
 	}
 
 	/**

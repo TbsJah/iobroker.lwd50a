@@ -46,6 +46,7 @@ class Lwd50a extends utils.Adapter {
     const port = this.config.port || 8889;
     this.log.info(`Verbinde mit W\xE4rmepumpe auf ${ip}:${port}...`);
     this.pump = new luxtronik.createConnection(ip, port);
+    this.updateData();
     const zipDef = import_stateMapping.STATE_MAPPING.Activate_Zip;
     if (zipDef) {
       await this.setObjectNotExistsAsync(`${zipDef.folder}.Activate_Zip`, {
@@ -71,49 +72,10 @@ class Lwd50a extends utils.Adapter {
       this.log.warn("Eingestelltes Intervall war zu kurz. Wurde zum Schutz auf 10 Sekunden korrigiert.");
     }
     this.log.info(`Starte Polling-Intervall. Lese Daten alle ${intervalSeconds} Sekunden aus.`);
-    setTimeout(async () => {
-      try {
-        const TITLES_3004 = {
-          10: "Temperatur Vorlauf",
-          11: "Temperatur R\xFCcklauf",
-          12: "Temperatur R\xFCcklauf Soll",
-          13: "Temperatur Heissgas",
-          14: "Temperatur Aussen",
-          15: "Temperatur Brauchwasser Ist",
-          16: "Temperatur Brauchwasser Soll",
-          17: "Temperatur W\xE4rmequelle Ein",
-          18: "Temperatur W\xE4rmequelle Aus"
-        };
-        const TITLES_3003 = {
-          1: "Heizkurve Abstand",
-          2: "Heizkurve Endpunkt",
-          3: "Heizkurve Parallelverschiebung",
-          4: "Heizkurve Nachtabsenkung",
-          207: "Dein gesuchter Wert (207)",
-          699: "Pumpenoptimierung"
-        };
-        const COMMAND = 3003;
-        const DICTIONARY = COMMAND === 3003 ? TITLES_3003 : TITLES_3004;
-        this.log.info(`Lade komplette Liste f\xFCr Befehl ${COMMAND}...`);
-        const allValues = await this.readAllRaw(COMMAND);
-        this.log.info(`\u2705 ERFOLG! Liste ${COMMAND} hat ${allValues.length} Werte geliefert. Starte Ausgabe...`);
-        let foundValues = 0;
-        for (let i = 0; i < allValues.length; i++) {
-          const val = allValues[i];
-          if (val !== 0 || DICTIONARY[i] !== void 0) {
-            const title = DICTIONARY[i] ? DICTIONARY[i] : "Unbekannt";
-            const marker = DICTIONARY[i] ? "\u2B50" : "  ";
-            this.log.info(
-              `${marker} [Index ${i.toString().padStart(3, " ")}] ${title.padEnd(35, " ")} = ${val}`
-            );
-            foundValues++;
-          }
-        }
-        this.log.info(`Smart Log beendet: ${foundValues} relevante Werte gefunden.`);
-      } catch (error) {
-        this.log.error(`Listen-Abfrage fehlgeschlagen: ${error.message}`);
-      }
-    }, 8e3);
+    this.pollingInterval = setInterval(() => {
+      this.log.debug("Polling ausgel\xF6st: Hole frische Daten von der W\xE4rmepumpe...");
+      this.updateData();
+    }, intervalSeconds * 1e3);
   }
   /**
    * Liest die komplette Liste (alle Parameter oder alle Messwerte) per TCP aus.
