@@ -73,39 +73,41 @@ class Lwd50a extends utils.Adapter {
     this.log.info(`Starte Polling-Intervall. Lese Daten alle ${intervalSeconds} Sekunden aus.`);
     setTimeout(async () => {
       try {
-        this.log.info("Starte Test-Abfrage f\xFCr Parameter 699...");
-        const testValue = await this.readRawParameter(699);
-        this.log.info(`\u2705 ERFOLG! Der Wert von Parameter 699 ist: ${testValue}`);
+        this.log.info("Starte Test-Abfrage f\xFCr Befehl 3003, Index 207...");
+        const testValue = await this.readRaw(3003, 700);
+        this.log.info(`\u2705 ERFOLG! Der Wert von 3003 / 700 ist: ${testValue}`);
       } catch (error) {
         this.log.error(`Test-Abfrage fehlgeschlagen: ${error.message}`);
       }
-    }, 15e3);
+    }, 8e3);
   }
   /**
-   * Liest eine rohe Parameter-ID direkt per TCP von der Luxtronik-Steuerung aus.
+   * Liest einen rohen Wert (Parameter oder Messwert) direkt per TCP aus.
    *
-   * @param parameterId Die numerische ID des Luxtronik-Parameters (z. B. 699)
-   * @returns Ein Promise, das den ausgelesenen Wert (als Zahl) zurückgibt
+   * @param command 3003 (Messwerte) oder 3004 (Parameter)
+   * @param command
+   * @param index Die numerische ID / der Index in der Liste (z. B. 207)
+   * @returns Ein Promise mit dem ausgelesenen Wert
    */
-  readRawParameter(parameterId) {
+  readRaw(command, index) {
     return new Promise((resolve, reject) => {
       const client = new net.Socket();
       const host = this.config.host;
-      const port = this.config.port || 8889;
+      const port = this.config.port || 8888;
       let responseData = Buffer.alloc(0);
       client.connect(port, host, () => {
-        this.log.debug(`[RAW READ] Frage rohen Parameter ${parameterId} ab...`);
+        this.log.info(`[RAW READ] Verbunden! Frage Liste ${command}, Index ${index} ab...`);
         const buffer = Buffer.alloc(8);
-        buffer.writeInt32BE(3004, 0);
+        buffer.writeInt32BE(command, 0);
         buffer.writeInt32BE(0, 4);
         client.write(buffer);
       });
       client.on("data", (chunk) => {
         responseData = Buffer.concat([responseData, chunk]);
-        const valueOffset = 12 + parameterId * 4;
+        const valueOffset = 12 + index * 4;
         if (responseData.length >= valueOffset + 4) {
           const responseCommand = responseData.readInt32BE(0);
-          if (responseCommand === 3004) {
+          if (responseCommand === command) {
             const value = responseData.readInt32BE(valueOffset);
             client.destroy();
             resolve(value);
@@ -119,7 +121,7 @@ class Lwd50a extends utils.Adapter {
       client.setTimeout(5e3);
       client.on("timeout", () => {
         client.destroy();
-        reject(new Error("Timeout beim Lesen des RAW-Parameters."));
+        reject(new Error("Timeout beim Auslesen."));
       });
     });
   }

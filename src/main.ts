@@ -86,66 +86,58 @@ class Lwd50a extends utils.Adapter {
 		// 	this.updateData();
 		// }, intervalSeconds * 1000);
 
-		// --- TEST: ROHEN PARAMETER AUSLESEN ---
-		// Wir warten 5 Sekunden nach dem Adapterstart, damit die Pumpe nicht überlastet wird
+		// --- TEST: ROHEN WERT AUSLESEN ---
 		setTimeout(async () => {
 			try {
-				this.log.info("Starte Test-Abfrage für Parameter 699...");
+				this.log.info("Starte Test-Abfrage für Befehl 3003, Index 207...");
 
-				// Hier feuerst du die ID 699 ab!
-				const testValue = await this.readRawParameter(699);
+				// Erster Parameter: 3003 (Values), Zweiter Parameter: 207 (Index)
+				const testValue = await this.readRaw(3003, 700);
 
-				this.log.info(`✅ ERFOLG! Der Wert von Parameter 699 ist: ${testValue}`);
+				this.log.info(`✅ ERFOLG! Der Wert von 3003 / 700 ist: ${testValue}`);
 			} catch (error: any) {
 				this.log.error(`Test-Abfrage fehlgeschlagen: ${error.message}`);
 			}
-		}, 15000);
+		}, 8000);
 	}
 
 	/**
-	 * Liest eine rohe Parameter-ID direkt per TCP von der Luxtronik-Steuerung aus.
+	 * Liest einen rohen Wert (Parameter oder Messwert) direkt per TCP aus.
 	 *
-	 * @param parameterId Die numerische ID des Luxtronik-Parameters (z. B. 699)
-	 * @returns Ein Promise, das den ausgelesenen Wert (als Zahl) zurückgibt
+	 * @param command 3003 (Messwerte) oder 3004 (Parameter)
+	 * @param command
+	 * @param index Die numerische ID / der Index in der Liste (z. B. 207)
+	 * @returns Ein Promise mit dem ausgelesenen Wert
 	 */
-	private readRawParameter(parameterId: number): Promise<number> {
+	private readRaw(command: number, index: number): Promise<number> {
 		return new Promise((resolve, reject) => {
 			const client = new net.Socket();
 			const host = this.config.host;
-			const port = this.config.port || 8889;
+			// TIPP: Wenn 8889 vorhin ein Timeout war, testen wir hier direkt Port 8888!
+			const port = this.config.port || 8888;
 
 			let responseData = Buffer.alloc(0);
 
 			client.connect(port, host, () => {
-				this.log.debug(`[RAW READ] Frage rohen Parameter ${parameterId} ab...`);
+				this.log.info(`[RAW READ] Verbunden! Frage Liste ${command}, Index ${index} ab...`);
 
-				// Befehl 3004 = "Lese alle Parameter"
 				const buffer = Buffer.alloc(8);
-				buffer.writeInt32BE(3004, 0); // Kommando
-				buffer.writeInt32BE(0, 4); // Dummy-Wert
+				buffer.writeInt32BE(command, 0); // Flexibler Befehl (3003 oder 3004)
+				buffer.writeInt32BE(0, 4); // Dummy
 				client.write(buffer);
 			});
 
-			// Wenn die Pumpe antwortet (Daten kommen oft in mehreren kleinen Paketen!)
 			client.on("data", (chunk: Buffer) => {
 				responseData = Buffer.concat([responseData, chunk]);
 
-				// Die Luxtronik-Antwort für 3004 ist so aufgebaut:
-				// Byte 0-3: Kommando (3004)
-				// Byte 4-7: Status
-				// Byte 8-11: Anzahl der Parameter (meist > 1100)
-				// Ab Byte 12: Die eigentlichen Parameterwerte (jeweils 4 Bytes groß)
-				const valueOffset = 12 + parameterId * 4;
+				const valueOffset = 12 + index * 4;
 
-				// Haben wir schon genug Daten empfangen, um unser Ziel-Byte zu lesen?
 				if (responseData.length >= valueOffset + 4) {
 					const responseCommand = responseData.readInt32BE(0);
 
-					if (responseCommand === 3004) {
-						// Exakt unseren einen Wert aus dem Datenstrom fischen!
+					if (responseCommand === command) {
 						const value = responseData.readInt32BE(valueOffset);
-
-						client.destroy(); // Verbindung sofort trennen, wir haben was wir wollen!
+						client.destroy();
 						resolve(value);
 					}
 				}
@@ -156,11 +148,10 @@ class Lwd50a extends utils.Adapter {
 				reject(err);
 			});
 
-			// Timeout nach 5 Sekunden, falls die Pumpe hängt
 			client.setTimeout(5000);
 			client.on("timeout", () => {
 				client.destroy();
-				reject(new Error("Timeout beim Lesen des RAW-Parameters."));
+				reject(new Error("Timeout beim Auslesen."));
 			});
 		});
 	}
