@@ -73,7 +73,7 @@ class Lwd50a extends utils.Adapter {
     this.log.info(`Starte Polling-Intervall. Lese Daten alle ${intervalSeconds} Sekunden aus.`);
     setTimeout(async () => {
       try {
-        const TITLES_3003 = {
+        const TITLES_3004 = {
           10: "Temperatur Vorlauf",
           11: "Temperatur R\xFCcklauf",
           12: "Temperatur R\xFCcklauf Soll",
@@ -82,19 +82,15 @@ class Lwd50a extends utils.Adapter {
           15: "Temperatur Brauchwasser Ist",
           16: "Temperatur Brauchwasser Soll",
           17: "Temperatur W\xE4rmequelle Ein",
-          18: "Temperatur W\xE4rmequelle Aus",
-          // Hier kannst du beliebig viele hinzufügen...
-          207: "Status / Unbekannt 207"
-          // Trage hier ein, was 207 laut deiner Recherche ist
+          18: "Temperatur W\xE4rmequelle Aus"
         };
-        const TITLES_3004 = {
+        const TITLES_3003 = {
           1: "Heizkurve Abstand",
           2: "Heizkurve Endpunkt",
           3: "Heizkurve Parallelverschiebung",
           4: "Heizkurve Nachtabsenkung",
-          // ...
+          207: "Dein gesuchter Wert (207)",
           699: "Pumpenoptimierung"
-          // (Oder wie auch immer es exakt heißt)
         };
         const COMMAND = 3003;
         const DICTIONARY = COMMAND === 3003 ? TITLES_3003 : TITLES_3004;
@@ -122,7 +118,7 @@ class Lwd50a extends utils.Adapter {
   /**
    * Liest die komplette Liste (alle Parameter oder alle Messwerte) per TCP aus.
    *
-   * @param command 3003 (Messwerte) oder 3004 (Parameter)
+   * @param command 3003 (Parameter) oder 3004 (Messwerte)
    * @returns Ein Promise, das ein Array mit allen Werten zurückgibt
    */
   readAllRaw(command) {
@@ -140,15 +136,18 @@ class Lwd50a extends utils.Adapter {
       });
       client.on("data", (chunk) => {
         responseData = Buffer.concat([responseData, chunk]);
-        if (responseData.length >= 12) {
+        const is3004 = command === 3004;
+        const headerSize = is3004 ? 12 : 8;
+        const lengthOffset = is3004 ? 8 : 4;
+        if (responseData.length >= headerSize) {
           const responseCommand = responseData.readInt32BE(0);
           if (responseCommand === command) {
-            const totalItems = responseData.readInt32BE(8);
-            const totalRequiredLength = 12 + totalItems * 4;
+            const totalItems = responseData.readInt32BE(lengthOffset);
+            const totalRequiredLength = headerSize + totalItems * 4;
             if (responseData.length >= totalRequiredLength) {
               const allValues = [];
               for (let i = 0; i < totalItems; i++) {
-                const valueOffset = 12 + i * 4;
+                const valueOffset = headerSize + i * 4;
                 allValues.push(responseData.readInt32BE(valueOffset));
               }
               client.destroy();

@@ -90,11 +90,11 @@ class Lwd50a extends utils.Adapter {
 		setTimeout(async () => {
 			try {
 				// ==========================================
-				// 1. UNSER WÖRTERBUCH (Auszug aus Bounis Doku)
+				// 1. UNSER WÖRTERBUCH (Korrigierte Zuordnung)
 				// ==========================================
 
-				// Bezeichnungen für 3003 (Messwerte / Calculated)
-				const TITLES_3003: Record<number, string> = {
+				// 3004 = MESSWERTE (Calculated - Read Only)
+				const TITLES_3004: Record<number, string> = {
 					10: "Temperatur Vorlauf",
 					11: "Temperatur Rücklauf",
 					12: "Temperatur Rücklauf Soll",
@@ -104,27 +104,24 @@ class Lwd50a extends utils.Adapter {
 					16: "Temperatur Brauchwasser Soll",
 					17: "Temperatur Wärmequelle Ein",
 					18: "Temperatur Wärmequelle Aus",
-					// Hier kannst du beliebig viele hinzufügen...
-					207: "Status / Unbekannt 207", // Trage hier ein, was 207 laut deiner Recherche ist
 				};
 
-				// Bezeichnungen für 3004 (Parameter / Settings)
-				const TITLES_3004: Record<number, string> = {
+				// 3003 = PARAMETER (Settings - Lese- und Schreibbar)
+				const TITLES_3003: Record<number, string> = {
 					1: "Heizkurve Abstand",
 					2: "Heizkurve Endpunkt",
 					3: "Heizkurve Parallelverschiebung",
 					4: "Heizkurve Nachtabsenkung",
-					// ...
-					699: "Pumpenoptimierung", // (Oder wie auch immer es exakt heißt)
+					207: "Dein gesuchter Wert (207)",
+					699: "Pumpenoptimierung",
 				};
 
 				// ==========================================
 				// 2. DAS AUSLESEN UND ÜBERSETZEN
 				// ==========================================
 
-				// Welchen Datensatz wollen wir testen? (3003 oder 3004)
+				// Ändere dies auf 3003 (Parameter) oder 3004 (Messwerte)
 				const COMMAND = 3003;
-				// Welches Wörterbuch gehört dazu?
 				const DICTIONARY = COMMAND === 3003 ? TITLES_3003 : TITLES_3004;
 
 				this.log.info(`Lade komplette Liste für Befehl ${COMMAND}...`);
@@ -136,14 +133,8 @@ class Lwd50a extends utils.Adapter {
 				for (let i = 0; i < allValues.length; i++) {
 					const val = allValues[i];
 
-					// Wir filtern wieder alle Nullen raus, ABER wenn wir dem Index
-					// extra einen Namen im Wörterbuch gegeben haben, zeigen wir ihn IMMER an!
 					if (val !== 0 || DICTIONARY[i] !== undefined) {
-						// Titel aus dem Wörterbuch holen, falls nicht vorhanden "Unbekannt" nutzen
 						const title = DICTIONARY[i] ? DICTIONARY[i] : "Unbekannt";
-
-						// Einen kleinen optischen Trick für die Ausgabe:
-						// Wenn der Wert bekannt ist, bekommt er ein Sternchen, damit er auffällt!
 						const marker = DICTIONARY[i] ? "⭐" : "  ";
 
 						this.log.info(
@@ -162,14 +153,14 @@ class Lwd50a extends utils.Adapter {
 	/**
 	 * Liest die komplette Liste (alle Parameter oder alle Messwerte) per TCP aus.
 	 *
-	 * @param command 3003 (Messwerte) oder 3004 (Parameter)
+	 * @param command 3003 (Parameter) oder 3004 (Messwerte)
 	 * @returns Ein Promise, das ein Array mit allen Werten zurückgibt
 	 */
 	private readAllRaw(command: number): Promise<number[]> {
 		return new Promise((resolve, reject) => {
 			const client = new net.Socket();
 			const host = this.config.host;
-			const port = this.config.port || 8888; // Je nachdem, welcher Port bei dir klappt
+			const port = this.config.port || 8888;
 
 			let responseData = Buffer.alloc(0);
 
@@ -185,24 +176,28 @@ class Lwd50a extends utils.Adapter {
 			client.on("data", (chunk: Buffer) => {
 				responseData = Buffer.concat([responseData, chunk]);
 
-				// Wir brauchen mindestens 12 Bytes, um den Header (inkl. Länge) lesen zu können
-				if (responseData.length >= 12) {
+				// --- DER PROTOKOLL-FIX ---
+				// 3004 (Messwerte) hat 12 Bytes Header. 3003 (Parameter) hat nur 8 Bytes Header!
+				const is3004 = command === 3004;
+				const headerSize = is3004 ? 12 : 8;
+				const lengthOffset = is3004 ? 8 : 4;
+
+				// Warten, bis wir zumindest den kompletten Header haben
+				if (responseData.length >= headerSize) {
 					const responseCommand = responseData.readInt32BE(0);
 
 					if (responseCommand === command) {
-						// Byte 8-11 verrät uns, wie viele Werte die Anlage uns gerade schickt!
-						const totalItems = responseData.readInt32BE(8);
-
-						// Header (12) + (Anzahl Werte * 4 Bytes)
-						const totalRequiredLength = 12 + totalItems * 4;
+						// Länge am korrekten Byte ablesen
+						const totalItems = responseData.readInt32BE(lengthOffset);
+						const totalRequiredLength = headerSize + totalItems * 4;
 
 						// Haben wir das komplette Datenpaket empfangen?
 						if (responseData.length >= totalRequiredLength) {
 							const allValues: number[] = [];
 
-							// In einer Schleife alle Werte auslesen und ins Array packen
+							// Schleife über alle Einträge
 							for (let i = 0; i < totalItems; i++) {
-								const valueOffset = 12 + i * 4;
+								const valueOffset = headerSize + i * 4;
 								allValues.push(responseData.readInt32BE(valueOffset));
 							}
 
@@ -218,7 +213,7 @@ class Lwd50a extends utils.Adapter {
 				reject(err);
 			});
 
-			client.setTimeout(8000); // Etwas mehr Zeit geben für den riesigen Datenblock
+			client.setTimeout(8000);
 			client.on("timeout", () => {
 				client.destroy();
 				reject(new Error(`Timeout beim Auslesen der kompletten Liste ${command}.`));
