@@ -253,20 +253,6 @@ class Lwd50a extends utils.Adapter {
       callback();
     }
   }
-  // If you need to react to object changes, uncomment the following block and the corresponding line in the constructor.
-  // You also need to subscribe to the objects with `this.subscribeObjects`, similar to `this.subscribeStates`.
-  // /**
-  //  * Is called if a subscribed object changes
-  //  */
-  // private onObjectChange(id: string, obj: ioBroker.Object | null | undefined): void {
-  // 	if (obj) {
-  // 		// The object was changed
-  // 		this.log.info(`object ${id} changed: ${JSON.stringify(obj)}`);
-  // 	} else {
-  // 		// The object was deleted
-  // 		this.log.info(`object ${id} deleted`);
-  // 	}
-  // }
   /**
    * Is called if a subscribed state changes
    *
@@ -346,21 +332,29 @@ class Lwd50a extends utils.Adapter {
     if (definition.factor && typeof state.val === "number") {
       valueToWrite = state.val * definition.factor;
     }
-    this.log.info(`Sende an Luxtronik: ${definition.luxWriteId} = ${valueToWrite}`);
-    this.pump.write(definition.luxWriteId, valueToWrite, async (err, _result) => {
+    const isRawNumber = /^\d+$/.test(definition.luxWriteId);
+    const handleWriteResult = (err, _result) => {
       if (err) {
         this.log.error(`Fehler beim Schreiben an Luxtronik (${definition.luxWriteId}): ${err.message}`);
         return;
       }
       this.log.info(`Wert ${state.val} erfolgreich an W\xE4rmepumpe \xFCbertragen.`);
-      try {
-        await this.setState(id, state.val, true);
-        await new Promise((resolve) => setTimeout(resolve, 500));
+      this.setState(id, state.val, true).then(() => {
+        return new Promise((resolve) => setTimeout(resolve, 500));
+      }).then(() => {
         this.updateData();
-      } catch (setStateErr) {
+      }).catch((setStateErr) => {
         this.log.error(`Fehler beim Best\xE4tigen des Status im ioBroker: ${setStateErr.message}`);
-      }
-    });
+      });
+    };
+    if (isRawNumber) {
+      const paramId = parseInt(definition.luxWriteId, 10);
+      this.log.info(`Sende RAW an Luxtronik: ID ${paramId} = ${valueToWrite}`);
+      this.pump.writeRaw(paramId, valueToWrite, handleWriteResult);
+    } else {
+      this.log.info(`Sende STANDARD an Luxtronik: ${definition.luxWriteId} = ${valueToWrite}`);
+      this.pump.write(definition.luxWriteId, valueToWrite, handleWriteResult);
+    }
   }
   // If you need to accept messages in your adapter, uncomment the following block and the corresponding line in the constructor.
   // /**

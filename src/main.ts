@@ -406,21 +406,6 @@ class Lwd50a extends utils.Adapter {
 		}
 	}
 
-	// If you need to react to object changes, uncomment the following block and the corresponding line in the constructor.
-	// You also need to subscribe to the objects with `this.subscribeObjects`, similar to `this.subscribeStates`.
-	// /**
-	//  * Is called if a subscribed object changes
-	//  */
-	// private onObjectChange(id: string, obj: ioBroker.Object | null | undefined): void {
-	// 	if (obj) {
-	// 		// The object was changed
-	// 		this.log.info(`object ${id} changed: ${JSON.stringify(obj)}`);
-	// 	} else {
-	// 		// The object was deleted
-	// 		this.log.info(`object ${id} deleted`);
-	// 	}
-	// }
-
 	/**
 	 * Is called if a subscribed state changes
 	 *
@@ -518,17 +503,17 @@ class Lwd50a extends utils.Adapter {
 			return;
 		}
 
-		// Callback wird "async", damit wir darin await nutzen können
-		// 1. Umrechnung: Falls ein Faktor definiert ist, den ioBroker-Wert wieder für die Pumpe hochrechnen!
+		// 1. Umrechnung: Falls ein Faktor definiert ist, den ioBroker-Wert wieder hochrechnen
 		let valueToWrite = state.val as number;
 		if (definition.factor && typeof state.val === "number") {
 			valueToWrite = state.val * definition.factor;
 		}
 
-		this.log.info(`Sende an Luxtronik: ${definition.luxWriteId} = ${valueToWrite}`);
+		// 2. Prüfen, ob die luxWriteId eine reine Nummer ist (z. B. "507" oder "699")
+		const isRawNumber = /^\d+$/.test(definition.luxWriteId);
 
-		// Callback als async deklarieren, damit wir innen "await" nutzen können
-		this.pump.write(definition.luxWriteId, valueToWrite, async (err: any, _result: any) => {
+		// 3. Den gemeinsamen Callback definieren (jetzt mit explizitem Rückgabetyp "void")
+		const handleWriteResult = (err: any, _result: any): void => {
 			if (err) {
 				this.log.error(`Fehler beim Schreiben an Luxtronik (${definition.luxWriteId}): ${err.message}`);
 				return;
@@ -536,20 +521,31 @@ class Lwd50a extends utils.Adapter {
 
 			this.log.info(`Wert ${state.val} erfolgreich an Wärmepumpe übertragen.`);
 
-			try {
-				// 2. Den Wert im ioBroker offiziell bestätigen (ack: true)
-				// Moderne Schreibweise: setState (ohne Async am Ende) gibt automatisch ein Promise zurück
-				await this.setState(id, state.val, true);
+			// Promises sauber verketten
+			this.setState(id, state.val, true)
+				.then(() => {
+					return new Promise(resolve => setTimeout(resolve, 500));
+				})
+				.then(() => {
+					this.updateData();
+				})
+				.catch((setStateErr: any) => {
+					this.log.error(`Fehler beim Bestätigen des Status im ioBroker: ${setStateErr.message}`);
+				});
+		};
 
-				// 3. Der Luxtronik-Steuerung eine kleine Pause geben, um den internen Speicher zu schreiben
-				await new Promise(resolve => setTimeout(resolve, 500));
+		// 4. Die magische Weiche: Je nach Typ den passenden Befehl abfeuern
+		if (isRawNumber) {
+			const paramId = parseInt(definition.luxWriteId, 10);
+			this.log.info(`Sende RAW an Luxtronik: ID ${paramId} = ${valueToWrite}`);
 
-				// 4. Frische Daten von der Anlage holen, damit alles 100% synchron ist
-				this.updateData();
-			} catch (setStateErr: any) {
-				this.log.error(`Fehler beim Bestätigen des Status im ioBroker: ${setStateErr.message}`);
-			}
-		});
+			// Als "any" casten, da writeRaw nicht in den Standard-Typen steht
+			this.pump.writeRaw(paramId, valueToWrite, handleWriteResult);
+		} else {
+			this.log.info(`Sende STANDARD an Luxtronik: ${definition.luxWriteId} = ${valueToWrite}`);
+
+			this.pump.write(definition.luxWriteId, valueToWrite, handleWriteResult);
+		}
 	}
 	// If you need to accept messages in your adapter, uncomment the following block and the corresponding line in the constructor.
 	// /**
