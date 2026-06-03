@@ -1,5 +1,3 @@
-// Datei: src/stateMapping.ts
-
 /**
  * Definiert die Struktur für einen ioBroker-Datenpunkt.
  * Wird genutzt, um die Luxtronik-Werte dynamisch anzulegen.
@@ -17,7 +15,7 @@ export interface StateDefinition {
 	write?: boolean;
 	/** Verzeichnis */
 	folder: string;
-	/** Die ID, die luxtronik2 zum Schreiben erwartet */
+	/** Die ID, die luxtronik2 zum Schreiben erwartet (wird automatisch ergänzt, falls leer!) */
 	luxWriteId?: string;
 	/** Optionaler Minimalwert */
 	min?: number;
@@ -36,7 +34,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 	// ==========================================
 	// EINSTELLUNGEN & PARAMETER (Beschreibbar)
 	// ==========================================
-	// --- HEIZKURVE (HAUPT-HEIZKREIS) ---
 	heating_curve_end_point: {
 		folder: "Einstellungen.Heizung",
 		name: "Heizkurve Endpunkt (Rücklauf)",
@@ -44,7 +41,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "°C",
 		write: true,
-		luxWriteId: "heating_curve_end_point",
 		min: 20,
 		max: 45,
 	},
@@ -55,7 +51,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "°C",
 		write: true,
-		luxWriteId: "heating_curve_parallel_offset",
 		min: 20,
 		max: 45,
 	},
@@ -66,7 +61,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "K",
 		write: true,
-		luxWriteId: "deltaHeatingReduction",
 		factor: 10,
 		min: -10,
 		max: 10,
@@ -78,7 +72,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "°C",
 		write: true,
-		luxWriteId: "heating_target_temperature",
+		luxWriteId: "heating_target_temperature", // Weicht ab, bleibt explizit stehen
 		min: -5,
 		max: 5,
 	},
@@ -89,12 +83,10 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "K",
 		write: true,
-		luxWriteId: "return_temperature_hysteresis",
 		factor: 1,
 		min: 1,
 		max: 5,
 	},
-	// --- Wasser ---
 	warmwater_temperature: {
 		folder: "Einstellungen.Warmwasser",
 		name: "Warmwasser Soll-Temperatur",
@@ -102,7 +94,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "°C",
 		write: true,
-		luxWriteId: "temperature_hot_water_target",
+		luxWriteId: "temperature_hot_water_target", // Weicht ab, bleibt explizit stehen
 		min: 30,
 		max: 65,
 	},
@@ -113,12 +105,10 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "K",
 		write: true,
-		luxWriteId: "hotwater_temperature_hysteresis",
 		factor: 1,
 		min: 1,
 		max: 15,
 	},
-	// --- MISCHKREIS 1 ---
 	mk1_curve_end_point: {
 		folder: "Einstellungen.Mischkreis1",
 		name: "MK1 Heizkurve Endpunkt",
@@ -126,7 +116,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "°C",
 		write: true,
-		luxWriteId: "mk1_curve_end_point",
 		factor: 1,
 		min: 20,
 		max: 50,
@@ -138,7 +127,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "°C",
 		write: true,
-		luxWriteId: "mk1_curve_parallel_offset",
 		factor: 1,
 		min: 20,
 		max: 50,
@@ -150,13 +138,10 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "K",
 		write: true,
-		luxWriteId: "deltaMk1Reduction",
 		factor: 10,
 		min: -10,
 		max: 10,
 	},
-
-	// --- MISCHKREIS 2 ---
 	mk2_curve_end_point: {
 		folder: "Einstellungen.Mischkreis2",
 		name: "MK2 Heizkurve Endpunkt",
@@ -164,7 +149,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "°C",
 		write: true,
-		luxWriteId: "mk2_curve_end_point",
 		min: 20,
 		max: 50,
 	},
@@ -175,7 +159,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "°C",
 		write: true,
-		luxWriteId: "mk2_curve_parallel_offset",
 		factor: 1,
 		min: -5,
 		max: 5,
@@ -187,13 +170,10 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "K",
 		write: true,
-		luxWriteId: "deltaMk2Reduction",
 		factor: 10,
 		min: -10,
 		max: 10,
 	},
-
-	// --- MISCHKREIS 3 ---
 	mk3_curve_end_point: {
 		folder: "Einstellungen.Mischkreis3",
 		name: "MK3 Heizkurve Endpunkt",
@@ -201,7 +181,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "°C",
 		write: true,
-		luxWriteId: "mk3_curve_end_point",
 		min: 20,
 		max: 50,
 	},
@@ -212,7 +191,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "K",
 		write: true,
-		luxWriteId: "mk3_curve_parallel_offset",
 		factor: 10,
 		min: -5,
 		max: 5,
@@ -224,20 +202,16 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "K",
 		write: true,
-		luxWriteId: "deltaMk3Reduction",
 		factor: 10,
 		min: -10,
 		max: 10,
 	},
-
-	// --- BETRIEBSARTEN ---
 	heating_operation_mode: {
 		folder: "Einstellungen.Betriebsmodus",
 		name: "Betriebsart Heizung",
 		role: "level.mode",
 		type: "number",
 		write: true,
-		luxWriteId: "heating_operation_mode",
 		states: { 0: "Automatik", 1: "Zweites WEZ", 2: "Party", 3: "Ferien", 4: "Aus" },
 	},
 	warmwater_operation_mode: {
@@ -246,7 +220,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "level.mode",
 		type: "number",
 		write: true,
-		luxWriteId: "warmwater_operation_mode",
 		states: { 0: "Automatik", 1: "Zweites WEZ", 2: "Party", 3: "Ferien", 4: "Aus" },
 	},
 	cooling_operation_mode: {
@@ -255,11 +228,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "level.mode",
 		type: "number",
 		write: true,
-		luxWriteId: "cooling_operation_mode",
 		states: { 0: "Aus", 1: "Automatik" },
 	},
-
-	// --- KÜHLUNG ---
 	cooling_release_temperature: {
 		folder: "Einstellungen.Kuehlung",
 		name: "Kühlung Freigabe-Temperatur",
@@ -278,7 +248,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "°C",
 		write: true,
-		luxWriteId: "cooling_inlet_temp",
 		min: 15,
 		max: 25,
 	},
@@ -300,7 +269,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		write: true,
 		luxWriteId: "cooling_stop",
 	},
-
 	heating_temperature_outside_2nd_compressor: {
 		folder: "Einstellungen.Verdichter",
 		name: "Freigabe 2. Verdichter (Außentemperatur)",
@@ -308,7 +276,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "°C",
 		write: true,
-		luxWriteId: "heating_temperature_outside_2nd_compressor",
 		min: -20,
 		max: 10,
 	},
@@ -319,12 +286,9 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "°C",
 		write: true,
-		luxWriteId: "hotwater_temperature_forerun_2nd_compressor",
 		min: 10,
 		max: 60,
 	},
-
-	// --- PUMPEN ---
 	heating_system_circ_pump_voltage_nominal: {
 		folder: "Einstellungen.Pumpen",
 		name: "Heizungsumwälzpumpe Nennspannung",
@@ -332,7 +296,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "V",
 		write: true,
-		luxWriteId: "heating_system_circ_pump_voltage_nominal",
 		factor: 1,
 		min: 3,
 		max: 10,
@@ -344,20 +307,16 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "V",
 		write: true,
-		luxWriteId: "heating_system_circ_pump_voltage_minimal",
 		factor: 1,
 		min: 3,
 		max: 10,
 	},
-
-	// --- ENTLÜFTUNG ---
 	runDeaerate: {
 		folder: "Einstellungen.Spezial",
 		name: "Entlüftungsprogramm starten",
 		role: "indicator",
 		type: "boolean",
 		write: true,
-		luxWriteId: "runDeaerate",
 		states: { 0: "Aus", 1: "Ein" },
 	},
 	hotWaterCircPumpDeaerate: {
@@ -367,7 +326,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		states: { 0: "Aus", 1: "Ein" },
 		write: true,
-		luxWriteId: "hotWaterCircPumpDeaerate",
 	},
 	solarPumpDeaerate: {
 		folder: "Einstellungen.Spezial",
@@ -376,9 +334,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		states: { 0: "Aus", 1: "Ein" },
 		write: true,
-		luxWriteId: "solarPumpDeaerate",
 	},
-	// --- ENTLÜFTUNG ---
 	Activate_Zip: {
 		folder: "Einstellungen.Spezial",
 		name: "Makro: ZIP Entlüftung starten",
@@ -386,12 +342,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		write: true,
 		states: { 0: "Aus", 1: "Ein" },
-		// KEINE luxWriteId, da dies ein rein virtueller Schalter im Adapter ist!
+		luxWriteId: "Activate_Zip", // Wird hier explizit gesetzt, da rein virtuell
 	},
-
-	// ==========================================
-	// EINSTELLUNGEN: SPEZIFISCHE PARAMETER-IDs
-	// ==========================================
 	thresholdHeatingLimit: {
 		folder: "Einstellungen.System-Einstellung",
 		name: "Parameter 700 (ID_Einst_Heizgrenze_Temp)",
@@ -400,7 +352,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		write: true,
 		luxWriteId: "700",
 		unit: "°C",
-		factor: 10,
 	},
 	heatingLimit: {
 		folder: "Einstellungen.System-Einstellung",
@@ -411,10 +362,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "699",
 		states: { 0: "Aus", 1: "Ein" },
 	},
-
-	// ==========================================
-	// INFORMATIONEN: TEMPERATUREN
-	// ==========================================
 	temperature_supply: {
 		folder: "Informationen.Temperaturen",
 		name: "Vorlauftemperatur",
@@ -541,10 +488,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "°C",
 	},
-
-	// ==========================================
-	// INFORMATIONEN: KÄLTEKREIS (Temperaturen & Regelung)
-	// ==========================================
 	temperature_overheating_target: {
 		folder: "Informationen.Kaeltekreis",
 		name: "Überhitzung Soll",
@@ -580,10 +523,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "°C",
 	},
-
-	// ==========================================
-	// INFORMATIONEN: DIGITALE & ANALOGE EINGÄNGE
-	// ==========================================
 	ASDin: {
 		folder: "Informationen.Eingaenge",
 		name: "Abtau-Endeschalter ASD",
@@ -694,229 +633,159 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		states: { 0: "Aus", 1: "Ein" },
 	},
-
-	// ==========================================
-	// INFORMATIONEN: AUSGÄNGE (Aaktoren / Relais)
-	// ==========================================
 	AVout: {
 		folder: "Informationen.Ausgaenge",
 		name: "Abtauventil AV",
 		role: "value",
 		type: "number",
-		states: {
-			0: "Aus",
-			1: "Ein",
-		},
+		states: { 0: "Aus", 1: "Ein" },
 	},
 	BUPout: {
 		folder: "Informationen.Ausgaenge",
 		name: "Warmwasser-Umwälzpumpe BUP",
 		role: "value",
 		type: "number",
-		states: {
-			0: "Aus",
-			1: "Ein",
-		},
+		states: { 0: "Aus", 1: "Ein" },
 	},
 	HUPout: {
 		folder: "Informationen.Ausgaenge",
 		name: "Heizungsumwälzpumpe HUP",
 		role: "value",
 		type: "number",
-		states: {
-			0: "Aus",
-			1: "Ein",
-		},
+		states: { 0: "Aus", 1: "Ein" },
 	},
 	MA1out: {
 		folder: "Informationen.Ausgaenge",
 		name: "Mischer 1 Auf MA1",
 		role: "value",
 		type: "number",
-		states: {
-			0: "Aus",
-			1: "Ein",
-		},
+		states: { 0: "Aus", 1: "Ein" },
 	},
 	MZ1out: {
 		folder: "Informationen.Ausgaenge",
 		name: "Mischer 1 Zu MZ1",
 		role: "value",
 		type: "number",
-		states: {
-			0: "Aus",
-			1: "Ein",
-		},
+		states: { 0: "Aus", 1: "Ein" },
 	},
 	VENout: {
 		folder: "Informationen.Ausgaenge",
 		name: "Ventilator VEN",
 		role: "value",
 		type: "number",
-		states: {
-			0: "Aus",
-			1: "Ein",
-		},
+		states: { 0: "Aus", 1: "Ein" },
 	},
 	VBOout: {
 		folder: "Informationen.Ausgaenge",
 		name: "Ventilausgang Brunnen VBO",
 		role: "value",
 		type: "number",
-		states: {
-			0: "Aus",
-			1: "Ein",
-		},
+		states: { 0: "Aus", 1: "Ein" },
 	},
 	VD1out: {
 		folder: "Informationen.Ausgaenge",
 		name: "Verdichter 1 VD1",
 		role: "value",
 		type: "number",
-		states: {
-			0: "Aus",
-			1: "Ein",
-		},
+		states: { 0: "Aus", 1: "Ein" },
 	},
 	VD2out: {
 		folder: "Informationen.Ausgaenge",
 		name: "Verdichter 2 VD2",
 		role: "value",
 		type: "number",
-		states: {
-			0: "Aus",
-			1: "Ein",
-		},
+		states: { 0: "Aus", 1: "Ein" },
 	},
 	ZIPout: {
 		folder: "Informationen.Ausgaenge",
 		name: "Zirkulationspumpe ZIP",
 		role: "value",
 		type: "number",
-		states: {
-			0: "Aus",
-			1: "Ein",
-		},
+		states: { 0: "Aus", 1: "Ein" },
 	},
 	ZUPout: {
 		folder: "Informationen.Ausgaenge",
 		name: "Zusatzumwälzpumpe ZUP",
 		role: "value",
 		type: "number",
-		states: {
-			0: "Aus",
-			1: "Ein",
-		},
+		states: { 0: "Aus", 1: "Ein" },
 	},
 	ZW1out: {
 		folder: "Informationen.Ausgaenge",
 		name: "Zweiter Wärmeerzeuger 1 ZW1",
 		role: "value",
 		type: "number",
-		states: {
-			0: "Aus",
-			1: "Ein",
-		},
+		states: { 0: "Aus", 1: "Ein" },
 	},
 	ZW2SSTout: {
 		folder: "Informationen.Ausgaenge",
 		name: "ZW2 / Störungsmeldung",
 		role: "value",
 		type: "number",
-		states: {
-			0: "Aus",
-			1: "Ein",
-		},
+		states: { 0: "Aus", 1: "Ein" },
 	},
 	ZW3SSTout: {
 		folder: "Informationen.Ausgaenge",
 		name: "ZW3 / Sammelstörung",
 		role: "value",
 		type: "number",
-		states: {
-			0: "Aus",
-			1: "Ein",
-		},
+		states: { 0: "Aus", 1: "Ein" },
 	},
 	FP2out: {
 		folder: "Informationen.Ausgaenge",
 		name: "Funktionspumpe 2 FP2",
 		role: "value",
 		type: "number",
-		states: {
-			0: "Aus",
-			1: "Ein",
-		},
+		states: { 0: "Aus", 1: "Ein" },
 	},
 	SLPout: {
 		folder: "Informationen.Ausgaenge",
 		name: "Solarladepumpe SLP",
 		role: "value",
 		type: "number",
-		states: {
-			0: "Aus",
-			1: "Ein",
-		},
+		states: { 0: "Aus", 1: "Ein" },
 	},
 	SUPout: {
 		folder: "Informationen.Ausgaenge",
 		name: "Zusatzpumpe SUP",
 		role: "value",
 		type: "number",
-		states: {
-			0: "Aus",
-			1: "Ein",
-		},
+		states: { 0: "Aus", 1: "Ein" },
 	},
 	MZ2out: {
 		folder: "Informationen.Ausgaenge",
 		name: "Mischer 2 Zu MZ2",
 		role: "value",
 		type: "number",
-		states: {
-			0: "Aus",
-			1: "Ein",
-		},
+		states: { 0: "Aus", 1: "Ein" },
 	},
 	MA2out: {
 		folder: "Informationen.Ausgaenge",
 		name: "Mischer 2 Auf MA2",
 		role: "value",
 		type: "number",
-		states: {
-			0: "Aus",
-			1: "Ein",
-		},
+		states: { 0: "Aus", 1: "Ein" },
 	},
 	MZ3out: {
 		folder: "Informationen.Ausgaenge",
 		name: "Mischer 3 Zu MZ3",
 		role: "value",
 		type: "number",
-		states: {
-			0: "Aus",
-			1: "Ein",
-		},
+		states: { 0: "Aus", 1: "Ein" },
 	},
 	MA3out: {
 		folder: "Informationen.Ausgaenge",
 		name: "Mischer 3 Auf MA3",
 		role: "value",
 		type: "number",
-		states: {
-			0: "Aus",
-			1: "Ein",
-		},
+		states: { 0: "Aus", 1: "Ein" },
 	},
 	FP3out: {
 		folder: "Informationen.Ausgaenge",
 		name: "Funktionspumpe 3 FP3",
 		role: "value",
 		type: "number",
-		states: {
-			0: "Aus",
-			1: "Ein",
-		},
+		states: { 0: "Aus", 1: "Ein" },
 	},
 	analogOut1: {
 		folder: "Informationen.Ausgaenge",
@@ -955,60 +824,42 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "Ventilator Zuluft VZU",
 		role: "value",
 		type: "number",
-		states: {
-			0: "Aus",
-			1: "Ein",
-		},
+		states: { 0: "Aus", 1: "Ein" },
 	},
 	Out_VAB: {
 		folder: "Informationen.Ausgaenge",
 		name: "Ventilator Abluft VAB",
 		role: "value",
 		type: "number",
-		states: {
-			0: "Aus",
-			1: "Ein",
-		},
+		states: { 0: "Aus", 1: "Ein" },
 	},
 	Out_VSK: {
 		folder: "Informationen.Ausgaenge",
 		name: "Ausgang VSK",
 		role: "value",
 		type: "number",
-		states: {
-			0: "Aus",
-			1: "Ein",
-		},
+		states: { 0: "Aus", 1: "Ein" },
 	},
 	Out_FRH: {
 		folder: "Informationen.Ausgaenge",
 		name: "Freigabe Heizung FRH",
 		role: "value",
 		type: "number",
-		states: {
-			0: "Aus",
-			1: "Ein",
-		},
+		states: { 0: "Aus", 1: "Ein" },
 	},
 	defrostValve: {
 		folder: "Informationen.Ausgaenge",
 		name: "Status Abtauventil",
 		role: "value",
 		type: "number",
-		states: {
-			0: "Aus",
-			1: "Ein",
-		},
+		states: { 0: "Aus", 1: "Ein" },
 	},
 	hotWaterBoilerValve: {
 		folder: "Informationen.Ausgaenge",
 		name: "Status Umschaltventil Warmwasser",
 		role: "value",
 		type: "number",
-		states: {
-			0: "Aus",
-			1: "Ein",
-		},
+		states: { 0: "Aus", 1: "Ein" },
 	},
 	heatingSystemCircPump: {
 		folder: "Informationen.Ausgaenge",
@@ -1021,35 +872,22 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "Motor Wärmequelle",
 		role: "value",
 		type: "number",
-		states: {
-			0: "Aus",
-			1: "Ein",
-		},
+		states: { 0: "Aus", 1: "Ein" },
 	},
 	compressor1: {
 		folder: "Informationen.Ausgaenge",
 		name: "Status Kompressor 1 Laufrückmeldung",
 		role: "value",
 		type: "number",
-		states: {
-			0: "Aus",
-			1: "Ein",
-		},
+		states: { 0: "Aus", 1: "Ein" },
 	},
 	hotWaterCircPumpExtern: {
 		folder: "Informationen.Ausgaenge",
 		name: "Warmwasser Zirkulationspumpe Extern",
 		role: "value",
 		type: "number",
-		states: {
-			0: "Aus",
-			1: "Ein",
-		},
+		states: { 0: "Aus", 1: "Ein" },
 	},
-
-	// ==========================================
-	// INFORMATIONEN: STATISTIKEN & ENERGIEZÄHLER
-	// ==========================================
 	hours_compressor1: {
 		folder: "Informationen.Statistik",
 		name: "Betriebsstunden Kompressor 1",
@@ -1177,10 +1015,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "thermalenergy_total",
 		factor: 10,
 	},
-
-	// ==========================================
-	// INFORMATIONEN: TIMER & VERZÖGERUNGEN
-	// ==========================================
 	Time_WPein_akt: {
 		folder: "Informationen.Timer",
 		name: "Aktuelle Einschaltzeit Wärmepumpe",
@@ -1272,53 +1106,13 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "s",
 	},
-	ahp_Zeit: {
-		folder: "Informationen.Timer",
-		name: "Zeit ahp-Stufe",
-		role: "value",
-		type: "number",
-		unit: "s",
-	},
-
-	// ==========================================
-	// INFORMATIONEN: SYSTEMINFO & NETZWERK
-	// ==========================================
-	typeHeatpump: {
-		folder: "Informationen.Systeminfo",
-		name: "Wärmepumpen-Typ",
-		role: "text",
-		type: "string",
-	},
-	firmware: {
-		folder: "Informationen.Systeminfo",
-		name: "Firmware-Version",
-		role: "text",
-		type: "string",
-	},
-	AdresseIP_akt: {
-		folder: "Informationen.Systeminfo",
-		name: "Aktuelle IP-Adresse",
-		role: "info.ip",
-		type: "string",
-	},
-	SubNetMask_akt: {
-		folder: "Informationen.Systeminfo",
-		name: "Subnetzmaske",
-		role: "info.ip",
-		type: "string",
-	},
-	Add_Broadcast: {
-		folder: "Informationen.Systeminfo",
-		name: "Broadcast-Adresse",
-		role: "info.ip",
-		type: "string",
-	},
-	Add_StdGateway: {
-		folder: "Informationen.Systeminfo",
-		name: "Standard-Gateway",
-		role: "info.ip",
-		type: "string",
-	},
+	ahp_Zeit: { folder: "Informationen.Timer", name: "Zeit ahp-Stufe", role: "value", type: "number", unit: "s" },
+	typeHeatpump: { folder: "Informationen.Systeminfo", name: "Wärmepumpen-Typ", role: "text", type: "string" },
+	firmware: { folder: "Informationen.Systeminfo", name: "Firmware-Version", role: "text", type: "string" },
+	AdresseIP_akt: { folder: "Informationen.Systeminfo", name: "Aktuelle IP-Adresse", role: "info.ip", type: "string" },
+	SubNetMask_akt: { folder: "Informationen.Systeminfo", name: "Subnetzmaske", role: "info.ip", type: "string" },
+	Add_Broadcast: { folder: "Informationen.Systeminfo", name: "Broadcast-Adresse", role: "info.ip", type: "string" },
+	Add_StdGateway: { folder: "Informationen.Systeminfo", name: "Standard-Gateway", role: "info.ip", type: "string" },
 	Comfort_exists: {
 		folder: "Informationen.Systeminfo",
 		name: "Comfort-Platine vorhanden",
@@ -1331,33 +1125,24 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 	},
-	LIN_exists: {
-		folder: "Informationen.Systeminfo",
-		name: "LIN-Bus vorhanden",
-		role: "indicator",
-		type: "boolean",
-	},
+	LIN_exists: { folder: "Informationen.Systeminfo", name: "LIN-Bus vorhanden", role: "indicator", type: "boolean" },
 	rawDeviceTimeCalc: {
 		folder: "Informationen.Systeminfo",
 		name: "Berechnete Gerätezeit",
 		role: "date",
 		type: "string",
 	},
-
-	// ==========================================
-	// INFORMATIONEN: STATUS & CODES
-	// ==========================================
-	status_heating: {
-		folder: "Informationen.Status",
-		name: "Status Heizbetrieb",
-		role: "indicator",
-		type: "boolean",
-	},
+	status_heating: { folder: "Informationen.Status", name: "Status Heizbetrieb", role: "indicator", type: "boolean" },
 	bivalentLevel: {
 		folder: "Informationen.Status",
 		name: "Bivalenzstufe",
 		role: "value",
 		type: "number",
+		states: {
+			1: "Ein Verdichter darf laufen",
+			2: "Zwei Verdichter dürfen laufen",
+			3: "Zusätzlicher Wärmeerzeuger darf mitlaufen",
+		},
 	},
 	WP_BZ_akt: {
 		folder: "Informationen.Status",
@@ -1402,12 +1187,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "text",
 		type: "string",
 	},
-	ahp_Stufe: {
-		folder: "Informationen.Status",
-		name: "Aktuelle ahp-Stufe",
-		role: "value",
-		type: "number",
-	},
+	ahp_Stufe: { folder: "Informationen.Status", name: "Aktuelle ahp-Stufe", role: "value", type: "number" },
 	ahp_Temp: {
 		folder: "Informationen.Status",
 		name: "Temperatur ahp-Stufe",
@@ -1420,12 +1200,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "Betriebszustand Warmwasser Code",
 		role: "value",
 		type: "number",
-	},
-	opStateHotWaterString: {
-		folder: "Informationen.Status",
-		name: "Betriebszustand Warmwasser Text",
-		role: "text",
-		type: "string",
 	},
 	opStateHeating: {
 		folder: "Informationen.Status",
@@ -1463,82 +1237,23 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 	},
-	StatusSlave_1: {
-		folder: "Informationen.Status",
-		name: "Status Slave 1",
-		role: "value",
-		type: "number",
-	},
-	StatusSlave_2: {
-		folder: "Informationen.Status",
-		name: "Status Slave 2",
-		role: "value",
-		type: "number",
-	},
-	StatusSlave_3: {
-		folder: "Informationen.Status",
-		name: "Status Slave 3",
-		role: "value",
-		type: "number",
-	},
-	StatusSlave_4: {
-		folder: "Informationen.Status",
-		name: "Status Slave 4",
-		role: "value",
-		type: "number",
-	},
-	StatusSlave_5: {
-		folder: "Informationen.Status",
-		name: "Status Slave 5",
-		role: "value",
-		type: "number",
-	},
-	SH_SW: {
-		folder: "Informationen.Status",
-		name: "Status SH_SW",
-		role: "value",
-		type: "number",
-	},
-	FreigabKuehl: {
-		folder: "Informationen.Status",
-		name: "Freigabe Kühlung",
-		role: "value",
-		type: "number",
-	},
-	SonderZeichen: {
-		folder: "Informationen.Status",
-		name: "Sonderzeichen Code",
-		role: "value",
-		type: "number",
-	},
-	SH_ZIP: {
-		folder: "Informationen.Status",
-		name: "Status SH_ZIP",
-		role: "value",
-		type: "number",
-	},
+	StatusSlave_1: { folder: "Informationen.Status", name: "Status Slave 1", role: "value", type: "number" },
+	StatusSlave_2: { folder: "Informationen.Status", name: "Status Slave 2", role: "value", type: "number" },
+	StatusSlave_3: { folder: "Informationen.Status", name: "Status Slave 3", role: "value", type: "number" },
+	StatusSlave_4: { folder: "Informationen.Status", name: "Status Slave 4", role: "value", type: "number" },
+	StatusSlave_5: { folder: "Informationen.Status", name: "Status Slave 5", role: "value", type: "number" },
+	SH_SW: { folder: "Informationen.Status", name: "Status SH_SW", role: "value", type: "number" },
+	FreigabKuehl: { folder: "Informationen.Status", name: "Freigabe Kühlung", role: "value", type: "number" },
+	SonderZeichen: { folder: "Informationen.Status", name: "Sonderzeichen Code", role: "value", type: "number" },
+	SH_ZIP: { folder: "Informationen.Status", name: "Status SH_ZIP", role: "value", type: "number" },
 	WebsrvProgrammWerteBeobarten: {
 		folder: "Informationen.Status",
 		name: "Webserver Programmwerte Beobachten",
 		role: "value",
 		type: "number",
 	},
-	Durchfluss_WQ: {
-		folder: "Informationen.Status",
-		name: "Durchfluss Wärmequelle",
-		role: "value",
-		type: "number",
-	},
-	flowRate: {
-		folder: "Informationen.Status",
-		name: "Durchflussmenge",
-		role: "value",
-		type: "number",
-	},
-
-	// ==========================================
-	// INFORMATIONEN: INTERNER LIN-BUS DETAILWERTE
-	// ==========================================
+	Durchfluss_WQ: { folder: "Informationen.Status", name: "Durchfluss Wärmequelle", role: "value", type: "number" },
+	flowRate: { folder: "Informationen.Status", name: "Durchflussmenge", role: "value", type: "number" },
 	LIN_TUE: {
 		folder: "Informationen.Status",
 		name: "LIN-Bus Verdampfer-Ansaug (TUE)",
@@ -1561,6 +1276,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value.temperature",
 		type: "number",
 		unit: "°C",
+		factor: 10,
 	},
 	LIN_UH: {
 		folder: "Informationen.Status",
@@ -1601,4 +1317,21 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "%",
 	},
+	opStateHotWaterString: {
+		folder: "Informationen.Warmwasser",
+		name: "LIN-Bus Verdampfer-Ansaug (TUE)",
+		role: "text",
+		type: "string",
+	},
 };
+
+// ==========================================
+// AUTOMATISCHER FALLBACK-SCHUTZ (Runtime Injection)
+// Schleife läuft einmalig beim Laden der Datei. Wenn 'luxWriteId' fehlt,
+// wird automatisch der Key der Map eingetragen (z.B. 'heating_curve_end_point')
+// ==========================================
+for (const key of Object.keys(STATE_MAPPING)) {
+	if (!STATE_MAPPING[key].luxWriteId) {
+		STATE_MAPPING[key].luxWriteId = key;
+	}
+}

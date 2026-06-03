@@ -253,12 +253,6 @@ class Lwd50a extends utils.Adapter {
       callback();
     }
   }
-  /**
-   * Is called if a subscribed state changes
-   *
-   * @param id - State ID
-   * @param state - State object
-   */
   async onStateChange(id, state) {
     if (!state) {
       this.log.info(`State ${id} wurde gel\xF6scht.`);
@@ -273,9 +267,7 @@ class Lwd50a extends utils.Adapter {
       this.log.warn(`Konnte keinen g\xFCltigen State-Schl\xFCssel aus der ID extrahieren: ${id}`);
       return;
     }
-    this.log.info(mappingKey);
     const definition = import_stateMapping.STATE_MAPPING[mappingKey];
-    this.log.info(`Wert ge\xE4ndert f\xFCr ${mappingKey}: ${JSON.stringify(definition)}`);
     if (!definition) {
       this.log.warn(`Kein Mapping f\xFCr ${mappingKey} gefunden.`);
       return;
@@ -332,13 +324,14 @@ class Lwd50a extends utils.Adapter {
     if (definition.factor && typeof state.val === "number") {
       valueToWrite = state.val * definition.factor;
     }
-    const isRawNumber = /^\d+$/.test(definition.luxWriteId);
+    const luxWriteId = definition.luxWriteId;
+    const isRawNumber = /^\d+$/.test(luxWriteId);
     const handleWriteResult = (err, _result) => {
       if (err) {
-        this.log.error(`Fehler beim Schreiben an Luxtronik (${definition.luxWriteId}): ${err.message}`);
+        this.log.error(`Fehler beim Schreiben an Luxtronik via [${luxWriteId}]: ${err.message}`);
         return;
       }
-      this.log.info(`Wert ${state.val} erfolgreich an W\xE4rmepumpe \xFCbertragen.`);
+      this.log.info(`Wert ${state.val} erfolgreich via [${luxWriteId}] an W\xE4rmepumpe \xFCbertragen.`);
       this.setState(id, state.val, true).then(() => {
         return new Promise((resolve) => setTimeout(resolve, 500));
       }).then(() => {
@@ -348,12 +341,12 @@ class Lwd50a extends utils.Adapter {
       });
     };
     if (isRawNumber) {
-      const paramId = parseInt(definition.luxWriteId, 10);
-      this.log.info(`Sende RAW an Luxtronik: ID ${paramId} = ${valueToWrite}`);
+      const paramId = parseInt(luxWriteId, 10);
+      this.log.info(`Sende RAW-NUMBER an Luxtronik: ID ${paramId} = ${valueToWrite}`);
       this.pump.writeRaw(paramId, valueToWrite, handleWriteResult);
     } else {
-      this.log.info(`Sende STANDARD an Luxtronik: ${definition.luxWriteId} = ${valueToWrite}`);
-      this.pump.write(definition.luxWriteId, valueToWrite, handleWriteResult);
+      this.log.info(`Sende STANDARD-STRING an Luxtronik: Name "${luxWriteId}" = ${valueToWrite}`);
+      this.pump.write(luxWriteId, valueToWrite, handleWriteResult);
     }
   }
   // If you need to accept messages in your adapter, uncomment the following block and the corresponding line in the constructor.

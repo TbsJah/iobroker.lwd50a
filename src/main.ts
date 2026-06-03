@@ -406,12 +406,6 @@ class Lwd50a extends utils.Adapter {
 		}
 	}
 
-	/**
-	 * Is called if a subscribed state changes
-	 *
-	 * @param id - State ID
-	 * @param state - State object
-	 */
 	private async onStateChange(id: string, state: ioBroker.State | null | undefined): Promise<void> {
 		if (!state) {
 			this.log.info(`State ${id} wurde gelöscht.`);
@@ -425,15 +419,13 @@ class Lwd50a extends utils.Adapter {
 		this.log.info(`Nutzerbefehl empfangen für ${id}: ${state.val}`);
 
 		const mappingKey = id.split(".").pop();
-		// 1. Sicherheits-Check: Abbrechen, wenn mappingKey undefined oder leer ist
+		// Sicherheits-Check: Abbrechen, wenn mappingKey undefined oder leer ist
 		if (!mappingKey) {
 			this.log.warn(`Konnte keinen gültigen State-Schlüssel aus der ID extrahieren: ${id}`);
-			return; // Bricht die Funktion hier ab, damit es keine Abstürze gibt
+			return;
 		}
 
-		this.log.info(mappingKey);
 		const definition = STATE_MAPPING[mappingKey];
-		this.log.info(`Wert geändert für ${mappingKey}: ${JSON.stringify(definition)}`);
 
 		// 1. Schritt: Existiert die Definition überhaupt im Mapping?
 		if (!definition) {
@@ -441,7 +433,7 @@ class Lwd50a extends utils.Adapter {
 			return;
 		}
 
-		// 2. Schritt: Virtuelle Makros abfangen (bevor luxWriteId geprüft wird!)
+		// 2. Schritt: Virtuelle Makros abfangen (bevor luxWriteId verarbeitet wird)
 		if (mappingKey === "Activate_Zip") {
 			const zipOutState = await this.getStateAsync("Informationen.Ausgaenge.ZIPout");
 			const isCurrentlyRunning = zipOutState ? zipOutState.val === 1 || zipOutState.val === true : false;
@@ -472,7 +464,6 @@ class Lwd50a extends utils.Adapter {
 				});
 			});
 
-			// Ganz wichtig: return hier stehen lassen, damit der normale Schreibcode übersprungen wird!
 			return;
 		}
 
@@ -503,25 +494,32 @@ class Lwd50a extends utils.Adapter {
 			return;
 		}
 
+		// ==========================================
+		// AB HIER STARTET DER NEUE, OPTIMIERTE SCHREIB-BLOCK
+		// ==========================================
+
 		// 1. Umrechnung: Falls ein Faktor definiert ist, den ioBroker-Wert wieder hochrechnen
 		let valueToWrite = state.val as number;
 		if (definition.factor && typeof state.val === "number") {
 			valueToWrite = state.val * definition.factor;
 		}
 
-		// 2. Prüfen, ob die luxWriteId eine reine Nummer ist (z. B. "507" oder "699")
-		const isRawNumber = /^\d+$/.test(definition.luxWriteId);
+		// 2. Die luxWriteId lokal sichern (ist durch den stateMapping-Fix garantiert belegt)
+		const luxWriteId = definition.luxWriteId;
 
-		// 3. Den gemeinsamen Callback definieren (jetzt mit explizitem Rückgabetyp "void")
+		// 3. Prüfen, ob diese ID eine reine Nummer ist (z. B. "507" oder "699")
+		const isRawNumber = /^\d+$/.test(luxWriteId);
+
+		// 4. Den gemeinsamen Callback definieren (Linter-safe mit ": void" und ohne "async")
 		const handleWriteResult = (err: any, _result: any): void => {
 			if (err) {
-				this.log.error(`Fehler beim Schreiben an Luxtronik (${definition.luxWriteId}): ${err.message}`);
+				this.log.error(`Fehler beim Schreiben an Luxtronik via [${luxWriteId}]: ${err.message}`);
 				return;
 			}
 
-			this.log.info(`Wert ${state.val} erfolgreich an Wärmepumpe übertragen.`);
+			this.log.info(`Wert ${state.val} erfolgreich via [${luxWriteId}] an Wärmepumpe übertragen.`);
 
-			// Promises sauber verketten
+			// Promises sauber verketten, um "no-misused-promises" zu verhindern
 			this.setState(id, state.val, true)
 				.then(() => {
 					return new Promise(resolve => setTimeout(resolve, 500));
@@ -534,19 +532,20 @@ class Lwd50a extends utils.Adapter {
 				});
 		};
 
-		// 4. Die magische Weiche: Je nach Typ den passenden Befehl abfeuern
+		// 5. Die magische Weiche: Je nach ID-Typ den passenden Befehl abfeuern
 		if (isRawNumber) {
-			const paramId = parseInt(definition.luxWriteId, 10);
-			this.log.info(`Sende RAW an Luxtronik: ID ${paramId} = ${valueToWrite}`);
+			const paramId = parseInt(luxWriteId, 10);
+			this.log.info(`Sende RAW-NUMBER an Luxtronik: ID ${paramId} = ${valueToWrite}`);
 
-			// Als "any" casten, da writeRaw nicht in den Standard-Typen steht
+			// Als "any" casten, damit TypeScript wegen "writeRaw" nicht meckert
 			this.pump.writeRaw(paramId, valueToWrite, handleWriteResult);
 		} else {
-			this.log.info(`Sende STANDARD an Luxtronik: ${definition.luxWriteId} = ${valueToWrite}`);
+			this.log.info(`Sende STANDARD-STRING an Luxtronik: Name "${luxWriteId}" = ${valueToWrite}`);
 
-			this.pump.write(definition.luxWriteId, valueToWrite, handleWriteResult);
+			this.pump.write(luxWriteId, valueToWrite, handleWriteResult);
 		}
 	}
+
 	// If you need to accept messages in your adapter, uncomment the following block and the corresponding line in the constructor.
 	// /**
 	//  * Some message was sent to this instance over message box. Used by email, pushover, text2speech, ...
