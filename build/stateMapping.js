@@ -329,7 +329,7 @@ const STATE_MAPPING = {
     write: true
   },
   Activate_Zip: {
-    folder: "Einstellungen.Spezial",
+    folder: "Einstellungen.Spez ial",
     name: "Makro: ZIP Entl\xFCftung starten",
     role: "value",
     type: "number",

@@ -336,7 +336,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		write: true,
 	},
 	Activate_Zip: {
-		folder: "Einstellungen.Spezial",
+		folder: "Einstellungen.Spez ial",
 		name: "Makro: ZIP Entlüftung starten",
 		role: "value",
 		type: "number",
