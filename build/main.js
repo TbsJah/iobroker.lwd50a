@@ -325,7 +325,13 @@ class Lwd50a extends utils.Adapter {
       valueToWrite = state.val * definition.factor;
     }
     const luxWriteId = definition.luxWriteId;
-    const isRawNumber = /^\d+$/.test(luxWriteId);
+    const isRawNumber = /^\d+$/.test(definition.luxWriteId || "");
+    if (isRawNumber && definition.unit === "\xB0C" && !definition.factor && typeof state.val === "number") {
+      this.log.info(
+        `Raw-Temperatur erkannt. Multipliziere Wert ${state.val} mit Faktor 10 f\xFCr Luxtronik-Platine.`
+      );
+      valueToWrite = state.val * 10;
+    }
     const handleWriteResult = (err, _result) => {
       if (err) {
         this.log.error(`Fehler beim Schreiben an Luxtronik via [${luxWriteId}]: ${err.message}`);

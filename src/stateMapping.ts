@@ -336,7 +336,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		write: true,
 	},
 	Activate_Zip: {
-		folder: "Einstellungen.Spez ial",
+		folder: "Einstellungen.Spezial",
 		name: "Makro: ZIP Entlüftung starten",
 		role: "value",
 		type: "number",
@@ -1145,10 +1145,20 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		},
 	},
 	WP_BZ_akt: {
-		folder: "Informationen.Status",
+		folder: "Informationen.Betriebszustand",
 		name: "Aktueller Betriebszustand Code",
 		role: "value",
 		type: "number",
+		states: {
+			0: "Heizbetrieb",
+			1: "Trinkwarmwasser",
+			2: "Schwimmbad",
+			3: "EVU-Sperre",
+			4: "Abtauen",
+			5: "Leerlauf",
+			6: "Externe Energiequelle",
+			7: "Kühlung",
+		},
 	},
 	heatpump_state1: {
 		folder: "Informationen.Status",
@@ -1200,18 +1210,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "Betriebszustand Warmwasser Code",
 		role: "value",
 		type: "number",
-	},
-	opStateHeating: {
-		folder: "Informationen.Status",
-		name: "Betriebszustand Heizung Code",
-		role: "value",
-		type: "number",
-	},
-	opStateHeatingString: {
-		folder: "Informationen.Status",
-		name: "Betriebszustand Heizung Text",
-		role: "text",
-		type: "string",
 	},
 	opStateMixer1: {
 		folder: "Informationen.Status",
@@ -1319,7 +1317,26 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 	},
 	opStateHotWaterString: {
 		folder: "Informationen.Warmwasser",
-		name: "LIN-Bus Verdampfer-Ansaug (TUE)",
+		name: "Status Warmwasser Text",
+		role: "text",
+		type: "string",
+	},
+	opStateHotWaterS: {
+		folder: "Informationen.Warmwasser",
+		name: "Status Warmwasser",
+		role: "value",
+		type: "number",
+	},
+	opStateHeating: {
+		folder: "Informationen.Heizung",
+		name: "Betriebszustand Heizung Code",
+		role: "value",
+		type: "number",
+		states: { 0: "Abgesenkt", 1: "Normal", 2: "Aus" },
+	},
+	opStateHeatingString: {
+		folder: "Informationen.Heizung",
+		name: "Betriebszustand Heizung Text",
 		role: "text",
 		type: "string",
 	},

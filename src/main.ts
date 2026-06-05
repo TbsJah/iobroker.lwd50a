@@ -507,8 +507,15 @@ class Lwd50a extends utils.Adapter {
 		// 2. Die luxWriteId lokal sichern (ist durch den stateMapping-Fix garantiert belegt)
 		const luxWriteId = definition.luxWriteId;
 
-		// 3. Prüfen, ob diese ID eine reine Nummer ist (z. B. "507" oder "699")
-		const isRawNumber = /^\d+$/.test(luxWriteId);
+		// --- NEU: SPEZIALSCHUTZ FÜR RAW-TEMPERATUREN (Weg B) ---
+		// Wenn wir eine rohe ID ansteuern, der Wert eine Temperatur (°C) ist und noch kein Faktor griff
+		const isRawNumber = /^\d+$/.test(definition.luxWriteId || "");
+		if (isRawNumber && definition.unit === "°C" && !definition.factor && typeof state.val === "number") {
+			this.log.info(
+				`Raw-Temperatur erkannt. Multipliziere Wert ${state.val} mit Faktor 10 für Luxtronik-Platine.`,
+			);
+			valueToWrite = state.val * 10;
+		}
 
 		// 4. Den gemeinsamen Callback definieren (Linter-safe mit ": void" und ohne "async")
 		const handleWriteResult = (err: any, _result: any): void => {
