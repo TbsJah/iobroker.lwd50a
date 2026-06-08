@@ -58,8 +58,8 @@ export async function initializeVirtualStates(adapter: any): Promise<void> {
 export async function calculateTotalHours(adapter: any): Promise<void> {
 	try {
 		// 1. Die beiden aktuellen Zustände aus dem ioBroker einlesen (über die übergebene Adapter-Instanz)
-		const heatingState = await adapter.getStateAsync("Informationen.Statistik.hours_heating");
-		const warmwaterState = await adapter.getStateAsync("Informationen.Statistik.hours_warmwater");
+		const heatingState = await adapter.getStateAsync("Informationen.Betriebsstunden.hours_heating");
+		const warmwaterState = await adapter.getStateAsync("Informationen.Betriebsstunden.hours_warmwater");
 
 		// 2. Werte prüfen und falls vorhanden als Zahl sichern (sonst Fallback auf 0)
 		const hoursHeating = heatingState && typeof heatingState.val === "number" ? heatingState.val : 0;
@@ -69,7 +69,7 @@ export async function calculateTotalHours(adapter: any): Promise<void> {
 		const totalHours = hoursHeating + hoursWarmwater;
 
 		// 4. Den virtuellen Datenpunkt mit Bestätigung (ack: true) beschreiben
-		await adapter.setStateAsync("Informationen.Statistik.hours_total_calculated", totalHours, true);
+		await adapter.setStateAsync("Informationen.Betriebsstunden.Betriebsstunden_Gesamt", totalHours, true);
 
 		adapter.log.debug(
 			`[Virtual DP] Gesamtstunden aktualisiert: ${totalHours}h (${hoursHeating}h Heizung + ${hoursWarmwater}h WW)`,

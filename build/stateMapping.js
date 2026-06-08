@@ -1334,8 +1334,8 @@ const STATE_MAPPING = {
     type: "number",
     unit: "h"
   },
-  hours_total_calculated: {
-    folder: "Informationen.Statistik",
+  Betriebsstunden_Gesamt: {
+    folder: "Informationen.Betriebsstunden",
     name: "Betriebsstunden Gesamt (Berechnet: Heizung + WW)",
     role: "value",
     type: "number",

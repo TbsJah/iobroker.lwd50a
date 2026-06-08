@@ -59,12 +59,12 @@ async function initializeVirtualStates(adapter) {
 }
 async function calculateTotalHours(adapter) {
   try {
-    const heatingState = await adapter.getStateAsync("Informationen.Statistik.hours_heating");
-    const warmwaterState = await adapter.getStateAsync("Informationen.Statistik.hours_warmwater");
+    const heatingState = await adapter.getStateAsync("Informationen.Betriebsstunden.hours_heating");
+    const warmwaterState = await adapter.getStateAsync("Informationen.Betriebsstunden.hours_warmwater");
     const hoursHeating = heatingState && typeof heatingState.val === "number" ? heatingState.val : 0;
     const hoursWarmwater = warmwaterState && typeof warmwaterState.val === "number" ? warmwaterState.val : 0;
     const totalHours = hoursHeating + hoursWarmwater;
-    await adapter.setStateAsync("Informationen.Statistik.hours_total_calculated", totalHours, true);
+    await adapter.setStateAsync("Informationen.Betriebsstunden.Betriebsstunden_Gesamt", totalHours, true);
     adapter.log.debug(
       `[Virtual DP] Gesamtstunden aktualisiert: ${totalHours}h (${hoursHeating}h Heizung + ${hoursWarmwater}h WW)`
     );
