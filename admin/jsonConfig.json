@@ -23,6 +23,32 @@
 				}
 			}
 		},
+		"tabDefaultValues": {
+			"type": "panel",
+			"label": "Vorgabewerte",
+			"items": {
+				"fusspunkt": {
+					"type": "number",
+					"label": "Fusspunkt Heizkurve (°C)",
+					"default": 21.7
+				},
+				"endpunkt": {
+					"type": "number",
+					"label": "Endpunkt Heizkurve (°C)",
+					"default": 23
+				},
+				"zip_aktiv": {
+					"type": "number",
+					"label": "Dauer ZIP aktiv (Sekunden)",
+					"default": 30
+				},
+				"zip_aktiv_ww": {
+					"type": "number",
+					"label": "Dauer ZIP aktiv bei WW (Sekunden)",
+					"default": 300
+				}
+			}
+		},
 		"tabParameters": {
 			"type": "panel",
 			"label": "Einstellungen / Parameter",

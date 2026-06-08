@@ -15,15 +15,17 @@ export interface StateDefinition {
 	write?: boolean;
 	/** Verzeichnis */
 	folder: string;
-	/** Die ID, die luxtronik2 zum Schreiben erwartet (wird automatisch ergänzt, falls leer!) */
+	/** Die ID, die luxtronik2 zum Schreiben erwartet */
 	luxWriteId?: string;
+	/** NEU: Kennzeichnung für rein virtuelle/berechnete Datenpunkte */
+	isVirtual?: boolean;
 	/** Optionaler Minimalwert */
 	min?: number;
 	/** Optionaler Maximalwert */
 	max?: number;
-	/** Optionaler Umrechnungsfaktor (Wert wird im Hauptskript hierdurch geteilt) */
+	/** Optionaler Umrechnungsfaktor */
 	factor?: number;
-	/** Optionales Mapping für numerische Werte zu Texten (z.B. für Dropdowns) */
+	/** Optionales Mapping für numerische Werte zu Texten */
 	states?: Record<number, string>;
 }
 
@@ -342,7 +344,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		write: true,
 		states: { 0: "Aus", 1: "Ein" },
-		luxWriteId: "Activate_Zip", // Wird hier explizit gesetzt, da rein virtuell
+		luxWriteId: "Activate_Zip",
+		isVirtual: true,
 	},
 	thresholdHeatingLimit: {
 		folder: "Einstellungen.System-Einstellung",
@@ -1346,7 +1349,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		unit: "h",
-		write: false, // Reiner Lesewert, da virtuell berechnet
+		write: false,
+		isVirtual: true,
 	},
 };
 

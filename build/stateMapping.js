@@ -335,8 +335,8 @@ const STATE_MAPPING = {
     type: "number",
     write: true,
     states: { 0: "Aus", 1: "Ein" },
-    luxWriteId: "Activate_Zip"
-    // Wird hier explizit gesetzt, da rein virtuell
+    luxWriteId: "Activate_Zip",
+    isVirtual: true
   },
   thresholdHeatingLimit: {
     folder: "Einstellungen.System-Einstellung",
@@ -1340,8 +1340,8 @@ const STATE_MAPPING = {
     role: "value",
     type: "number",
     unit: "h",
-    write: false
-    // Reiner Lesewert, da virtuell berechnet
+    write: false,
+    isVirtual: true
   }
 };
 for (const key of Object.keys(STATE_MAPPING)) {

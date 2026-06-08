@@ -48,25 +48,7 @@ class Lwd50a extends utils.Adapter {
     this.log.info(`Verbinde mit W\xE4rmepumpe auf ${ip}:${port}...`);
     this.pump = new luxtronik.createConnection(ip, port);
     this.updateData();
-    const zipDef = import_stateMapping.STATE_MAPPING.Activate_Zip;
-    if (zipDef) {
-      await this.setObjectNotExistsAsync(`${zipDef.folder}.Activate_Zip`, {
-        type: "state",
-        common: {
-          name: zipDef.name,
-          type: zipDef.type,
-          role: zipDef.role,
-          read: true,
-          write: true,
-          def: 0,
-          // Standardwert auf AUS
-          states: zipDef.states
-        },
-        native: {}
-      });
-      await this.setState(`${zipDef.folder}.Activate_Zip`, { val: 0, ack: true });
-      await this.subscribeStatesAsync(`${zipDef.folder}.Activate_Zip`);
-    }
+    await (0, import_virtualStates.initializeVirtualStates)(this);
     let intervalSeconds = this.config.interval || 30;
     if (intervalSeconds < 10) {
       intervalSeconds = 10;

@@ -18,9 +18,45 @@ var __copyProps = (to, from, except, desc) => {
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 var virtualStates_exports = {};
 __export(virtualStates_exports, {
-  calculateTotalHours: () => calculateTotalHours
+  calculateTotalHours: () => calculateTotalHours,
+  initializeVirtualStates: () => initializeVirtualStates
 });
 module.exports = __toCommonJS(virtualStates_exports);
+var import_stateMapping = require("./stateMapping");
+async function initializeVirtualStates(adapter) {
+  try {
+    for (const [key, definition] of Object.entries(import_stateMapping.STATE_MAPPING)) {
+      if (definition.isVirtual) {
+        const fullId = `${definition.folder}.${key}`;
+        adapter.log.info(`[Virtual DP] Erstelle/Pr\xFCfe virtuellen Datenpunkt: ${fullId}`);
+        await adapter.setObjectNotExistsAsync(fullId, {
+          type: "state",
+          common: {
+            name: definition.name,
+            type: definition.type,
+            role: definition.role,
+            unit: definition.unit,
+            read: true,
+            write: !!definition.write,
+            states: definition.states
+          },
+          native: {}
+        });
+        const currentState = await adapter.getStateAsync(fullId);
+        if (!currentState) {
+          const defaultVal = definition.type === "number" ? 0 : definition.type === "boolean" ? false : "";
+          await adapter.setStateAsync(fullId, { val: defaultVal, ack: true });
+        }
+        if (definition.write) {
+          await adapter.subscribeStatesAsync(fullId);
+          adapter.log.info(`[Virtual DP] Schreib-Kanal abonniert f\xFCr: ${fullId}`);
+        }
+      }
+    }
+  } catch (err) {
+    adapter.log.error(`Fehler bei der automatischen Initialisierung der virtuellen Datenpunkte: ${err.message}`);
+  }
+}
 async function calculateTotalHours(adapter) {
   try {
     const heatingState = await adapter.getStateAsync("Informationen.Statistik.hours_heating");
@@ -38,6 +74,7 @@ async function calculateTotalHours(adapter) {
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  calculateTotalHours
+  calculateTotalHours,
+  initializeVirtualStates
 });
 //# sourceMappingURL=virtualStates.js.map

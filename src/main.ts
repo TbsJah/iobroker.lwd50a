@@ -9,7 +9,7 @@ import * as luxtronik from "luxtronik2";
 import * as net from "net";
 // Importiere dein neues Mapping-Objekt
 import { STATE_MAPPING } from "./stateMapping";
-import { calculateTotalHours } from "./virtualStates";
+import { calculateTotalHours, initializeVirtualStates } from "./virtualStates";
 
 class Lwd50a extends utils.Adapter {
 	private pollingInterval?: NodeJS.Timeout;
@@ -45,27 +45,7 @@ class Lwd50a extends utils.Adapter {
 		// Erste Abfrage sofort starten
 		this.updateData();
 
-		// --- VIRTUELLE DATENPUNKTE ANLEGEN ---
-		const zipDef = STATE_MAPPING.Activate_Zip;
-		if (zipDef) {
-			await this.setObjectNotExistsAsync(`${zipDef.folder}.Activate_Zip`, {
-				type: "state",
-				common: {
-					name: zipDef.name,
-					type: zipDef.type,
-					role: zipDef.role,
-					read: true,
-					write: true,
-					def: 0, // Standardwert auf AUS
-					states: zipDef.states,
-				},
-				native: {},
-			});
-			// Optional: Den Status direkt beim Start initial auf 0 (Aus) setzen,
-			// damit er nicht unbestätigt (null) bleibt.
-			await this.setState(`${zipDef.folder}.Activate_Zip`, { val: 0, ack: true });
-			await this.subscribeStatesAsync(`${zipDef.folder}.Activate_Zip`);
-		}
+		await initializeVirtualStates(this);
 
 		// Hole das Intervall aus der Konfiguration (Standard: 30 Sekunden)
 		// WICHTIG: setInterval benötigt Millisekunden, daher * 1000
