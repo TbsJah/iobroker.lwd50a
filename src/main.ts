@@ -9,6 +9,7 @@ import * as luxtronik from "luxtronik2";
 import * as net from "net";
 // Importiere dein neues Mapping-Objekt
 import { STATE_MAPPING } from "./stateMapping";
+import { calculateTotalHours } from "./virtualStates";
 
 class Lwd50a extends utils.Adapter {
 	private pollingInterval?: NodeJS.Timeout;
@@ -66,27 +67,6 @@ class Lwd50a extends utils.Adapter {
 			await this.subscribeStatesAsync(`${zipDef.folder}.Activate_Zip`);
 		}
 
-		// const paramId = 700;
-		// this.log.info(`Sende RAW an Luxtronik via Bibliothek: ID ${paramId} = ${15}`);
-
-		// // WICHTIG: Da writeRaw in den offiziellen TypeScript-Typen (types.d.ts) der
-		// // Bibliothek wahrscheinlich nicht dokumentiert ist, tricksen wir TypeScript
-		// // mit "as any" kurz aus, damit es keine rote Fehlerlinie wirft!
-		// this.pump.writeRaw(paramId, 15, (err: any, data: any) => {
-		// 	if (err) {
-		// 		this.log.error(`Raw-Write fehlgeschlagen für ID ${paramId}: ${err.message}`);
-		// 		return;
-		// 	}
-
-		// 	this.log.info(`Raw-Write erfolgreich auf ${15} gesetzt! Pumpe antwortet: ${JSON.stringify(data)}`);
-		// 	try {
-		// 		// 3. Werte neu abfragen
-		// 		this.updateData();
-		// 	} catch (setStateErr: any) {
-		// 		this.log.error(`Fehler beim Bestätigen des Status im ioBroker: ${setStateErr.message}`);
-		// 	}
-		// });
-
 		// Hole das Intervall aus der Konfiguration (Standard: 30 Sekunden)
 		// WICHTIG: setInterval benötigt Millisekunden, daher * 1000
 		let intervalSeconds = this.config.interval || 30;
@@ -106,69 +86,6 @@ class Lwd50a extends utils.Adapter {
 			// Hier rufst du einfach deine bestehende Auslese-Funktion auf
 			this.updateData();
 		}, intervalSeconds * 1000);
-
-		// --- TEST: ALLE WERTE MIT BOUNIS TITELN INS LOG AUSGEBEN ---
-		// setTimeout(async () => {
-		// 	try {
-		// 		// ==========================================
-		// 		// 1. UNSER WÖRTERBUCH (Korrigierte Zuordnung)
-		// 		// ==========================================
-
-		// 		// 3004 = MESSWERTE (Calculated - Read Only)
-		// 		const TITLES_3004: Record<number, string> = {
-		// 			10: "Temperatur Vorlauf",
-		// 			11: "Temperatur Rücklauf",
-		// 			12: "Temperatur Rücklauf Soll",
-		// 			13: "Temperatur Heissgas",
-		// 			14: "Temperatur Aussen",
-		// 			15: "Temperatur Brauchwasser Ist",
-		// 			16: "Temperatur Brauchwasser Soll",
-		// 			17: "Temperatur Wärmequelle Ein",
-		// 			18: "Temperatur Wärmequelle Aus",
-		// 		};
-
-		// 		// 3003 = PARAMETER (Settings - Lese- und Schreibbar)
-		// 		const TITLES_3003: Record<number, string> = {
-		// 			1: "Heizkurve Abstand",
-		// 			2: "Heizkurve Endpunkt",
-		// 			3: "Heizkurve Parallelverschiebung",
-		// 			4: "Heizkurve Nachtabsenkung",
-		// 			207: "Dein gesuchter Wert (207)",
-		// 			699: "Pumpenoptimierung",
-		// 		};
-
-		// 		// ==========================================
-		// 		// 2. DAS AUSLESEN UND ÜBERSETZEN
-		// 		// ==========================================
-
-		// 		// Ändere dies auf 3003 (Parameter) oder 3004 (Messwerte)
-		// 		const COMMAND = 3003;
-		// 		const DICTIONARY = COMMAND === 3003 ? TITLES_3003 : TITLES_3004;
-
-		// 		this.log.info(`Lade komplette Liste für Befehl ${COMMAND}...`);
-		// 		const allValues = await this.readAllRaw(COMMAND);
-
-		// 		this.log.info(`✅ ERFOLG! Liste ${COMMAND} hat ${allValues.length} Werte geliefert. Starte Ausgabe...`);
-
-		// 		let foundValues = 0;
-		// 		for (let i = 0; i < allValues.length; i++) {
-		// 			const val = allValues[i];
-
-		// 			if (val !== 0 || DICTIONARY[i] !== undefined) {
-		// 				const title = DICTIONARY[i] ? DICTIONARY[i] : "Unbekannt";
-		// 				const marker = DICTIONARY[i] ? "⭐" : "  ";
-
-		// 				this.log.info(
-		// 					`${marker} [Index ${i.toString().padStart(3, " ")}] ${title.padEnd(35, " ")} = ${val}`,
-		// 				);
-		// 				foundValues++;
-		// 			}
-		// 		}
-		// 		this.log.info(`Smart Log beendet: ${foundValues} relevante Werte gefunden.`);
-		// 	} catch (error: any) {
-		// 		this.log.error(`Listen-Abfrage fehlgeschlagen: ${error.message}`);
-		// 	}
-		// }, 8000);
 	}
 
 	/**
@@ -376,6 +293,7 @@ class Lwd50a extends utils.Adapter {
 					`Fehler beim Schreiben der Objekte in die ioBroker-Datenbank: ${(catchErr as Error).message}`,
 				);
 			}
+			await calculateTotalHours(this);
 		});
 	}
 
@@ -569,6 +487,33 @@ class Lwd50a extends utils.Adapter {
 	// 		}
 	// 	}
 	// }
+	/**
+	 * Berechnet die Gesamt-Betriebsstunden aus Heizung und Warmwasser
+	 * und schreibt das Ergebnis in den virtuellen Datenpunkt.
+	 */
+	private async calculateTotalHours(): Promise<void> {
+		try {
+			// 1. Die beiden aktuellen Zustände aus dem ioBroker einlesen
+			const heatingState = await this.getStateAsync("Informationen.Statistik.hours_heating");
+			const warmwaterState = await this.getStateAsync("Informationen.Statistik.hours_warmwater");
+
+			// 2. Werte prüfen und falls vorhanden als Zahl sichern (sonst Fallback auf 0)
+			const hoursHeating = heatingState && typeof heatingState.val === "number" ? heatingState.val : 0;
+			const hoursWarmwater = warmwaterState && typeof warmwaterState.val === "number" ? warmwaterState.val : 0;
+
+			// 3. Die magische Summe bilden
+			const totalHours = hoursHeating + hoursWarmwater;
+
+			// 4. Den virtuellen Datenpunkt mit Bestätigung (ack: true) beschreiben
+			await this.setStateAsync("Informationen.Statistik.hours_total_calculated", totalHours, true);
+
+			this.log.debug(
+				`[Virtual DP] Gesamtstunden aktualisiert: ${totalHours}h (${hoursHeating}h Heizung + ${hoursWarmwater}h WW)`,
+			);
+		} catch (err: any) {
+			this.log.error(`Fehler bei der Berechnung der Gesamt-Betriebsstunden: ${err.message}`);
+		}
+	}
 }
 if (require.main !== module) {
 	// Export the constructor in compact mode

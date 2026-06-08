@@ -882,95 +882,6 @@ const STATE_MAPPING = {
     type: "number",
     states: { 0: "Aus", 1: "Ein" }
   },
-  hours_compressor1: {
-    folder: "Informationen.Statistik",
-    name: "Betriebsstunden Kompressor 1",
-    role: "value",
-    type: "number",
-    unit: "h"
-  },
-  starts_compressor1: {
-    folder: "Informationen.Statistik",
-    name: "Schaltspiele Kompressor 1",
-    role: "value",
-    type: "number"
-  },
-  hours_compressor2: {
-    folder: "Informationen.Statistik",
-    name: "Betriebsstunden Kompressor 2",
-    role: "value",
-    type: "number",
-    unit: "h"
-  },
-  starts_compressor2: {
-    folder: "Informationen.Statistik",
-    name: "Schaltspiele Kompressor 2",
-    role: "value",
-    type: "number"
-  },
-  hours_2nd_heat_source1: {
-    folder: "Informationen.Statistik",
-    name: "Betriebsstunden Zweiter W\xE4rmeerzeuger 1 (Heizstab)",
-    role: "value",
-    type: "number",
-    unit: "h"
-  },
-  hours_2nd_heat_source2: {
-    folder: "Informationen.Statistik",
-    name: "Betriebsstunden Zweiter W\xE4rmeerzeuger 2",
-    role: "value",
-    type: "number",
-    unit: "h"
-  },
-  hours_2nd_heat_source3: {
-    folder: "Informationen.Statistik",
-    name: "Betriebsstunden Zweiter W\xE4rmeerzeuger 3",
-    role: "value",
-    type: "number",
-    unit: "h"
-  },
-  hours_heatpump: {
-    folder: "Informationen.Statistik",
-    name: "Betriebsstunden W\xE4rmepumpe Gesamt",
-    role: "value",
-    type: "number",
-    unit: "h"
-  },
-  hours_heating: {
-    folder: "Informationen.Statistik",
-    name: "Betriebsstunden Heizbetrieb",
-    role: "value",
-    type: "number",
-    unit: "h"
-  },
-  hours_warmwater: {
-    folder: "Informationen.Statistik",
-    name: "Betriebsstunden Warmwassererzeugung",
-    role: "value",
-    type: "number",
-    unit: "h"
-  },
-  hours_cooling: {
-    folder: "Informationen.Statistik",
-    name: "Betriebsstunden K\xFChlbetrieb",
-    role: "value",
-    type: "number",
-    unit: "h"
-  },
-  hours_solar: {
-    folder: "Informationen.Statistik",
-    name: "Betriebsstunden Solaranlage",
-    role: "value",
-    type: "number",
-    unit: "h"
-  },
-  Zaehler_BetrZeitSW: {
-    folder: "Informationen.Statistik",
-    name: "Betriebsstundenz\xE4hler SW",
-    role: "value",
-    type: "number",
-    unit: "h"
-  },
   thermalenergy_heating: {
     folder: "Informationen.Statistik",
     name: "W\xE4rmemenge Heizung Erzeugt",
@@ -1333,6 +1244,104 @@ const STATE_MAPPING = {
     name: "Betriebszustand Heizung Text",
     role: "text",
     type: "string"
+  },
+  hours_compressor1: {
+    folder: "Informationen.Betriebsstunden",
+    name: "Betriebsstunden Kompressor 1",
+    role: "value",
+    type: "number",
+    unit: "h"
+  },
+  starts_compressor1: {
+    folder: "Informationen.Betriebsstunden",
+    name: "Schaltspiele Kompressor 1",
+    role: "value",
+    type: "number"
+  },
+  hours_compressor2: {
+    folder: "Informationen.Betriebsstunden",
+    name: "Betriebsstunden Kompressor 2",
+    role: "value",
+    type: "number",
+    unit: "h"
+  },
+  starts_compressor2: {
+    folder: "Informationen.Betriebsstunden",
+    name: "Schaltspiele Kompressor 2",
+    role: "value",
+    type: "number"
+  },
+  hours_2nd_heat_source1: {
+    folder: "Informationen.Betriebsstunden",
+    name: "Betriebsstunden Zweiter W\xE4rmeerzeuger 1 (Heizstab)",
+    role: "value",
+    type: "number",
+    unit: "h"
+  },
+  hours_2nd_heat_source2: {
+    folder: "Informationen.Betriebsstunden",
+    name: "Betriebsstunden Zweiter W\xE4rmeerzeuger 2",
+    role: "value",
+    type: "number",
+    unit: "h"
+  },
+  hours_2nd_heat_source3: {
+    folder: "Informationen.Betriebsstunden",
+    name: "Betriebsstunden Zweiter W\xE4rmeerzeuger 3",
+    role: "value",
+    type: "number",
+    unit: "h"
+  },
+  hours_heatpump: {
+    folder: "Informationen.Betriebsstunden",
+    name: "Betriebsstunden W\xE4rmepumpe Gesamt",
+    role: "value",
+    type: "number",
+    unit: "h"
+  },
+  hours_heating: {
+    folder: "Informationen.Betriebsstunden",
+    name: "Betriebsstunden Heizbetrieb",
+    role: "value",
+    type: "number",
+    unit: "h"
+  },
+  hours_warmwater: {
+    folder: "Informationen.Betriebsstunden",
+    name: "Betriebsstunden Warmwassererzeugung",
+    role: "value",
+    type: "number",
+    unit: "h"
+  },
+  hours_cooling: {
+    folder: "Informationen.Betriebsstunden",
+    name: "Betriebsstunden K\xFChlbetrieb",
+    role: "value",
+    type: "number",
+    unit: "h"
+  },
+  hours_solar: {
+    folder: "Informationen.Betriebsstunden",
+    name: "Betriebsstunden Solaranlage",
+    role: "value",
+    type: "number",
+    unit: "h"
+  },
+  Zaehler_BetrZeitSW: {
+    folder: "Informationen.Betriebsstunden",
+    name: "Betriebsstundenz\xE4hler SW",
+    role: "value",
+    type: "number",
+    unit: "h"
+  },
+  hours_total_calculated: {
+    folder: "Informationen.Statistik",
+    name: "Betriebsstunden Gesamt (Berechnet: Heizung + WW)",
+    role: "value",
+    type: "number",
+    unit: "h",
+    write: false
+    // Reiner Lesewert, da virtuell berechnet
   }
 };
 for (const key of Object.keys(STATE_MAPPING)) {

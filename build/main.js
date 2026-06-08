@@ -25,6 +25,7 @@ var utils = __toESM(require("@iobroker/adapter-core"));
 var luxtronik = __toESM(require("luxtronik2"));
 var net = __toESM(require("net"));
 var import_stateMapping = require("./stateMapping");
+var import_virtualStates = require("./virtualStates");
 class Lwd50a extends utils.Adapter {
   pollingInterval;
   pump;
@@ -229,6 +230,7 @@ class Lwd50a extends utils.Adapter {
           `Fehler beim Schreiben der Objekte in die ioBroker-Datenbank: ${catchErr.message}`
         );
       }
+      await (0, import_virtualStates.calculateTotalHours)(this);
     });
   }
   /**
@@ -371,6 +373,25 @@ class Lwd50a extends utils.Adapter {
   // 		}
   // 	}
   // }
+  /**
+   * Berechnet die Gesamt-Betriebsstunden aus Heizung und Warmwasser
+   * und schreibt das Ergebnis in den virtuellen Datenpunkt.
+   */
+  async calculateTotalHours() {
+    try {
+      const heatingState = await this.getStateAsync("Informationen.Statistik.hours_heating");
+      const warmwaterState = await this.getStateAsync("Informationen.Statistik.hours_warmwater");
+      const hoursHeating = heatingState && typeof heatingState.val === "number" ? heatingState.val : 0;
+      const hoursWarmwater = warmwaterState && typeof warmwaterState.val === "number" ? warmwaterState.val : 0;
+      const totalHours = hoursHeating + hoursWarmwater;
+      await this.setStateAsync("Informationen.Statistik.hours_total_calculated", totalHours, true);
+      this.log.debug(
+        `[Virtual DP] Gesamtstunden aktualisiert: ${totalHours}h (${hoursHeating}h Heizung + ${hoursWarmwater}h WW)`
+      );
+    } catch (err) {
+      this.log.error(`Fehler bei der Berechnung der Gesamt-Betriebsstunden: ${err.message}`);
+    }
+  }
 }
 if (require.main !== module) {
   module.exports = (options) => new Lwd50a(options);
