@@ -204,111 +204,111 @@ const STATE_MAPPING = {
   },
   // Ausgänge
   AVout: {
-    folder: "Informationen.Ausgaenge",
+    folder: "Informationen.03_Ausgaenge",
     name: "Abtauventil AV",
     role: "value",
     type: "number",
     states: { 0: "Aus", 1: "Ein" }
   },
   BUPout: {
-    folder: "Informationen.Ausgaenge",
+    folder: "Informationen.03_Ausgaenge",
     name: "Warmwasser-Umw\xE4lzpumpe BUP",
     role: "value",
     type: "number",
     states: { 0: "Aus", 1: "Ein" }
   },
   HUPout: {
-    folder: "Informationen.Ausgaenge",
+    folder: "Informationen.03_Ausgaenge",
     name: "Heizungsumw\xE4lzpumpe HUP",
     role: "value",
     type: "number",
     states: { 0: "Aus", 1: "Ein" }
   },
   VENout: {
-    folder: "Informationen.Ausgaenge",
+    folder: "Informationen.03_Ausgaenge",
     name: "Ventilator VEN",
     role: "value",
     type: "number",
     states: { 0: "Aus", 1: "Ein" }
   },
   VD1out: {
-    folder: "Informationen.Ausgaenge",
+    folder: "Informationen.03_Ausgaenge",
     name: "Verdichter 1 VD1",
     role: "value",
     type: "number",
     states: { 0: "Aus", 1: "Ein" }
   },
   ZIPout: {
-    folder: "Informationen.Ausgaenge",
+    folder: "Informationen.03_Ausgaenge",
     name: "Zirkulationspumpe ZIP",
     role: "value",
     type: "number",
     states: { 0: "Aus", 1: "Ein" }
   },
   ZUPout: {
-    folder: "Informationen.Ausgaenge",
+    folder: "Informationen.03_Ausgaenge",
     name: "Zusatzumw\xE4lzpumpe ZUP",
     role: "value",
     type: "number",
     states: { 0: "Aus", 1: "Ein" }
   },
   ZW1out: {
-    folder: "Informationen.Ausgaenge",
+    folder: "Informationen.03_Ausgaenge",
     name: "Zweiter W\xE4rmeerzeuger 1 ZW1",
     role: "value",
     type: "number",
     states: { 0: "Aus", 1: "Ein" }
   },
   analogOut1: {
-    folder: "Informationen.Ausgaenge",
+    folder: "Informationen.03_Ausgaenge",
     name: "Analoger Ausgang 1",
     role: "value",
     type: "number",
     unit: "V"
   },
   analogOut2: {
-    folder: "Informationen.Ausgaenge",
+    folder: "Informationen.03_Ausgaenge",
     name: "Analoger Ausgang 2",
     role: "value",
     type: "number",
     unit: "V"
   },
   defrostValve: {
-    folder: "Informationen.Ausgaenge",
+    folder: "Informationen.03_Ausgaenge",
     name: "Status Abtauventil",
     role: "value",
     type: "number",
     states: { 0: "Aus", 1: "Ein" }
   },
   hotWaterBoilerValve: {
-    folder: "Informationen.Ausgaenge",
+    folder: "Informationen.03_Ausgaenge",
     name: "Status Umschaltventil Warmwasser",
     role: "value",
     type: "number",
     states: { 0: "Aus", 1: "Ein" }
   },
   heatingSystemCircPump: {
-    folder: "Informationen.Ausgaenge",
+    folder: "Informationen.03_Ausgaenge",
     name: "Heizungssystem Zirkulationspumpe Laufindikator",
     role: "indicator",
     type: "boolean"
   },
   heatSourceMotor: {
-    folder: "Informationen.Ausgaenge",
+    folder: "Informationen.03_Ausgaenge",
     name: "Motor W\xE4rmequelle",
     role: "value",
     type: "number",
     states: { 0: "Aus", 1: "Ein" }
   },
   compressor1: {
-    folder: "Informationen.Ausgaenge",
+    folder: "Informationen.03_Ausgaenge",
     name: "Status Kompressor 1 Laufr\xFCckmeldung",
     role: "value",
     type: "number",
     states: { 0: "Aus", 1: "Ein" }
   },
   hotWaterCircPumpExtern: {
-    folder: "Informationen.Ausgaenge",
+    folder: "Informationen.03_Ausgaenge",
     name: "Warmwasser Zirkulationspumpe Extern",
     role: "value",
     type: "number",
@@ -316,74 +316,116 @@ const STATE_MAPPING = {
   },
   //Zeiten
   Time_WPein_akt: {
-    folder: "Informationen.03_Timer",
+    folder: "Informationen.04_Timer",
     name: "Aktuelle Einschaltzeit W\xE4rmepumpe",
     role: "value",
     type: "number",
     unit: "s"
   },
   Time_ZWE1_akt: {
-    folder: "Informationen.03_Timer",
+    folder: "Informationen.04_Timer",
     name: "Aktuelle Laufzeit ZWE1",
     role: "value",
     type: "number",
     unit: "s"
   },
   Timer_EinschVerz: {
-    folder: "Informationen.03_Timer",
+    folder: "Informationen.04_Timer",
     name: "Einschaltverz\xF6gerung Restzeit",
     role: "value",
     type: "number",
     unit: "s"
   },
   Time_SSPAUS_akt: {
-    folder: "Informationen.03_Timer",
+    folder: "Informationen.04_Timer",
     name: "Aktuelle Sperrzeit AUS",
     role: "value",
     type: "number",
     unit: "s"
   },
   Time_SSPEIN_akt: {
-    folder: "Informationen.03_Timer",
+    folder: "Informationen.04_Timer",
     name: "Aktuelle Sperrzeit EIN",
     role: "value",
     type: "number",
     unit: "s"
   },
   Time_VDStd_akt: {
-    folder: "Informationen.03_Timer",
+    folder: "Informationen.04_Timer",
     name: "Aktuelle Standzeit Verdichter",
     role: "value",
     type: "number",
     unit: "s"
   },
   Time_HRM_akt: {
-    folder: "Informationen.03_Timer",
+    folder: "Informationen.04_Timer",
     name: "Aktuelle Zeit HRM",
     role: "value",
     type: "number",
     unit: "s"
   },
   Time_HRW_akt: {
-    folder: "Informationen.03_Timer",
+    folder: "Informationen.04_Timer",
     name: "Aktuelle Zeit HRW",
     role: "value",
     type: "number",
     unit: "s"
   },
   Time_Heissgas: {
-    folder: "Informationen.03_Timer",
+    folder: "Informationen.04_Timer",
     name: "Zeit Hei\xDFgas\xFCberwachung",
     role: "value",
     type: "number",
     unit: "s"
   },
   ahp_Zeit: {
-    folder: "Informationen.03_Timer",
+    folder: "Informationen.04_Timer",
     name: "Zeit ahp-Stufe",
     role: "value",
     type: "number",
     unit: "s"
+  },
+  //Betriebsstunden
+  hours_compressor1: {
+    folder: "Informationen.05_Betriebsstunden",
+    name: "Betriebsstunden Kompressor 1",
+    role: "value",
+    type: "number",
+    unit: "h"
+  },
+  starts_compressor1: {
+    folder: "Informationen.05_Betriebsstunden",
+    name: "Schaltspiele Kompressor 1",
+    role: "value",
+    type: "number"
+  },
+  hours_2nd_heat_source1: {
+    folder: "Informationen.05_Betriebsstunden",
+    name: "Betriebsstunden Zweiter W\xE4rmeerzeuger 1 (Heizstab)",
+    role: "value",
+    type: "number",
+    unit: "h"
+  },
+  hours_heatpump: {
+    folder: "Informationen.05_Betriebsstunden",
+    name: "Betriebsstunden W\xE4rmepumpe Gesamt",
+    role: "value",
+    type: "number",
+    unit: "h"
+  },
+  hours_heating: {
+    folder: "Informationen.05_Betriebsstunden",
+    name: "Betriebsstunden Heizbetrieb",
+    role: "value",
+    type: "number",
+    unit: "h"
+  },
+  hours_warmwater: {
+    folder: "Informationen.05_Betriebsstunden",
+    name: "Betriebsstunden Warmwassererzeugung",
+    role: "value",
+    type: "number",
+    unit: "h"
   },
   // ==========================================
   // EINSTELLUNGEN & PARAMETER (Beschreibbar)
@@ -1056,56 +1098,6 @@ const STATE_MAPPING = {
     name: "Betriebszustand Heizung Text",
     role: "text",
     type: "string"
-  },
-  hours_compressor1: {
-    folder: "Informationen.Betriebsstunden",
-    name: "Betriebsstunden Kompressor 1",
-    role: "value",
-    type: "number",
-    unit: "h"
-  },
-  starts_compressor1: {
-    folder: "Informationen.Betriebsstunden",
-    name: "Schaltspiele Kompressor 1",
-    role: "value",
-    type: "number"
-  },
-  hours_2nd_heat_source1: {
-    folder: "Informationen.Betriebsstunden",
-    name: "Betriebsstunden Zweiter W\xE4rmeerzeuger 1 (Heizstab)",
-    role: "value",
-    type: "number",
-    unit: "h"
-  },
-  hours_heatpump: {
-    folder: "Informationen.Betriebsstunden",
-    name: "Betriebsstunden W\xE4rmepumpe Gesamt",
-    role: "value",
-    type: "number",
-    unit: "h"
-  },
-  hours_heating: {
-    folder: "Informationen.Betriebsstunden",
-    name: "Betriebsstunden Heizbetrieb",
-    role: "value",
-    type: "number",
-    unit: "h"
-  },
-  hours_warmwater: {
-    folder: "Informationen.Betriebsstunden",
-    name: "Betriebsstunden Warmwassererzeugung",
-    role: "value",
-    type: "number",
-    unit: "h"
-  },
-  Betriebsstunden_Gesamt: {
-    folder: "Informationen.Betriebsstunden",
-    name: "Betriebsstunden Gesamt (Berechnet: Heizung + WW)",
-    role: "value",
-    type: "number",
-    unit: "h",
-    write: false,
-    isVirtual: true
   }
 };
 for (const key of Object.keys(STATE_MAPPING)) {

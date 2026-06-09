@@ -78,3 +78,50 @@ export async function calculateTotalHours(adapter: any): Promise<void> {
 		adapter.log.error(`Fehler bei der Berechnung der Gesamt-Betriebsstunden: ${err.message}`);
 	}
 }
+
+/**
+ * Verarbeitet das fertige Fehler-Array der Coolchip-Bibliothek
+ * und baut ein strukturiertes JSON-Array für den ioBroker.
+ *
+ * @param adapter Die Instanz des aktuellen ioBroker-Adapters
+ * @param coolchipErrors Das originale errors-Array aus pump.read()
+ */
+export async function updateErrorHistory(adapter: any, coolchipErrors: any[]): Promise<void> {
+	try {
+		if (!coolchipErrors || !Array.isArray(coolchipErrors)) {
+			adapter.log.debug("[Virtual DP] Keine gültige Fehlerliste von Coolchip erhalten.");
+			return;
+		}
+
+		const errorLogList = [];
+
+		// Wir laufen durch das von Coolchip gelieferte Array
+		for (let i = 0; i < coolchipErrors.length; i++) {
+			const err = coolchipErrors[i];
+
+			// Nur hinzufügen, wenn ein echter Fehlercode existiert und ungleich 0 ist
+			if (err && err.code && err.code !== 0) {
+				// Coolchip liefert den Zeitstempel meistens als Unix-Timestamp (Sekunden)
+				const errorTimestamp = err.timestamp;
+				const dateObject = new Date(errorTimestamp * 1000);
+				const readableDate = errorTimestamp > 0 ? dateObject.toLocaleString("de-DE") : "Unbekannt";
+
+				errorLogList.push({
+					index: i + 1,
+					code: err.code,
+					datum: readableDate,
+					timestamp: errorTimestamp,
+				});
+			}
+		}
+
+		const jsonString = JSON.stringify(errorLogList);
+		await adapter.setStateChangedAsync("Informationen.Fehlerspeicher.error_history", jsonString, true);
+
+		adapter.log.debug(
+			`[Virtual DP] Fehlerhistorie über Coolchip-Modul aktualisiert. ${errorLogList.length} Einträge.`,
+		);
+	} catch (err: any) {
+		adapter.log.error(`Fehler bei der JSON-Fehlerhistorie via Coolchip: ${err.message}`);
+	}
+}

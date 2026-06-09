@@ -19,7 +19,8 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 var virtualStates_exports = {};
 __export(virtualStates_exports, {
   calculateTotalHours: () => calculateTotalHours,
-  initializeVirtualStates: () => initializeVirtualStates
+  initializeVirtualStates: () => initializeVirtualStates,
+  updateErrorHistory: () => updateErrorHistory
 });
 module.exports = __toCommonJS(virtualStates_exports);
 var import_stateMapping = require("./stateMapping");
@@ -69,9 +70,40 @@ async function calculateTotalHours(adapter) {
     adapter.log.error(`Fehler bei der Berechnung der Gesamt-Betriebsstunden: ${err.message}`);
   }
 }
+async function updateErrorHistory(adapter, coolchipErrors) {
+  try {
+    if (!coolchipErrors || !Array.isArray(coolchipErrors)) {
+      adapter.log.debug("[Virtual DP] Keine g\xFCltige Fehlerliste von Coolchip erhalten.");
+      return;
+    }
+    const errorLogList = [];
+    for (let i = 0; i < coolchipErrors.length; i++) {
+      const err = coolchipErrors[i];
+      if (err && err.code && err.code !== 0) {
+        const errorTimestamp = err.timestamp;
+        const dateObject = new Date(errorTimestamp * 1e3);
+        const readableDate = errorTimestamp > 0 ? dateObject.toLocaleString("de-DE") : "Unbekannt";
+        errorLogList.push({
+          index: i + 1,
+          code: err.code,
+          datum: readableDate,
+          timestamp: errorTimestamp
+        });
+      }
+    }
+    const jsonString = JSON.stringify(errorLogList);
+    await adapter.setStateChangedAsync("Informationen.Fehlerspeicher.error_history", jsonString, true);
+    adapter.log.debug(
+      `[Virtual DP] Fehlerhistorie \xFCber Coolchip-Modul aktualisiert. ${errorLogList.length} Eintr\xE4ge.`
+    );
+  } catch (err) {
+    adapter.log.error(`Fehler bei der JSON-Fehlerhistorie via Coolchip: ${err.message}`);
+  }
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   calculateTotalHours,
-  initializeVirtualStates
+  initializeVirtualStates,
+  updateErrorHistory
 });
 //# sourceMappingURL=virtualStates.js.map

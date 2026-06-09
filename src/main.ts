@@ -6,7 +6,7 @@ import * as utils from "@iobroker/adapter-core";
 import * as luxtronik from "luxtronik2";
 import * as net from "net";
 import { STATE_MAPPING } from "./stateMapping";
-import { calculateTotalHours, initializeVirtualStates } from "./virtualStates";
+import { calculateTotalHours, initializeVirtualStates, updateErrorHistory } from "./virtualStates";
 
 class Lwd50a extends utils.Adapter {
 	private pollingInterval?: NodeJS.Timeout;
@@ -265,8 +265,9 @@ class Lwd50a extends utils.Adapter {
 							}
 						}
 
-						// --- DYNAMISCHE ZEITUMWANDLUNG FÜR SEKUNDEN ---
-						let targetType: "number" | "string" | "boolean" = definition.type;
+						// --- DYNAMISCHE ZEITUMWANDLUNG FÜR SEKUNDEN & JSON-SCHUTZ ---
+						// Typ-Weiche für ioBroker: Falls im Mapping "json" steht, machen wir für ioBroker ein "string" daraus
+						let targetType: ioBroker.CommonType = definition.type === "json" ? "string" : definition.type;
 						let targetRole = definition.role;
 						let targetUnit = definition.unit;
 
@@ -279,7 +280,6 @@ class Lwd50a extends utils.Adapter {
 								targetUnit = undefined; // Einheit "s" entfernen, da kein Zahlenwert mehr
 							}
 						}
-
 						const folderId = definition.folder;
 						const stateId = `${folderId}.${key}`;
 
@@ -322,6 +322,9 @@ class Lwd50a extends utils.Adapter {
 
 				// Virtuelle / berechnete Datenpunkte aktualisieren
 				await calculateTotalHours(this);
+
+				// JETZT NEU & EINFACH: Direkt das errors-Objekt von Coolchip übergeben
+				await updateErrorHistory(this, coolchipData.errors);
 			});
 		} catch (catchErr) {
 			this.log.error(`Fehler im updateData-Ablauf: ${(catchErr as Error).message}`);

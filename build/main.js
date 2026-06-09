@@ -228,7 +228,7 @@ class Lwd50a extends utils.Adapter {
                 value = value === true || value === 1;
               }
             }
-            let targetType = definition.type;
+            let targetType = definition.type === "json" ? "string" : definition.type;
             let targetRole = definition.role;
             let targetUnit = definition.unit;
             if (definition.unit === "s") {
@@ -272,6 +272,7 @@ class Lwd50a extends utils.Adapter {
           }
         }
         await (0, import_virtualStates.calculateTotalHours)(this);
+        await (0, import_virtualStates.updateErrorHistory)(this, coolchipData.errors);
       });
     } catch (catchErr) {
       this.log.error(`Fehler im updateData-Ablauf: ${catchErr.message}`);
