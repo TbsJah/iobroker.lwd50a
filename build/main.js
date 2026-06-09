@@ -139,7 +139,25 @@ class Lwd50a extends utils.Adapter {
     });
   }
   /**
+   * Rechnet eine Sekundenzahl in das lesbare Format hh:mm:ss um.
+   *
+   * @param totalSeconds Die Sekunden als reine Zahl
+   */
+  formatSecondsToHMS(totalSeconds) {
+    if (totalSeconds < 0 || isNaN(totalSeconds)) {
+      return "00:00:00";
+    }
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor(totalSeconds % 3600 / 60);
+    const seconds = totalSeconds % 60;
+    const hh = hours.toString().padStart(2, "0");
+    const mm = minutes.toString().padStart(2, "0");
+    const ss = seconds.toString().padStart(2, "0");
+    return `${hh}:${mm}:${ss}`;
+  }
+  /**
    * Holt alle Daten von der Wärmepumpe ab und verteilt sie im ioBroker.
+   * Konvertiert Sekunden automatisch in das lesbare hh:mm:ss Format.
    */
   async updateData() {
     if (!this.pump) {
@@ -210,6 +228,18 @@ class Lwd50a extends utils.Adapter {
                 value = value === true || value === 1;
               }
             }
+            let targetType = definition.type;
+            let targetRole = definition.role;
+            let targetUnit = definition.unit;
+            if (definition.unit === "s") {
+              const totalSeconds = typeof value === "number" ? value : parseInt(value, 10);
+              if (!isNaN(totalSeconds)) {
+                value = this.formatSecondsToHMS(totalSeconds);
+                targetType = "string";
+                targetRole = "text";
+                targetUnit = void 0;
+              }
+            }
             const folderId = definition.folder;
             const stateId = `${folderId}.${key}`;
             if (!this.createdStates.has(stateId)) {
@@ -222,9 +252,9 @@ class Lwd50a extends utils.Adapter {
                 type: "state",
                 common: {
                   name: definition.name,
-                  type: definition.type,
-                  role: definition.role,
-                  unit: definition.unit,
+                  type: targetType,
+                  role: targetRole,
+                  unit: targetUnit,
                   read: true,
                   write: definition.write || false,
                   min: definition.min,

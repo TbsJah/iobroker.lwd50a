@@ -177,8 +177,7 @@ const STATE_MAPPING = {
     name: "Analoger Eingang 1",
     role: "value",
     type: "number",
-    unit: "V",
-    factor: 1
+    unit: "V"
   },
   NDin_pressure: {
     folder: "Informationen.02_Eingaenge",
@@ -203,6 +202,119 @@ const STATE_MAPPING = {
     type: "number",
     states: { 0: "Aus", 1: "Ein" }
   },
+  // Ausgänge
+  AVout: {
+    folder: "Informationen.Ausgaenge",
+    name: "Abtauventil AV",
+    role: "value",
+    type: "number",
+    states: { 0: "Aus", 1: "Ein" }
+  },
+  BUPout: {
+    folder: "Informationen.Ausgaenge",
+    name: "Warmwasser-Umw\xE4lzpumpe BUP",
+    role: "value",
+    type: "number",
+    states: { 0: "Aus", 1: "Ein" }
+  },
+  HUPout: {
+    folder: "Informationen.Ausgaenge",
+    name: "Heizungsumw\xE4lzpumpe HUP",
+    role: "value",
+    type: "number",
+    states: { 0: "Aus", 1: "Ein" }
+  },
+  VENout: {
+    folder: "Informationen.Ausgaenge",
+    name: "Ventilator VEN",
+    role: "value",
+    type: "number",
+    states: { 0: "Aus", 1: "Ein" }
+  },
+  VD1out: {
+    folder: "Informationen.Ausgaenge",
+    name: "Verdichter 1 VD1",
+    role: "value",
+    type: "number",
+    states: { 0: "Aus", 1: "Ein" }
+  },
+  ZIPout: {
+    folder: "Informationen.Ausgaenge",
+    name: "Zirkulationspumpe ZIP",
+    role: "value",
+    type: "number",
+    states: { 0: "Aus", 1: "Ein" }
+  },
+  ZUPout: {
+    folder: "Informationen.Ausgaenge",
+    name: "Zusatzumw\xE4lzpumpe ZUP",
+    role: "value",
+    type: "number",
+    states: { 0: "Aus", 1: "Ein" }
+  },
+  ZW1out: {
+    folder: "Informationen.Ausgaenge",
+    name: "Zweiter W\xE4rmeerzeuger 1 ZW1",
+    role: "value",
+    type: "number",
+    states: { 0: "Aus", 1: "Ein" }
+  },
+  analogOut1: {
+    folder: "Informationen.Ausgaenge",
+    name: "Analoger Ausgang 1",
+    role: "value",
+    type: "number",
+    unit: "V"
+  },
+  analogOut2: {
+    folder: "Informationen.Ausgaenge",
+    name: "Analoger Ausgang 2",
+    role: "value",
+    type: "number",
+    unit: "V"
+  },
+  defrostValve: {
+    folder: "Informationen.Ausgaenge",
+    name: "Status Abtauventil",
+    role: "value",
+    type: "number",
+    states: { 0: "Aus", 1: "Ein" }
+  },
+  hotWaterBoilerValve: {
+    folder: "Informationen.Ausgaenge",
+    name: "Status Umschaltventil Warmwasser",
+    role: "value",
+    type: "number",
+    states: { 0: "Aus", 1: "Ein" }
+  },
+  heatingSystemCircPump: {
+    folder: "Informationen.Ausgaenge",
+    name: "Heizungssystem Zirkulationspumpe Laufindikator",
+    role: "indicator",
+    type: "boolean"
+  },
+  heatSourceMotor: {
+    folder: "Informationen.Ausgaenge",
+    name: "Motor W\xE4rmequelle",
+    role: "value",
+    type: "number",
+    states: { 0: "Aus", 1: "Ein" }
+  },
+  compressor1: {
+    folder: "Informationen.Ausgaenge",
+    name: "Status Kompressor 1 Laufr\xFCckmeldung",
+    role: "value",
+    type: "number",
+    states: { 0: "Aus", 1: "Ein" }
+  },
+  hotWaterCircPumpExtern: {
+    folder: "Informationen.Ausgaenge",
+    name: "Warmwasser Zirkulationspumpe Extern",
+    role: "value",
+    type: "number",
+    states: { 0: "Aus", 1: "Ein" }
+  },
+  //Zeiten
   // ==========================================
   // EINSTELLUNGEN & PARAMETER (Beschreibbar)
   // ==========================================
@@ -635,261 +747,6 @@ const STATE_MAPPING = {
     role: "value.temperature",
     type: "number",
     unit: "\xB0C"
-  },
-  AVout: {
-    folder: "Informationen.Ausgaenge",
-    name: "Abtauventil AV",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  BUPout: {
-    folder: "Informationen.Ausgaenge",
-    name: "Warmwasser-Umw\xE4lzpumpe BUP",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  HUPout: {
-    folder: "Informationen.Ausgaenge",
-    name: "Heizungsumw\xE4lzpumpe HUP",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  MA1out: {
-    folder: "Informationen.Ausgaenge",
-    name: "Mischer 1 Auf MA1",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  MZ1out: {
-    folder: "Informationen.Ausgaenge",
-    name: "Mischer 1 Zu MZ1",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  VENout: {
-    folder: "Informationen.Ausgaenge",
-    name: "Ventilator VEN",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  VBOout: {
-    folder: "Informationen.Ausgaenge",
-    name: "Ventilausgang Brunnen VBO",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  VD1out: {
-    folder: "Informationen.Ausgaenge",
-    name: "Verdichter 1 VD1",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  VD2out: {
-    folder: "Informationen.Ausgaenge",
-    name: "Verdichter 2 VD2",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  ZIPout: {
-    folder: "Informationen.Ausgaenge",
-    name: "Zirkulationspumpe ZIP",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  ZUPout: {
-    folder: "Informationen.Ausgaenge",
-    name: "Zusatzumw\xE4lzpumpe ZUP",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  ZW1out: {
-    folder: "Informationen.Ausgaenge",
-    name: "Zweiter W\xE4rmeerzeuger 1 ZW1",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  ZW2SSTout: {
-    folder: "Informationen.Ausgaenge",
-    name: "ZW2 / St\xF6rungsmeldung",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  ZW3SSTout: {
-    folder: "Informationen.Ausgaenge",
-    name: "ZW3 / Sammelst\xF6rung",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  FP2out: {
-    folder: "Informationen.Ausgaenge",
-    name: "Funktionspumpe 2 FP2",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  SLPout: {
-    folder: "Informationen.Ausgaenge",
-    name: "Solarladepumpe SLP",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  SUPout: {
-    folder: "Informationen.Ausgaenge",
-    name: "Zusatzpumpe SUP",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  MZ2out: {
-    folder: "Informationen.Ausgaenge",
-    name: "Mischer 2 Zu MZ2",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  MA2out: {
-    folder: "Informationen.Ausgaenge",
-    name: "Mischer 2 Auf MA2",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  MZ3out: {
-    folder: "Informationen.Ausgaenge",
-    name: "Mischer 3 Zu MZ3",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  MA3out: {
-    folder: "Informationen.Ausgaenge",
-    name: "Mischer 3 Auf MA3",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  FP3out: {
-    folder: "Informationen.Ausgaenge",
-    name: "Funktionspumpe 3 FP3",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  analogOut1: {
-    folder: "Informationen.Ausgaenge",
-    name: "Analoger Ausgang 1",
-    role: "value",
-    type: "number",
-    unit: "V",
-    factor: 100
-  },
-  analogOut2: {
-    folder: "Informationen.Ausgaenge",
-    name: "Analoger Ausgang 2",
-    role: "value",
-    type: "number",
-    unit: "V",
-    factor: 100
-  },
-  analogOut3: {
-    folder: "Informationen.Ausgaenge",
-    name: "Analoger Ausgang 3",
-    role: "value",
-    type: "number",
-    unit: "V",
-    factor: 100
-  },
-  analogOut4: {
-    folder: "Informationen.Ausgaenge",
-    name: "Analoger Ausgang 4",
-    role: "value",
-    type: "number",
-    unit: "V",
-    factor: 100
-  },
-  Out_VZU: {
-    folder: "Informationen.Ausgaenge",
-    name: "Ventilator Zuluft VZU",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  Out_VAB: {
-    folder: "Informationen.Ausgaenge",
-    name: "Ventilator Abluft VAB",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  Out_VSK: {
-    folder: "Informationen.Ausgaenge",
-    name: "Ausgang VSK",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  Out_FRH: {
-    folder: "Informationen.Ausgaenge",
-    name: "Freigabe Heizung FRH",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  defrostValve: {
-    folder: "Informationen.Ausgaenge",
-    name: "Status Abtauventil",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  hotWaterBoilerValve: {
-    folder: "Informationen.Ausgaenge",
-    name: "Status Umschaltventil Warmwasser",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  heatingSystemCircPump: {
-    folder: "Informationen.Ausgaenge",
-    name: "Heizungssystem Zirkulationspumpe Laufindikator",
-    role: "indicator",
-    type: "boolean"
-  },
-  heatSourceMotor: {
-    folder: "Informationen.Ausgaenge",
-    name: "Motor W\xE4rmequelle",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  compressor1: {
-    folder: "Informationen.Ausgaenge",
-    name: "Status Kompressor 1 Laufr\xFCckmeldung",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  hotWaterCircPumpExtern: {
-    folder: "Informationen.Ausgaenge",
-    name: "Warmwasser Zirkulationspumpe Extern",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
   },
   thermalenergy_heating: {
     folder: "Informationen.Statistik",

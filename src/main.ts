@@ -156,7 +156,29 @@ class Lwd50a extends utils.Adapter {
 	}
 
 	/**
+	 * Rechnet eine Sekundenzahl in das lesbare Format hh:mm:ss um.
+	 *
+	 * @param totalSeconds Die Sekunden als reine Zahl
+	 */
+	private formatSecondsToHMS(totalSeconds: number): string {
+		if (totalSeconds < 0 || isNaN(totalSeconds)) {
+			return "00:00:00";
+		}
+
+		const hours = Math.floor(totalSeconds / 3600);
+		const minutes = Math.floor((totalSeconds % 3600) / 60);
+		const seconds = totalSeconds % 60;
+
+		const hh = hours.toString().padStart(2, "0");
+		const mm = minutes.toString().padStart(2, "0");
+		const ss = seconds.toString().padStart(2, "0");
+
+		return `${hh}:${mm}:${ss}`;
+	}
+
+	/**
 	 * Holt alle Daten von der Wärmepumpe ab und verteilt sie im ioBroker.
+	 * Konvertiert Sekunden automatisch in das lesbare hh:mm:ss Format.
 	 */
 	private async updateData(): Promise<void> {
 		if (!this.pump) {
@@ -230,7 +252,7 @@ class Lwd50a extends utils.Adapter {
 					}
 
 					if (value !== undefined) {
-						// Typenkorrekturen für ioBroker vornehmen
+						// Standard-Typenkorrekturen für ioBroker vornehmen
 						if (definition.type === "number" && typeof value === "string") {
 							const textVal = value.toLowerCase();
 							value = textVal === "ein" ? 1 : textVal === "aus" ? 0 : parseFloat(value);
@@ -240,6 +262,21 @@ class Lwd50a extends utils.Adapter {
 								value = textVal === "ein" || textVal === "true" || textVal === "1";
 							} else {
 								value = value === true || value === 1;
+							}
+						}
+
+						// --- DYNAMISCHE ZEITUMWANDLUNG FÜR SEKUNDEN ---
+						let targetType: "number" | "string" | "boolean" = definition.type;
+						let targetRole = definition.role;
+						let targetUnit = definition.unit;
+
+						if (definition.unit === "s") {
+							const totalSeconds = typeof value === "number" ? value : parseInt(value, 10);
+							if (!isNaN(totalSeconds)) {
+								value = this.formatSecondsToHMS(totalSeconds);
+								targetType = "string"; // Typ zwingend auf string ändern
+								targetRole = "text"; // Passende Rolle für Text-Uhrzeit
+								targetUnit = undefined; // Einheit "s" entfernen, da kein Zahlenwert mehr
 							}
 						}
 
@@ -255,14 +292,14 @@ class Lwd50a extends utils.Adapter {
 								native: {},
 							});
 
-							// Datenpunkt selbst anlegen
+							// Datenpunkt selbst anlegen (jetzt mit dynamischen Typvariablen)
 							await this.setObjectNotExistsAsync(stateId, {
 								type: "state",
 								common: {
 									name: definition.name,
-									type: definition.type,
-									role: definition.role,
-									unit: definition.unit,
+									type: targetType,
+									role: targetRole,
+									unit: targetUnit,
 									read: true,
 									write: definition.write || false,
 									min: definition.min,
