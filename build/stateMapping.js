@@ -356,11 +356,83 @@ const STATE_MAPPING = {
     luxWriteId: "699",
     states: { 0: "Aus", 1: "Ein" }
   },
+  727: {
+    folder: "Einstellungen.System-Einstellung",
+    name: "Parameter 727 (ID_Laufvar_Heizgrenze)",
+    role: "value",
+    type: "number",
+    write: true,
+    luxWriteId: "727",
+    unit: "\xB0C"
+  },
+  43: {
+    folder: "Einstellungen.System-Einstellung",
+    name: "Parameter 43 (ID_Einst_ABTLuft_akt)",
+    role: "value",
+    type: "number",
+    write: true,
+    luxWriteId: "43",
+    unit: "\xB0C"
+  },
+  44: {
+    folder: "Einstellungen.System-Einstellung",
+    name: "Parameter 44 (ID_Einst_ABTLuft_akt)",
+    role: "value",
+    type: "number",
+    write: true,
+    luxWriteId: "44",
+    unit: "\xB0C"
+  },
+  45: {
+    folder: "Einstellungen.System-Einstellung",
+    name: "Parameter 45 (ID_Einst_LAbtTime_akt)",
+    role: "value",
+    type: "number",
+    write: true,
+    luxWriteId: "45",
+    unit: "\xB0C"
+  },
+  697: {
+    folder: "Einstellungen.System-Einstellung",
+    name: "Parameter 697 (ID_Einst_Zirk_Ein_akt)",
+    role: "value",
+    type: "number",
+    write: true,
+    luxWriteId: "697",
+    unit: "\xB0C"
+  },
+  698: {
+    folder: "Einstellungen.System-Einstellung",
+    name: "Parameter 698 (ID_Einst_Zirk_Aus_akt)",
+    role: "value",
+    type: "number",
+    write: true,
+    luxWriteId: "698",
+    unit: "\xB0C"
+  },
+  869: {
+    folder: "Einstellungen.System-Einstellung",
+    name: "Parameter 869 (ID_Einst_Effizienzpumpe_akt)",
+    role: "value",
+    type: "number",
+    write: true,
+    luxWriteId: "869",
+    unit: "\xB0C"
+  },
   temperature_supply: {
     folder: "Informationen.Temperaturen",
     name: "Vorlauftemperatur",
     role: "value.temperature",
     type: "number",
+    unit: "\xB0C"
+  },
+  16: {
+    folder: "Informationen.Temperaturen",
+    name: "Value 16 (ID_WEB_Mitteltemperatur)",
+    role: "value",
+    type: "number",
+    write: false,
+    luxWriteId: "16",
     unit: "\xB0C"
   },
   temperature_return: {
@@ -1258,36 +1330,9 @@ const STATE_MAPPING = {
     role: "value",
     type: "number"
   },
-  hours_compressor2: {
-    folder: "Informationen.Betriebsstunden",
-    name: "Betriebsstunden Kompressor 2",
-    role: "value",
-    type: "number",
-    unit: "h"
-  },
-  starts_compressor2: {
-    folder: "Informationen.Betriebsstunden",
-    name: "Schaltspiele Kompressor 2",
-    role: "value",
-    type: "number"
-  },
   hours_2nd_heat_source1: {
     folder: "Informationen.Betriebsstunden",
     name: "Betriebsstunden Zweiter W\xE4rmeerzeuger 1 (Heizstab)",
-    role: "value",
-    type: "number",
-    unit: "h"
-  },
-  hours_2nd_heat_source2: {
-    folder: "Informationen.Betriebsstunden",
-    name: "Betriebsstunden Zweiter W\xE4rmeerzeuger 2",
-    role: "value",
-    type: "number",
-    unit: "h"
-  },
-  hours_2nd_heat_source3: {
-    folder: "Informationen.Betriebsstunden",
-    name: "Betriebsstunden Zweiter W\xE4rmeerzeuger 3",
     role: "value",
     type: "number",
     unit: "h"
@@ -1309,27 +1354,6 @@ const STATE_MAPPING = {
   hours_warmwater: {
     folder: "Informationen.Betriebsstunden",
     name: "Betriebsstunden Warmwassererzeugung",
-    role: "value",
-    type: "number",
-    unit: "h"
-  },
-  hours_cooling: {
-    folder: "Informationen.Betriebsstunden",
-    name: "Betriebsstunden K\xFChlbetrieb",
-    role: "value",
-    type: "number",
-    unit: "h"
-  },
-  hours_solar: {
-    folder: "Informationen.Betriebsstunden",
-    name: "Betriebsstunden Solaranlage",
-    role: "value",
-    type: "number",
-    unit: "h"
-  },
-  Zaehler_BetrZeitSW: {
-    folder: "Informationen.Betriebsstunden",
-    name: "Betriebsstundenz\xE4hler SW",
     role: "value",
     type: "number",
     unit: "h"

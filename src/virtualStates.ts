@@ -71,9 +71,9 @@ export async function calculateTotalHours(adapter: any): Promise<void> {
 		// 4. Den virtuellen Datenpunkt mit Bestätigung (ack: true) beschreiben
 		await adapter.setStateAsync("Informationen.Betriebsstunden.Betriebsstunden_Gesamt", totalHours, true);
 
-		adapter.log.debug(
-			`[Virtual DP] Gesamtstunden aktualisiert: ${totalHours}h (${hoursHeating}h Heizung + ${hoursWarmwater}h WW)`,
-		);
+		//	adapter.log.debug(
+		//		`[Virtual DP] Gesamtstunden aktualisiert: ${totalHours}h (${hoursHeating}h Heizung + ${hoursWarmwater}h WW)`,
+		//	);
 	} catch (err: any) {
 		adapter.log.error(`Fehler bei der Berechnung der Gesamt-Betriebsstunden: ${err.message}`);
 	}

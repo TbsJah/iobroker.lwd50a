@@ -40,14 +40,15 @@ class Lwd50a extends utils.Adapter {
     this.on("unload", this.onUnload.bind(this));
   }
   /**
-   * Is called when databases are connected and adapter received configuration.
+   * Wird aufgerufen, sobald der Adapter mit den ioBroker-Datenbanken verbunden ist.
    */
   async onReady() {
     const ip = this.config.host;
     const port = this.config.port || 8889;
     this.log.info(`Verbinde mit W\xE4rmepumpe auf ${ip}:${port}...`);
     this.pump = new luxtronik.createConnection(ip, port);
-    this.updateData();
+    await (0, import_virtualStates.initializeVirtualStates)(this);
+    await this.updateData();
     await (0, import_virtualStates.initializeVirtualStates)(this);
     let intervalSeconds = this.config.interval || 30;
     if (intervalSeconds < 10) {
@@ -56,24 +57,21 @@ class Lwd50a extends utils.Adapter {
     }
     this.log.info(`Starte Polling-Intervall. Lese Daten alle ${intervalSeconds} Sekunden aus.`);
     this.pollingInterval = setInterval(() => {
-      this.log.debug("Polling ausgel\xF6st: Hole frische Daten von der W\xE4rmepumpe...");
-      this.updateData();
+      void this.updateData();
     }, intervalSeconds * 1e3);
   }
   /**
    * Liest die komplette Liste (alle Parameter oder alle Messwerte) per TCP aus.
    *
    * @param command 3003 (Parameter) oder 3004 (Messwerte)
-   * @returns Ein Promise, das ein Array mit allen Werten zurückgibt
    */
   readAllRaw(command) {
     return new Promise((resolve, reject) => {
       const client = new net.Socket();
       const host = this.config.host;
-      const port = this.config.port || 8888;
+      const port = 8888;
       let responseData = Buffer.alloc(0);
       client.connect(port, host, () => {
-        this.log.info(`[RAW READ ALL] Fordere komplette Liste ${command} an...`);
         const buffer = Buffer.alloc(8);
         buffer.writeInt32BE(command, 0);
         buffer.writeInt32BE(0, 4);
@@ -113,78 +111,86 @@ class Lwd50a extends utils.Adapter {
     });
   }
   /**
-   * Holt die Daten von der Wärmepumpe und schreibt sie in ioBroker
+   * Holt alle Daten von der Wärmepumpe ab und verteilt sie im ioBroker.
    */
-  updateData() {
+  async updateData() {
     if (!this.pump) {
       this.log.error("Abfrage abgebrochen: Keine aktive Verbindung zur W\xE4rmepumpe vorhanden.");
       return;
     }
-    this.pump.read(async (err, data) => {
-      if (err) {
-        if (err.message && err.message.toLowerCase().includes("busy")) {
-          this.log.warn("W\xE4rmepumpe ist ausgelastet (busy). \xDCberspringe diesen Abfrage-Zyklus.");
+    try {
+      const rawParams = await this.readAllRaw(3003).catch((err) => {
+        this.log.debug(`Raw-Parameter (3003) nicht verf\xFCgbar: ${err.message}`);
+        return [];
+      });
+      const rawValues = await this.readAllRaw(3004).catch((err) => {
+        this.log.debug(`Raw-Messwerte (3004) nicht verf\xFCgbar: ${err.message}`);
+        return [];
+      });
+      this.pump.read(async (err, coolchipData) => {
+        if (err) {
+          if (err.message && err.message.toLowerCase().includes("busy")) {
+            this.log.warn("W\xE4rmepumpe ist ausgelastet (busy). \xDCberspringe diesen Abfrage-Zyklus.");
+            return;
+          }
+          this.log.error(`Verbindungsfehler beim Einlesen der Daten: ${err.message}`);
           return;
         }
-        this.log.error(`Verbindungsfehler beim Einlesen der Daten: ${err.message}`);
-        return;
-      }
-      try {
-        const allIncomingData = {
-          ...data.values,
-          ...data.parameters
-        };
-        for (const [key, value] of Object.entries(allIncomingData)) {
-          const definition = import_stateMapping.STATE_MAPPING[key];
-          if (definition) {
-            const configWithDynamicKeys = this.config;
-            const configKey = `sync_${key}`;
-            if (configWithDynamicKeys[configKey] === false) {
-              this.log.debug(`Datenpunkt ${key} \xFCbersprungen, da in der Konfiguration deaktiviert.`);
-              continue;
+        for (const [key, definition] of Object.entries(import_stateMapping.STATE_MAPPING)) {
+          if (definition.isVirtual) {
+            continue;
+          }
+          const configWithDynamicKeys = this.config;
+          if (configWithDynamicKeys[`sync_${key}`] === false) {
+            continue;
+          }
+          const luxId = definition.luxWriteId || key;
+          const isRawNumber = /^\d+$/.test(luxId);
+          let value = void 0;
+          if (isRawNumber) {
+            const index = parseInt(luxId, 10);
+            if (definition.folder.startsWith("Einstellungen")) {
+              if (rawParams && index < rawParams.length) {
+                value = rawParams[index];
+              }
+            } else if (definition.folder.startsWith("Informationen")) {
+              if (rawValues && index < rawValues.length) {
+                value = rawValues[index];
+              }
+            }
+            if (value !== void 0 && typeof value === "number" && definition.factor) {
+              value = value / definition.factor;
+            }
+          } else {
+            if (coolchipData.values && coolchipData.values[luxId] !== void 0) {
+              value = coolchipData.values[luxId];
+            } else if (coolchipData.parameters && coolchipData.parameters[luxId] !== void 0) {
+              value = coolchipData.parameters[luxId];
+            } else if (coolchipData.additional && coolchipData.additional[luxId] !== void 0) {
+              value = coolchipData.additional[luxId];
+            }
+          }
+          if (value !== void 0) {
+            if (definition.type === "number" && typeof value === "string") {
+              const textVal = value.toLowerCase();
+              value = textVal === "ein" ? 1 : textVal === "aus" ? 0 : parseFloat(value);
+            } else if (definition.type === "boolean") {
+              if (typeof value === "string") {
+                const textVal = value.toLowerCase();
+                value = textVal === "ein" || textVal === "true" || textVal === "1";
+              } else {
+                value = value === true || value === 1;
+              }
             }
             const folderId = definition.folder;
             const stateId = `${folderId}.${key}`;
-            let finalValue = value;
-            if (definition.type === "number") {
-              if (typeof value === "string") {
-                const textValue = value.toLowerCase();
-                if (textValue === "ein") {
-                  finalValue = 1;
-                } else if (textValue === "aus") {
-                  finalValue = 0;
-                } else {
-                  finalValue = parseFloat(value);
-                }
-              } else {
-                finalValue = value;
-              }
-            } else if (definition.type === "boolean") {
-              if (typeof value === "string") {
-                const textValue = value.toLowerCase();
-                if (textValue === "ein" || textValue === "true" || textValue === "1") {
-                  finalValue = true;
-                } else if (textValue === "aus" || textValue === "false" || textValue === "0") {
-                  finalValue = false;
-                } else {
-                  finalValue = false;
-                }
-              } else {
-                finalValue = value === true || value === 1;
-              }
-            }
-            if (typeof finalValue === "number" && !isNaN(finalValue) && definition.factor) {
-              finalValue = finalValue / definition.factor;
-            }
             if (!this.createdStates.has(stateId)) {
-              await this.setObjectNotExists(folderId, {
+              await this.setObjectNotExistsAsync(folderId, {
                 type: "channel",
-                common: {
-                  name: folderId.charAt(0).toUpperCase() + folderId.slice(1)
-                },
+                common: { name: folderId.split(".").pop() || folderId },
                 native: {}
               });
-              await this.setObjectNotExists(stateId, {
+              await this.setObjectNotExistsAsync(stateId, {
                 type: "state",
                 common: {
                   name: definition.name,
@@ -204,21 +210,19 @@ class Lwd50a extends utils.Adapter {
               }
               this.createdStates.add(stateId);
             }
-            await this.setState(stateId, finalValue, true);
+            await this.setStateChangedAsync(stateId, value, true);
           }
         }
-      } catch (catchErr) {
-        this.log.error(
-          `Fehler beim Schreiben der Objekte in die ioBroker-Datenbank: ${catchErr.message}`
-        );
-      }
-      await (0, import_virtualStates.calculateTotalHours)(this);
-    });
+        await (0, import_virtualStates.calculateTotalHours)(this);
+      });
+    } catch (catchErr) {
+      this.log.error(`Fehler im updateData-Ablauf: ${catchErr.message}`);
+    }
   }
   /**
-   * Wird aufgerufen, wenn der Adapter beendet wird (z.B. Neustart oder Update)
+   * Wird aufgerufen, wenn der Adapter gestoppt oder neugestartet wird.
    *
-   * @param callback - Callback-Funktion, die aufgerufen wird, wenn das Beenden abgeschlossen ist
+   * @param callback Callback-Funktion, die aufgerufen werden muss, wenn das Beenden abgeschlossen ist.
    */
   onUnload(callback) {
     try {
@@ -237,18 +241,23 @@ class Lwd50a extends utils.Adapter {
       callback();
     }
   }
+  /**
+   * Verarbeitet vom Benutzer im ioBroker geänderte Werte und sendet sie an die Wärmepumpe.
+   *
+   * @param id Die ID des geänderten State
+   * @param state Der neue State-Wert
+   */
   async onStateChange(id, state) {
-    if (!state) {
-      this.log.info(`State ${id} wurde gel\xF6scht.`);
-      return;
-    }
-    if (state.ack) {
+    if (!state || state.ack) {
+      if (!state) {
+        this.log.info(`State ${id} wurde gel\xF6scht.`);
+      }
       return;
     }
     this.log.info(`Nutzerbefehl empfangen f\xFCr ${id}: ${state.val}`);
     const mappingKey = id.split(".").pop();
     if (!mappingKey) {
-      this.log.warn(`Konnte keinen g\xFCltigen State-Schl\xFCssel aus der ID extrahieren: ${id}`);
+      this.log.warn(`Ung\xFCltiger State-Schl\xFCssel aus ID extrahiert: ${id}`);
       return;
     }
     const definition = import_stateMapping.STATE_MAPPING[mappingKey];
@@ -261,9 +270,7 @@ class Lwd50a extends utils.Adapter {
       const isCurrentlyRunning = zipOutState ? zipOutState.val === 1 || zipOutState.val === true : false;
       const targetVal = isCurrentlyRunning ? 0 : 1;
       const actionText = targetVal === 1 ? "Aktiviere" : "Deaktiviere";
-      this.log.info(
-        `Makro gestartet: ${actionText} ZIP Entl\xFCftung basierend auf ZIPout (Ziel-Status: ${targetVal})...`
-      );
+      this.log.info(`Makro gestartet: ${actionText} ZIP Entl\xFCftung basierend auf ZIPout...`);
       this.pump.write("runDeaerate", targetVal, async (err1) => {
         if (err1) {
           this.log.error(`Makro Fehler bei Schritt 1 (runDeaerate): ${err1.message}`);
@@ -277,43 +284,33 @@ class Lwd50a extends utils.Adapter {
           }
           this.log.info(`Makro erfolgreich: ZIP Entl\xFCftungsprogramm wurde auf ${targetVal} gesetzt.`);
           await this.setState(id, { val: targetVal, ack: true });
-          this.updateData();
+          await this.updateData();
         });
       });
       return;
     }
     if (!definition.luxWriteId || definition.write !== true) {
-      this.log.warn(`Kein Schreib-Mapping f\xFCr ${mappingKey} gefunden.`);
+      this.log.warn(`Kein Schreib-Mapping f\xFCr ${mappingKey} vorhanden oder erlaubt.`);
       return;
     }
     if (typeof state.val === "number") {
       if (definition.min !== void 0 && state.val < definition.min) {
-        this.log.warn(
-          `Eingabewert ${state.val} unterschreitet Minimum von ${definition.min} f\xFCr ${mappingKey}. Abgebrochen.`
-        );
+        this.log.warn(`Wert ${state.val} unterschreitet Minimum von ${definition.min}. Abgebrochen.`);
         return;
       }
       if (definition.max !== void 0 && state.val > definition.max) {
-        this.log.warn(
-          `Eingabewert ${state.val} \xFCberschreitet Maximum von ${definition.max} f\xFCr ${mappingKey}. Abgebrochen.`
-        );
+        this.log.warn(`Wert ${state.val} \xFCberschreitet Maximum von ${definition.max}. Abgebrochen.`);
         return;
       }
-    }
-    if (!this.pump) {
-      this.log.error("Schreiben abgebrochen: Keine aktive Verbindung zur W\xE4rmepumpe vorhanden.");
-      return;
     }
     let valueToWrite = state.val;
     if (definition.factor && typeof state.val === "number") {
       valueToWrite = state.val * definition.factor;
     }
     const luxWriteId = definition.luxWriteId;
-    const isRawNumber = /^\d+$/.test(definition.luxWriteId || "");
+    const isRawNumber = /^\d+$/.test(luxWriteId);
     if (isRawNumber && definition.unit === "\xB0C" && !definition.factor && typeof state.val === "number") {
-      this.log.info(
-        `Raw-Temperatur erkannt. Multipliziere Wert ${state.val} mit Faktor 10 f\xFCr Luxtronik-Platine.`
-      );
+      this.log.info(`Raw-Temperatur erkannt. Multipliziere Wert ${state.val} mit Faktor 10 f\xFCr Luxtronik.`);
       valueToWrite = state.val * 10;
     }
     const handleWriteResult = (err, _result) => {
@@ -322,11 +319,7 @@ class Lwd50a extends utils.Adapter {
         return;
       }
       this.log.info(`Wert ${state.val} erfolgreich via [${luxWriteId}] an W\xE4rmepumpe \xFCbertragen.`);
-      this.setState(id, state.val, true).then(() => {
-        return new Promise((resolve) => setTimeout(resolve, 500));
-      }).then(() => {
-        this.updateData();
-      }).catch((setStateErr) => {
+      this.setState(id, state.val, true).then(() => new Promise((resolve) => setTimeout(resolve, 500))).then(() => this.updateData()).catch((setStateErr) => {
         this.log.error(`Fehler beim Best\xE4tigen des Status im ioBroker: ${setStateErr.message}`);
       });
     };
@@ -337,41 +330,6 @@ class Lwd50a extends utils.Adapter {
     } else {
       this.log.info(`Sende STANDARD-STRING an Luxtronik: Name "${luxWriteId}" = ${valueToWrite}`);
       this.pump.write(luxWriteId, valueToWrite, handleWriteResult);
-    }
-  }
-  // If you need to accept messages in your adapter, uncomment the following block and the corresponding line in the constructor.
-  // /**
-  //  * Some message was sent to this instance over message box. Used by email, pushover, text2speech, ...
-  //  * Using this method requires "common.messagebox" property to be set to true in io-package.json
-  //  */
-  //
-  // private onMessage(obj: ioBroker.Message): void {
-  // 	if (typeof obj === "object" && obj.message) {
-  // 		if (obj.command === "send") {
-  // 			// e.g. send email or pushover or whatever
-  // 			this.log.info("send command");
-  // 			// Send response in callback if required
-  // 			if (obj.callback) this.sendTo(obj.from, obj.command, "Message received", obj.callback);
-  // 		}
-  // 	}
-  // }
-  /**
-   * Berechnet die Gesamt-Betriebsstunden aus Heizung und Warmwasser
-   * und schreibt das Ergebnis in den virtuellen Datenpunkt.
-   */
-  async calculateTotalHours() {
-    try {
-      const heatingState = await this.getStateAsync("Informationen.Statistik.hours_heating");
-      const warmwaterState = await this.getStateAsync("Informationen.Statistik.hours_warmwater");
-      const hoursHeating = heatingState && typeof heatingState.val === "number" ? heatingState.val : 0;
-      const hoursWarmwater = warmwaterState && typeof warmwaterState.val === "number" ? warmwaterState.val : 0;
-      const totalHours = hoursHeating + hoursWarmwater;
-      await this.setStateAsync("Informationen.Statistik.hours_total_calculated", totalHours, true);
-      this.log.debug(
-        `[Virtual DP] Gesamtstunden aktualisiert: ${totalHours}h (${hoursHeating}h Heizung + ${hoursWarmwater}h WW)`
-      );
-    } catch (err) {
-      this.log.error(`Fehler bei der Berechnung der Gesamt-Betriebsstunden: ${err.message}`);
     }
   }
 }

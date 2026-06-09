@@ -2,12 +2,9 @@
  * Created with @iobroker/create-adapter v3.1.5
  */
 
-// The adapter-core module gives you access to the core ioBroker functions
-// you need to create an adapter
 import * as utils from "@iobroker/adapter-core";
 import * as luxtronik from "luxtronik2";
 import * as net from "net";
-// Importiere dein neues Mapping-Objekt
 import { STATE_MAPPING } from "./stateMapping";
 import { calculateTotalHours, initializeVirtualStates } from "./virtualStates";
 
@@ -23,36 +20,31 @@ class Lwd50a extends utils.Adapter {
 		});
 		this.on("ready", this.onReady.bind(this));
 		this.on("stateChange", this.onStateChange.bind(this));
-		// this.on("objectChange", this.onObjectChange.bind(this));
-		// this.on("message", this.onMessage.bind(this));
 		this.on("unload", this.onUnload.bind(this));
 	}
 
 	/**
-	 * Is called when databases are connected and adapter received configuration.
+	 * Wird aufgerufen, sobald der Adapter mit den ioBroker-Datenbanken verbunden ist.
 	 */
 	private async onReady(): Promise<void> {
-		// Initialize your adapter here
-
 		const ip = this.config.host;
 		const port = this.config.port || 8889;
 
 		this.log.info(`Verbinde mit Wärmepumpe auf ${ip}:${port}...`);
-
-		// Speichere die Verbindung in der Klassenvariable
 		this.pump = new luxtronik.createConnection(ip, port);
 
-		// Erste Abfrage sofort starten
-		this.updateData();
+		// Alle virtuellen Datenpunkte aus dem Mapping vorab generieren
+		await initializeVirtualStates(this);
+
+		// Erste Abfrage sofort starten (Da onReady "async" ist, können wir hier direkt awaiten!)
+		await this.updateData();
 
 		await initializeVirtualStates(this);
 
 		// Hole das Intervall aus der Konfiguration (Standard: 30 Sekunden)
-		// WICHTIG: setInterval benötigt Millisekunden, daher * 1000
 		let intervalSeconds = this.config.interval || 30;
 
-		// Sicherheitssperre: Niemals öfter als alle 10 Sekunden abfragen,
-		// um die Steuerung der Luxtronik nicht zum Absturz zu bringen!
+		// Sicherheitssperre
 		if (intervalSeconds < 10) {
 			intervalSeconds = 10;
 			this.log.warn("Eingestelltes Intervall war zu kurz. Wurde zum Schutz auf 10 Sekunden korrigiert.");
@@ -61,10 +53,9 @@ class Lwd50a extends utils.Adapter {
 		this.log.info(`Starte Polling-Intervall. Lese Daten alle ${intervalSeconds} Sekunden aus.`);
 
 		this.pollingInterval = setInterval(() => {
-			this.log.debug("Polling ausgelöst: Hole frische Daten von der Wärmepumpe...");
-
-			// Hier rufst du einfach deine bestehende Auslese-Funktion auf
-			this.updateData();
+			// Mit dem Wörtchen "void" signalisieren wir TypeScript explizit:
+			// "Ja, wir wissen, dass hier ein Promise kommt, aber wir ignorieren es hier absichtlich!"
+			void this.updateData();
 		}, intervalSeconds * 1000);
 	}
 
@@ -72,19 +63,16 @@ class Lwd50a extends utils.Adapter {
 	 * Liest die komplette Liste (alle Parameter oder alle Messwerte) per TCP aus.
 	 *
 	 * @param command 3003 (Parameter) oder 3004 (Messwerte)
-	 * @returns Ein Promise, das ein Array mit allen Werten zurückgibt
 	 */
 	private readAllRaw(command: number): Promise<number[]> {
 		return new Promise((resolve, reject) => {
 			const client = new net.Socket();
 			const host = this.config.host;
-			const port = this.config.port || 8888;
+			const port = 8888; // Raw-Port ist standardmäßig immer 8888
 
 			let responseData = Buffer.alloc(0);
 
 			client.connect(port, host, () => {
-				this.log.info(`[RAW READ ALL] Fordere komplette Liste ${command} an...`);
-
 				const buffer = Buffer.alloc(8);
 				buffer.writeInt32BE(command, 0);
 				buffer.writeInt32BE(0, 4);
@@ -94,31 +82,23 @@ class Lwd50a extends utils.Adapter {
 			client.on("data", (chunk: Buffer) => {
 				responseData = Buffer.concat([responseData, chunk]);
 
-				// --- DER PROTOKOLL-FIX ---
-				// 3004 (Messwerte) hat 12 Bytes Header. 3003 (Parameter) hat nur 8 Bytes Header!
 				const is3004 = command === 3004;
 				const headerSize = is3004 ? 12 : 8;
 				const lengthOffset = is3004 ? 8 : 4;
 
-				// Warten, bis wir zumindest den kompletten Header haben
 				if (responseData.length >= headerSize) {
 					const responseCommand = responseData.readInt32BE(0);
 
 					if (responseCommand === command) {
-						// Länge am korrekten Byte ablesen
 						const totalItems = responseData.readInt32BE(lengthOffset);
 						const totalRequiredLength = headerSize + totalItems * 4;
 
-						// Haben wir das komplette Datenpaket empfangen?
 						if (responseData.length >= totalRequiredLength) {
 							const allValues: number[] = [];
-
-							// Schleife über alle Einträge
 							for (let i = 0; i < totalItems; i++) {
 								const valueOffset = headerSize + i * 4;
 								allValues.push(responseData.readInt32BE(valueOffset));
 							}
-
 							client.destroy();
 							resolve(allValues);
 						}
@@ -138,108 +118,109 @@ class Lwd50a extends utils.Adapter {
 			});
 		});
 	}
+
 	/**
-	 * Holt die Daten von der Wärmepumpe und schreibt sie in ioBroker
+	 * Holt alle Daten von der Wärmepumpe ab und verteilt sie im ioBroker.
 	 */
-	private updateData(): void {
+	private async updateData(): Promise<void> {
 		if (!this.pump) {
 			this.log.error("Abfrage abgebrochen: Keine aktive Verbindung zur Wärmepumpe vorhanden.");
 			return;
 		}
 
-		this.pump.read(async (err: Error | null, data: any) => {
-			if (err) {
-				// NEU: Prüfen, ob die Wärmepumpe beschäftigt ("busy") ist
-				if (err.message && err.message.toLowerCase().includes("busy")) {
-					this.log.warn("Wärmepumpe ist ausgelastet (busy). Überspringe diesen Abfrage-Zyklus.");
-					return; // Das nächste normale Intervall holt die Daten wieder!
+		try {
+			// 1. Beide Raw-Listen parallel im Hintergrund via TCP anfordern
+			const rawParams = await this.readAllRaw(3003).catch(err => {
+				this.log.debug(`Raw-Parameter (3003) nicht verfügbar: ${err.message}`);
+				return [] as number[];
+			});
+			const rawValues = await this.readAllRaw(3004).catch(err => {
+				this.log.debug(`Raw-Messwerte (3004) nicht verfügbar: ${err.message}`);
+				return [] as number[];
+			});
+
+			// 2. Standard-Abfrage über die Coolchip-Bibliothek ausführen
+			this.pump.read(async (err: Error | null, coolchipData: any) => {
+				if (err) {
+					if (err.message && err.message.toLowerCase().includes("busy")) {
+						this.log.warn("Wärmepumpe ist ausgelastet (busy). Überspringe diesen Abfrage-Zyklus.");
+						return;
+					}
+					this.log.error(`Verbindungsfehler beim Einlesen der Daten: ${err.message}`);
+					return;
 				}
 
-				// Normaler Verbindungsfehler
-				this.log.error(`Verbindungsfehler beim Einlesen der Daten: ${err.message}`);
-				return;
-			}
-			//this.log.info("Daten von der Wärmepumpe erfolgreich empfangen.");
+				// Schleife über das gesamte Mapping-Wörterbuch
+				for (const [key, definition] of Object.entries(STATE_MAPPING)) {
+					if (definition.isVirtual) {
+						continue;
+					}
 
-			try {
-				// Wir kombinieren values und parameters in ein einziges Objekt,
-				// damit wir beide Bereiche in einer einzigen Schleife durchlaufen können.
-				const allIncomingData = {
-					...data.values,
-					...data.parameters,
-				};
+					// Synchronisations-Check aus der Adapter-Konfiguration
+					const configWithDynamicKeys = this.config as Record<string, any>;
+					if (configWithDynamicKeys[`sync_${key}`] === false) {
+						continue;
+					}
 
-				for (const [key, value] of Object.entries(allIncomingData)) {
-					const definition = STATE_MAPPING[key];
+					const luxId = definition.luxWriteId || key;
+					const isRawNumber = /^\d+$/.test(luxId);
+					let value: any = undefined;
 
-					if (definition) {
-						// Wir sagen TypeScript, dass wir für diesen kurzen Check die Config
-						// als Objekt betrachten, das mit beliebigen Text-Schlüsseln (string) abgefragt werden darf.
-						const configWithDynamicKeys = this.config as Record<string, any>;
-						const configKey = `sync_${key}`;
+					// --- ENTSCHEIDUNG: RAW-WERT ODER COOLCHIP-TEXT-MAPPING ---
+					if (isRawNumber) {
+						const index = parseInt(luxId, 10);
+						if (definition.folder.startsWith("Einstellungen")) {
+							if (rawParams && index < rawParams.length) {
+								value = rawParams[index];
+							}
+						} else if (definition.folder.startsWith("Informationen")) {
+							if (rawValues && index < rawValues.length) {
+								value = rawValues[index];
+							}
+						}
 
-						if (configWithDynamicKeys[configKey] === false) {
-							this.log.debug(`Datenpunkt ${key} übersprungen, da in der Konfiguration deaktiviert.`);
-							continue;
+						// Rohen Wert per Faktor anpassen (z.B. 200 / 10 = 20 °C)
+						if (value !== undefined && typeof value === "number" && definition.factor) {
+							value = value / definition.factor;
+						}
+					} else {
+						if (coolchipData.values && coolchipData.values[luxId] !== undefined) {
+							value = coolchipData.values[luxId];
+						} else if (coolchipData.parameters && coolchipData.parameters[luxId] !== undefined) {
+							value = coolchipData.parameters[luxId];
+						} else if (coolchipData.additional && coolchipData.additional[luxId] !== undefined) {
+							value = coolchipData.additional[luxId];
+						}
+					}
+
+					if (value !== undefined) {
+						// Typenkorrekturen für ioBroker vornehmen
+						if (definition.type === "number" && typeof value === "string") {
+							const textVal = value.toLowerCase();
+							value = textVal === "ein" ? 1 : textVal === "aus" ? 0 : parseFloat(value);
+						} else if (definition.type === "boolean") {
+							if (typeof value === "string") {
+								const textVal = value.toLowerCase();
+								value = textVal === "ein" || textVal === "true" || textVal === "1";
+							} else {
+								value = value === true || value === 1;
+							}
 						}
 
 						const folderId = definition.folder;
 						const stateId = `${folderId}.${key}`;
 
-						// --- WERT-ANPASSUNG (z.B. Druckwerte von Zentibar in bar umrechnen) ---
-						let finalValue = value;
-
-						// 1. Behandlung für den Typ "number" (Zahlen)
-						if (definition.type === "number") {
-							if (typeof value === "string") {
-								const textValue = value.toLowerCase();
-								if (textValue === "ein") {
-									finalValue = 1;
-								} else if (textValue === "aus") {
-									finalValue = 0;
-								} else {
-									finalValue = parseFloat(value);
-								}
-							} else {
-								finalValue = value;
-							}
-						} else if (definition.type === "boolean") {
-							if (typeof value === "string") {
-								const textValue = value.toLowerCase();
-								if (textValue === "ein" || textValue === "true" || textValue === "1") {
-									finalValue = true;
-								} else if (textValue === "aus" || textValue === "false" || textValue === "0") {
-									finalValue = false;
-								} else {
-									// Fallback, falls die Pumpe Unerwartetes sendet
-									finalValue = false;
-								}
-							} else {
-								// Wenn der Wert von der Pumpe schon ein echter Boolean oder eine Zahl ist
-								finalValue = value === true || value === 1;
-							}
-						}
-
-						// --- UNIVERSELLE FAKTOR-ANPASSUNG FÜR NUMMERN ---
-						// Wenn ein Faktor im Mapping definiert ist, wird der Wert hierdurch geteilt
-						if (typeof finalValue === "number" && !isNaN(finalValue) && definition.factor) {
-							finalValue = finalValue / definition.factor;
-						}
-						// -------------------------------------------------
-
-						// Prüfen, ob wir diesen Datenpunkt in dieser Sitzung schon angelegt haben
+						// Dynamische Objekterstellung beim ersten Durchlauf
 						if (!this.createdStates.has(stateId)) {
-							// 1. Zuerst den Ordner (Channel) anlegen
-							await this.setObjectNotExists(folderId, {
+							// Übergeordneten Channel/Ordner anlegen
+							await this.setObjectNotExistsAsync(folderId, {
 								type: "channel",
-								common: {
-									name: folderId.charAt(0).toUpperCase() + folderId.slice(1),
-								},
+								common: { name: folderId.split(".").pop() || folderId },
 								native: {},
 							});
 
-							// 2. Dann den eigentlichen Datenpunkt anlegen
-							await this.setObjectNotExists(stateId, {
+							// Datenpunkt selbst anlegen
+							await this.setObjectNotExistsAsync(stateId, {
 								type: "state",
 								common: {
 									name: definition.name,
@@ -255,43 +236,38 @@ class Lwd50a extends utils.Adapter {
 								native: {},
 							});
 
-							// 3. Wenn das Objekt beschreibbar ist, abonnieren
 							if (definition.write) {
 								await this.subscribeStatesAsync(stateId);
 							}
-
-							// 4. Im Gedächtnis abspeichern, damit es beim nächsten Intervall übersprungen wird!
 							this.createdStates.add(stateId);
 						}
 
-						// 5. Zuletzt den Wert in den Datenpunkt schreiben (Das passiert IMMER!)
-						await this.setState(stateId, finalValue as any, true);
+						// Wert nur bei echter Änderung in DB schreiben (schont Systemressourcen)
+						await this.setStateChangedAsync(stateId, value, true);
 					}
 				}
-			} catch (catchErr) {
-				this.log.error(
-					`Fehler beim Schreiben der Objekte in die ioBroker-Datenbank: ${(catchErr as Error).message}`,
-				);
-			}
-			await calculateTotalHours(this);
-		});
+
+				// Virtuelle / berechnete Datenpunkte aktualisieren
+				await calculateTotalHours(this);
+			});
+		} catch (catchErr) {
+			this.log.error(`Fehler im updateData-Ablauf: ${(catchErr as Error).message}`);
+		}
 	}
 
 	/**
-	 * Wird aufgerufen, wenn der Adapter beendet wird (z.B. Neustart oder Update)
+	 * Wird aufgerufen, wenn der Adapter gestoppt oder neugestartet wird.
 	 *
-	 * @param callback - Callback-Funktion, die aufgerufen wird, wenn das Beenden abgeschlossen ist
+	 * @param callback Callback-Funktion, die aufgerufen werden muss, wenn das Beenden abgeschlossen ist.
 	 */
 	private onUnload(callback: () => void): void {
 		try {
-			// 1. Intervall stoppen! Ganz wichtig!
 			if (this.pollingInterval) {
 				clearInterval(this.pollingInterval);
 				this.pollingInterval = undefined;
 				this.log.info("Polling-Intervall erfolgreich gestoppt.");
 			}
 
-			// 2. Verbindung zur Pumpe sicher trennen (falls die Bibliothek das unterstützt)
 			if (this.pump && typeof this.pump.disconnect === "function") {
 				this.pump.disconnect();
 			}
@@ -304,34 +280,35 @@ class Lwd50a extends utils.Adapter {
 		}
 	}
 
+	/**
+	 * Verarbeitet vom Benutzer im ioBroker geänderte Werte und sendet sie an die Wärmepumpe.
+	 *
+	 * @param id Die ID des geänderten State
+	 * @param state Der neue State-Wert
+	 */
 	private async onStateChange(id: string, state: ioBroker.State | null | undefined): Promise<void> {
-		if (!state) {
-			this.log.info(`State ${id} wurde gelöscht.`);
-			return;
-		}
-
-		if (state.ack) {
+		if (!state || state.ack) {
+			if (!state) {
+				this.log.info(`State ${id} wurde gelöscht.`);
+			}
 			return;
 		}
 
 		this.log.info(`Nutzerbefehl empfangen für ${id}: ${state.val}`);
 
 		const mappingKey = id.split(".").pop();
-		// Sicherheits-Check: Abbrechen, wenn mappingKey undefined oder leer ist
 		if (!mappingKey) {
-			this.log.warn(`Konnte keinen gültigen State-Schlüssel aus der ID extrahieren: ${id}`);
+			this.log.warn(`Ungültiger State-Schlüssel aus ID extrahiert: ${id}`);
 			return;
 		}
 
 		const definition = STATE_MAPPING[mappingKey];
-
-		// 1. Schritt: Existiert die Definition überhaupt im Mapping?
 		if (!definition) {
 			this.log.warn(`Kein Mapping für ${mappingKey} gefunden.`);
 			return;
 		}
 
-		// 2. Schritt: Virtuelle Makros abfangen (bevor luxWriteId verarbeitet wird)
+		// --- VIRTUELLES MAKRO: ZIP ENTLÜFTUNG ---
 		if (mappingKey === "Activate_Zip") {
 			const zipOutState = await this.getStateAsync("Informationen.Ausgaenge.ZIPout");
 			const isCurrentlyRunning = zipOutState ? zipOutState.val === 1 || zipOutState.val === true : false;
@@ -339,9 +316,7 @@ class Lwd50a extends utils.Adapter {
 			const targetVal = isCurrentlyRunning ? 0 : 1;
 			const actionText = targetVal === 1 ? "Aktiviere" : "Deaktiviere";
 
-			this.log.info(
-				`Makro gestartet: ${actionText} ZIP Entlüftung basierend auf ZIPout (Ziel-Status: ${targetVal})...`,
-			);
+			this.log.info(`Makro gestartet: ${actionText} ZIP Entlüftung basierend auf ZIPout...`);
 
 			this.pump.write("runDeaerate", targetVal, async (err1: any) => {
 				if (err1) {
@@ -358,64 +333,46 @@ class Lwd50a extends utils.Adapter {
 
 					this.log.info(`Makro erfolgreich: ZIP Entlüftungsprogramm wurde auf ${targetVal} gesetzt.`);
 					await this.setState(id, { val: targetVal, ack: true });
-					this.updateData();
+
+					// FIX: Hier das "await" ergänzen, damit das Promise ordnungsgemäß verarbeitet wird
+					await this.updateData();
 				});
 			});
-
 			return;
 		}
 
-		// 3. Schritt: Strenge Prüfung für alle NORMALEN Schreib-Datenpunkte
+		// Schreibschutz- und Validierungsprüfung
 		if (!definition.luxWriteId || definition.write !== true) {
-			this.log.warn(`Kein Schreib-Mapping für ${mappingKey} gefunden.`);
+			this.log.warn(`Kein Schreib-Mapping für ${mappingKey} vorhanden oder erlaubt.`);
 			return;
 		}
 
-		// Zusätzlicher Schutz: Prüfen, ob der eingegebene Wert die Limits sprengt
 		if (typeof state.val === "number") {
 			if (definition.min !== undefined && state.val < definition.min) {
-				this.log.warn(
-					`Eingabewert ${state.val} unterschreitet Minimum von ${definition.min} für ${mappingKey}. Abgebrochen.`,
-				);
+				this.log.warn(`Wert ${state.val} unterschreitet Minimum von ${definition.min}. Abgebrochen.`);
 				return;
 			}
 			if (definition.max !== undefined && state.val > definition.max) {
-				this.log.warn(
-					`Eingabewert ${state.val} überschreitet Maximum von ${definition.max} für ${mappingKey}. Abgebrochen.`,
-				);
+				this.log.warn(`Wert ${state.val} überschreitet Maximum von ${definition.max}. Abgebrochen.`);
 				return;
 			}
 		}
 
-		if (!this.pump) {
-			this.log.error("Schreiben abgebrochen: Keine aktive Verbindung zur Wärmepumpe vorhanden.");
-			return;
-		}
-
-		// ==========================================
-		// AB HIER STARTET DER NEUE, OPTIMIERTE SCHREIB-BLOCK
-		// ==========================================
-
-		// 1. Umrechnung: Falls ein Faktor definiert ist, den ioBroker-Wert wieder hochrechnen
 		let valueToWrite = state.val as number;
 		if (definition.factor && typeof state.val === "number") {
 			valueToWrite = state.val * definition.factor;
 		}
 
-		// 2. Die luxWriteId lokal sichern (ist durch den stateMapping-Fix garantiert belegt)
 		const luxWriteId = definition.luxWriteId;
+		const isRawNumber = /^\d+$/.test(luxWriteId);
 
-		// --- NEU: SPEZIALSCHUTZ FÜR RAW-TEMPERATUREN (Weg B) ---
-		// Wenn wir eine rohe ID ansteuern, der Wert eine Temperatur (°C) ist und noch kein Faktor griff
-		const isRawNumber = /^\d+$/.test(definition.luxWriteId || "");
+		// Spezialschutz für rohe Registertemperaturen (falls im Mapping kein Faktor definiert ist)
 		if (isRawNumber && definition.unit === "°C" && !definition.factor && typeof state.val === "number") {
-			this.log.info(
-				`Raw-Temperatur erkannt. Multipliziere Wert ${state.val} mit Faktor 10 für Luxtronik-Platine.`,
-			);
+			this.log.info(`Raw-Temperatur erkannt. Multipliziere Wert ${state.val} mit Faktor 10 für Luxtronik.`);
 			valueToWrite = state.val * 10;
 		}
 
-		// 4. Den gemeinsamen Callback definieren (Linter-safe mit ": void" und ohne "async")
+		// Synchroner, linter-konformer Callback für den Schreibvorgang
 		const handleWriteResult = (err: any, _result: any): void => {
 			if (err) {
 				this.log.error(`Fehler beim Schreiben an Luxtronik via [${luxWriteId}]: ${err.message}`);
@@ -424,81 +381,28 @@ class Lwd50a extends utils.Adapter {
 
 			this.log.info(`Wert ${state.val} erfolgreich via [${luxWriteId}] an Wärmepumpe übertragen.`);
 
-			// Promises sauber verketten, um "no-misused-promises" zu verhindern
 			this.setState(id, state.val, true)
-				.then(() => {
-					return new Promise(resolve => setTimeout(resolve, 500));
-				})
-				.then(() => {
-					this.updateData();
-				})
+				.then(() => new Promise(resolve => setTimeout(resolve, 500)))
+				.then(() => this.updateData())
 				.catch((setStateErr: any) => {
 					this.log.error(`Fehler beim Bestätigen des Status im ioBroker: ${setStateErr.message}`);
 				});
 		};
 
-		// 5. Die magische Weiche: Je nach ID-Typ den passenden Befehl abfeuern
+		// Datentransfer-Weiche abfeuern
 		if (isRawNumber) {
 			const paramId = parseInt(luxWriteId, 10);
 			this.log.info(`Sende RAW-NUMBER an Luxtronik: ID ${paramId} = ${valueToWrite}`);
-
-			// Als "any" casten, damit TypeScript wegen "writeRaw" nicht meckert
 			this.pump.writeRaw(paramId, valueToWrite, handleWriteResult);
 		} else {
 			this.log.info(`Sende STANDARD-STRING an Luxtronik: Name "${luxWriteId}" = ${valueToWrite}`);
-
 			this.pump.write(luxWriteId, valueToWrite, handleWriteResult);
 		}
 	}
-
-	// If you need to accept messages in your adapter, uncomment the following block and the corresponding line in the constructor.
-	// /**
-	//  * Some message was sent to this instance over message box. Used by email, pushover, text2speech, ...
-	//  * Using this method requires "common.messagebox" property to be set to true in io-package.json
-	//  */
-	//
-	// private onMessage(obj: ioBroker.Message): void {
-	// 	if (typeof obj === "object" && obj.message) {
-	// 		if (obj.command === "send") {
-	// 			// e.g. send email or pushover or whatever
-	// 			this.log.info("send command");
-	// 			// Send response in callback if required
-	// 			if (obj.callback) this.sendTo(obj.from, obj.command, "Message received", obj.callback);
-	// 		}
-	// 	}
-	// }
-	/**
-	 * Berechnet die Gesamt-Betriebsstunden aus Heizung und Warmwasser
-	 * und schreibt das Ergebnis in den virtuellen Datenpunkt.
-	 */
-	private async calculateTotalHours(): Promise<void> {
-		try {
-			// 1. Die beiden aktuellen Zustände aus dem ioBroker einlesen
-			const heatingState = await this.getStateAsync("Informationen.Statistik.hours_heating");
-			const warmwaterState = await this.getStateAsync("Informationen.Statistik.hours_warmwater");
-
-			// 2. Werte prüfen und falls vorhanden als Zahl sichern (sonst Fallback auf 0)
-			const hoursHeating = heatingState && typeof heatingState.val === "number" ? heatingState.val : 0;
-			const hoursWarmwater = warmwaterState && typeof warmwaterState.val === "number" ? warmwaterState.val : 0;
-
-			// 3. Die magische Summe bilden
-			const totalHours = hoursHeating + hoursWarmwater;
-
-			// 4. Den virtuellen Datenpunkt mit Bestätigung (ack: true) beschreiben
-			await this.setStateAsync("Informationen.Statistik.hours_total_calculated", totalHours, true);
-
-			this.log.debug(
-				`[Virtual DP] Gesamtstunden aktualisiert: ${totalHours}h (${hoursHeating}h Heizung + ${hoursWarmwater}h WW)`,
-			);
-		} catch (err: any) {
-			this.log.error(`Fehler bei der Berechnung der Gesamt-Betriebsstunden: ${err.message}`);
-		}
-	}
 }
+
 if (require.main !== module) {
-	// Export the constructor in compact mode
 	module.exports = (options: Partial<utils.AdapterOptions> | undefined) => new Lwd50a(options);
 } else {
-	// otherwise start the instance directly
 	(() => new Lwd50a())();
 }

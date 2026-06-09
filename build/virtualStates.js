@@ -65,9 +65,6 @@ async function calculateTotalHours(adapter) {
     const hoursWarmwater = warmwaterState && typeof warmwaterState.val === "number" ? warmwaterState.val : 0;
     const totalHours = hoursHeating + hoursWarmwater;
     await adapter.setStateAsync("Informationen.Betriebsstunden.Betriebsstunden_Gesamt", totalHours, true);
-    adapter.log.debug(
-      `[Virtual DP] Gesamtstunden aktualisiert: ${totalHours}h (${hoursHeating}h Heizung + ${hoursWarmwater}h WW)`
-    );
   } catch (err) {
     adapter.log.error(`Fehler bei der Berechnung der Gesamt-Betriebsstunden: ${err.message}`);
   }
