@@ -23,6 +23,126 @@ __export(stateMapping_exports, {
 module.exports = __toCommonJS(stateMapping_exports);
 const STATE_MAPPING = {
   // ==========================================
+  // Informationen & Values (Lesbar)
+  // ==========================================
+  temperature_supply: {
+    folder: "Informationen.Temperaturen",
+    name: "Vorlauftemperatur",
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C"
+  },
+  temperature_return: {
+    folder: "Informationen.Temperaturen",
+    name: "R\xFCcklauftemperatur",
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C"
+  },
+  temperature_target_return: {
+    folder: "Informationen.Temperaturen",
+    name: "R\xFCckl.-Soll-Temperatur",
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C"
+  },
+  temperature_hot_gas: {
+    folder: "Informationen.Temperaturen",
+    name: "Heissgas-Temperatur",
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C"
+  },
+  temperature_outside: {
+    folder: "Informationen.Temperaturen",
+    name: "Au\xDFentemperatur",
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C"
+  },
+  Mitteltemperatur: {
+    folder: "Informationen.Temperaturen",
+    name: "Value 16 (ID_WEB_Mitteltemperatur)",
+    role: "value",
+    type: "number",
+    write: false,
+    luxWriteId: "16",
+    unit: "\xB0C",
+    factor: 10
+  },
+  temperature_hot_water: {
+    folder: "Informationen.Temperaturen",
+    name: "Warmwassertemperatur",
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C"
+  },
+  Wamwassertemperatur_Ist: {
+    folder: "Informationen.Temperaturen",
+    name: "Value 17 (ID_WEB_Temperatur_TBW)",
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    write: false,
+    luxWriteId: "17",
+    factor: 10
+  },
+  Wamwassertemperatur_Soll: {
+    folder: "Informationen.Temperaturen",
+    name: "Value 18 (ID_WEB_Einst_BWS_akt)",
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    write: false,
+    luxWriteId: "18",
+    factor: 10
+  },
+  temperature_heat_source_in: {
+    folder: "Informationen.Temperaturen",
+    name: "W\xE4rmequelle Eintritt",
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C"
+  },
+  LIN_TUE1: {
+    folder: "Informationen.Temperaturen",
+    name: "LIN-Bus Ansaug VD",
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C"
+  },
+  LIN_VDH: {
+    folder: "Informationen.Temperaturen",
+    name: "LIN-Bus Hei\xDFgastemperatur Verdichter (VDH)",
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C"
+  },
+  LIN_UH: {
+    folder: "Informationen.Temperaturen",
+    name: "LIN-Bus \xDCberhitzung Ist (UH)",
+    role: "value.temperature",
+    type: "number",
+    unit: "K"
+  },
+  LIN_UH_Soll: {
+    folder: "Informationen.Temperaturen",
+    name: "LIN-Bus \xDCberhitzung Soll",
+    role: "value.temperature",
+    type: "number",
+    unit: "K"
+  },
+  Verdampfungstemp: {
+    folder: "Informationen.Temperaturen",
+    name: "Value 194 (ID_WEB_SEC_VerdEVI)",
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    write: false,
+    luxWriteId: "194",
+    factor: 10
+  },
+  // ==========================================
   // EINSTELLUNGEN & PARAMETER (Beschreibbar)
   // ==========================================
   heating_curve_end_point: {
@@ -345,7 +465,8 @@ const STATE_MAPPING = {
     type: "number",
     write: true,
     luxWriteId: "700",
-    unit: "\xB0C"
+    unit: "\xB0C",
+    factor: 10
   },
   heatingLimit: {
     folder: "Einstellungen.System-Einstellung",
@@ -417,141 +538,6 @@ const STATE_MAPPING = {
     type: "number",
     write: true,
     luxWriteId: "869",
-    unit: "\xB0C"
-  },
-  temperature_supply: {
-    folder: "Informationen.Temperaturen",
-    name: "Vorlauftemperatur",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C"
-  },
-  16: {
-    folder: "Informationen.Temperaturen",
-    name: "Value 16 (ID_WEB_Mitteltemperatur)",
-    role: "value",
-    type: "number",
-    write: false,
-    luxWriteId: "16",
-    unit: "\xB0C"
-  },
-  temperature_return: {
-    folder: "Informationen.Temperaturen",
-    name: "R\xFCcklauftemperatur",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C"
-  },
-  temperature_outside: {
-    folder: "Informationen.Temperaturen",
-    name: "Au\xDFentemperatur",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C"
-  },
-  temperature_hot_water: {
-    folder: "Informationen.Temperaturen",
-    name: "Warmwassertemperatur",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C"
-  },
-  temperature_heat_source_in: {
-    folder: "Informationen.Temperaturen",
-    name: "W\xE4rmequelle Eintritt",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C"
-  },
-  temperature_heat_source_out: {
-    folder: "Informationen.Temperaturen",
-    name: "W\xE4rmequelle Austritt",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C"
-  },
-  temperature_mixer1_flow: {
-    folder: "Informationen.Temperaturen",
-    name: "Mischkreis 1 Vorlauf Ist",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C"
-  },
-  temperature_mixer1_target: {
-    folder: "Informationen.Temperaturen",
-    name: "Mischkreis 1 Vorlauf Soll",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C"
-  },
-  temperature_mixer3_flow: {
-    folder: "Informationen.Temperaturen",
-    name: "Mischkreis 3 Vorlauf Ist",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C"
-  },
-  temperature_mixer3_target: {
-    folder: "Informationen.Temperaturen",
-    name: "Mischkreis 3 Vorlauf Soll",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C"
-  },
-  temperaturw_RFV: {
-    folder: "Informationen.Temperaturen",
-    name: "Raumfernversteller RFV1",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C"
-  },
-  Temperatur_RFV2: {
-    folder: "Informationen.Temperaturen",
-    name: "Raumfernversteller RFV2",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C"
-  },
-  Temperatur_RFV3: {
-    folder: "Informationen.Temperaturen",
-    name: "Raumfernversteller RFV3",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C"
-  },
-  temperature_solar_collector: {
-    folder: "Informationen.Temperaturen",
-    name: "Solar-Kollektortemperatur",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C"
-  },
-  temperature_solar_storage: {
-    folder: "Informationen.Temperaturen",
-    name: "Solar-Speichertemperatur",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C"
-  },
-  temperature_external_source: {
-    folder: "Informationen.Temperaturen",
-    name: "Externe Energiequelle Temperatur",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C"
-  },
-  Temp_Lueftung_Zuluft: {
-    folder: "Informationen.Temperaturen",
-    name: "L\xFCftung Zuluft Temperatur",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C"
-  },
-  Temp_Lueftung_Abluft: {
-    folder: "Informationen.Temperaturen",
-    name: "L\xFCftung Abluft Temperatur",
-    role: "value.temperature",
-    type: "number",
     unit: "\xB0C"
   },
   temperature_overheating_target: {
@@ -1235,38 +1221,6 @@ const STATE_MAPPING = {
     role: "value.temperature",
     type: "number",
     unit: "\xB0C",
-    factor: 10
-  },
-  LIN_TUE1: {
-    folder: "Informationen.Status",
-    name: "LIN-Bus Ansaug VD",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C",
-    factor: 10
-  },
-  LIN_VDH: {
-    folder: "Informationen.Status",
-    name: "LIN-Bus Hei\xDFgastemperatur Verdichter (VDH)",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C",
-    factor: 10
-  },
-  LIN_UH: {
-    folder: "Informationen.Status",
-    name: "LIN-Bus \xDCberhitzung Ist (UH)",
-    role: "value.temperature",
-    type: "number",
-    unit: "K",
-    factor: 10
-  },
-  LIN_UH_Soll: {
-    folder: "Informationen.Status",
-    name: "LIN-Bus \xDCberhitzung Soll",
-    role: "value.temperature",
-    type: "number",
-    unit: "K",
     factor: 10
   },
   LIN_HD: {
