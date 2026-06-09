@@ -25,43 +25,44 @@ const STATE_MAPPING = {
   // ==========================================
   // Informationen & Values (Lesbar)
   // ==========================================
+  // Temperaturen
   temperature_supply: {
-    folder: "Informationen.Temperaturen",
+    folder: "Informationen.01_Temperaturen",
     name: "Vorlauftemperatur",
     role: "value.temperature",
     type: "number",
     unit: "\xB0C"
   },
   temperature_return: {
-    folder: "Informationen.Temperaturen",
+    folder: "Informationen.01_Temperaturen",
     name: "R\xFCcklauftemperatur",
     role: "value.temperature",
     type: "number",
     unit: "\xB0C"
   },
   temperature_target_return: {
-    folder: "Informationen.Temperaturen",
+    folder: "Informationen.01_Temperaturen",
     name: "R\xFCckl.-Soll-Temperatur",
     role: "value.temperature",
     type: "number",
     unit: "\xB0C"
   },
   temperature_hot_gas: {
-    folder: "Informationen.Temperaturen",
+    folder: "Informationen.01_Temperaturen",
     name: "Heissgas-Temperatur",
     role: "value.temperature",
     type: "number",
     unit: "\xB0C"
   },
   temperature_outside: {
-    folder: "Informationen.Temperaturen",
+    folder: "Informationen.01_Temperaturen",
     name: "Au\xDFentemperatur",
     role: "value.temperature",
     type: "number",
     unit: "\xB0C"
   },
   Mitteltemperatur: {
-    folder: "Informationen.Temperaturen",
+    folder: "Informationen.01_Temperaturen",
     name: "Value 16 (ID_WEB_Mitteltemperatur)",
     role: "value",
     type: "number",
@@ -71,14 +72,14 @@ const STATE_MAPPING = {
     factor: 10
   },
   temperature_hot_water: {
-    folder: "Informationen.Temperaturen",
+    folder: "Informationen.01_Temperaturen",
     name: "Warmwassertemperatur",
     role: "value.temperature",
     type: "number",
     unit: "\xB0C"
   },
   Wamwassertemperatur_Ist: {
-    folder: "Informationen.Temperaturen",
+    folder: "Informationen.01_Temperaturen",
     name: "Value 17 (ID_WEB_Temperatur_TBW)",
     role: "value.temperature",
     type: "number",
@@ -88,7 +89,7 @@ const STATE_MAPPING = {
     factor: 10
   },
   Wamwassertemperatur_Soll: {
-    folder: "Informationen.Temperaturen",
+    folder: "Informationen.01_Temperaturen",
     name: "Value 18 (ID_WEB_Einst_BWS_akt)",
     role: "value.temperature",
     type: "number",
@@ -98,52 +99,109 @@ const STATE_MAPPING = {
     factor: 10
   },
   temperature_heat_source_in: {
-    folder: "Informationen.Temperaturen",
+    folder: "Informationen.01_Temperaturen",
     name: "W\xE4rmequelle Eintritt",
     role: "value.temperature",
     type: "number",
     unit: "\xB0C"
   },
   LIN_TUE1: {
-    folder: "Informationen.Temperaturen",
+    folder: "Informationen.01_Temperaturen",
     name: "LIN-Bus Ansaug VD",
     role: "value.temperature",
     type: "number",
     unit: "\xB0C"
   },
   LIN_VDH: {
-    folder: "Informationen.Temperaturen",
+    folder: "Informationen.01_Temperaturen",
     name: "LIN-Bus Hei\xDFgastemperatur Verdichter (VDH)",
     role: "value.temperature",
     type: "number",
     unit: "\xB0C",
-    factor: 10
+    factor: 1
   },
   LIN_UH: {
-    folder: "Informationen.Temperaturen",
+    folder: "Informationen.01_Temperaturen",
     name: "LIN-Bus \xDCberhitzung Ist (UH)",
     role: "value.temperature",
     type: "number",
     unit: "K",
-    factor: 10
+    factor: 1
   },
   LIN_UH_Soll: {
-    folder: "Informationen.Temperaturen",
+    folder: "Informationen.01_Temperaturen",
     name: "LIN-Bus \xDCberhitzung Soll",
     role: "value.temperature",
     type: "number",
     unit: "K",
-    factor: 10
+    factor: 1
   },
-  Verdampfungstemp: {
-    folder: "Informationen.Temperaturen",
-    name: "Value 194 (ID_WEB_SEC_VerdEVI)",
-    role: "value.temperature",
+  // Eingänge
+  ASDin: {
+    folder: "Informationen.02_Eingaenge",
+    name: "Abtau-Endeschalter ASD",
+    role: "value",
     type: "number",
-    unit: "\xB0C",
-    write: false,
-    luxWriteId: "194",
-    factor: 10
+    states: { 0: "Aus", 1: "Ein" }
+  },
+  EVUin: {
+    folder: "Informationen.02_Eingaenge",
+    name: "EVU-Sperre",
+    role: "value",
+    type: "number",
+    states: { 0: "Aus", 1: "Ein" }
+  },
+  HDin: {
+    folder: "Informationen.02_Eingaenge",
+    name: "Hochdruckw\xE4chter HD",
+    role: "value",
+    type: "number",
+    states: { 0: "Aus", 1: "Ein" }
+  },
+  MOTin: {
+    folder: "Informationen.02_Eingaenge",
+    name: "Motorschutz MOT",
+    role: "value",
+    type: "number",
+    states: { 0: "Aus", 1: "Ein" }
+  },
+  NDin: {
+    folder: "Informationen.02_Eingaenge",
+    name: "Niederdruckw\xE4chter ND",
+    role: "value",
+    type: "number",
+    states: { 0: "Aus", 1: "Ein" }
+  },
+  AnalogIn: {
+    folder: "Informationen.02_Eingaenge",
+    name: "Analoger Eingang 1",
+    role: "value",
+    type: "number",
+    unit: "V",
+    factor: 1
+  },
+  NDin_pressure: {
+    folder: "Informationen.02_Eingaenge",
+    name: "Niederdruck-Sensorwert",
+    role: "value.pressure",
+    type: "number",
+    unit: "bar",
+    factor: 1
+  },
+  HDin_pressure: {
+    folder: "Informationen.02_Eingaenge",
+    name: "Hochdruck-Sensorwert",
+    role: "value.pressure",
+    type: "number",
+    unit: "bar",
+    factor: 1
+  },
+  BWTin: {
+    folder: "Informationen.02_Eingaenge",
+    name: "Brauchwasserthermostat BWT",
+    role: "value",
+    type: "number",
+    states: { 0: "Aus", 1: "Ein" }
   },
   // ==========================================
   // EINSTELLUNGEN & PARAMETER (Beschreibbar)
@@ -577,116 +635,6 @@ const STATE_MAPPING = {
     role: "value.temperature",
     type: "number",
     unit: "\xB0C"
-  },
-  ASDin: {
-    folder: "Informationen.Eingaenge",
-    name: "Abtau-Endeschalter ASD",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  BWTin: {
-    folder: "Informationen.Eingaenge",
-    name: "Brauchwasserthermostat BWT",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  EVUin: {
-    folder: "Informationen.Eingaenge",
-    name: "EVU-Sperre",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  HDin: {
-    folder: "Informationen.Eingaenge",
-    name: "Hochdruckw\xE4chter HD",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  MOTin: {
-    folder: "Informationen.Eingaenge",
-    name: "Motorschutz MOT",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  NDin: {
-    folder: "Informationen.Eingaenge",
-    name: "Niederdruckw\xE4chter ND",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  NDin_pressure: {
-    folder: "Informationen.Eingaenge",
-    name: "Niederdruck-Sensorwert",
-    role: "value.pressure",
-    type: "number",
-    unit: "bar",
-    factor: 1
-  },
-  HDin_pressure: {
-    folder: "Informationen.Eingaenge",
-    name: "Hochdruck-Sensorwert",
-    role: "value.pressure",
-    type: "number",
-    unit: "bar",
-    factor: 1
-  },
-  PEXin: {
-    folder: "Informationen.Eingaenge",
-    name: "Externer Druckw\xE4chter PEX",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  SWTin: {
-    folder: "Informationen.Eingaenge",
-    name: "Schwimmbadthermostat SWT",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  AnalogIn: {
-    folder: "Informationen.Eingaenge",
-    name: "Analoger Eingang 1",
-    role: "value",
-    type: "number",
-    unit: "V",
-    factor: 100
-  },
-  AnalogIn2: {
-    folder: "Informationen.Eingaenge",
-    name: "Analoger Eingang 2",
-    role: "value",
-    type: "number",
-    unit: "V",
-    factor: 100
-  },
-  AnalogIn3: {
-    folder: "Informationen.Eingaenge",
-    name: "Analoger Eingang 3",
-    role: "value",
-    type: "number",
-    unit: "V",
-    factor: 100
-  },
-  SAXin: {
-    folder: "Informationen.Eingaenge",
-    name: "Eingang SAX",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
-  },
-  SPLin: {
-    folder: "Informationen.Eingaenge",
-    name: "Eingang SPL",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" }
   },
   AVout: {
     folder: "Informationen.Ausgaenge",
