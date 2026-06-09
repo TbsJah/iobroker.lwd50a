@@ -427,6 +427,14 @@ const STATE_MAPPING = {
     type: "number",
     unit: "h"
   },
+  errors: {
+    folder: "Informationen.06_Fehler",
+    name: "Fehlerstatus (aktuelles Fehlerobjekt)",
+    role: "object",
+    type: "json",
+    write: false,
+    luxWriteId: "errors"
+  },
   // ==========================================
   // EINSTELLUNGEN & PARAMETER (Beschreibbar)
   // ==========================================
