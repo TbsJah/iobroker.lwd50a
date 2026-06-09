@@ -50,6 +50,7 @@ class Lwd50a extends utils.Adapter {
     await (0, import_virtualStates.initializeVirtualStates)(this);
     await this.updateData();
     await (0, import_virtualStates.initializeVirtualStates)(this);
+    void this.dumpAllRawToLog();
     let intervalSeconds = this.config.interval || 30;
     if (intervalSeconds < 10) {
       intervalSeconds = 10;
@@ -59,6 +60,33 @@ class Lwd50a extends utils.Adapter {
     this.pollingInterval = setInterval(() => {
       void this.updateData();
     }, intervalSeconds * 1e3);
+  }
+  /**
+   * Führt einen einmaligen, vollständigen Dump aller rohen Indizes und Werte
+   * aus 3003 und 3004 in das ioBroker-Log aus.
+   */
+  async dumpAllRawToLog() {
+    try {
+      this.log.info("=======================================================");
+      this.log.info("START COMPACT RAW DUMP: LISTE 3003 (PARAMETER)");
+      this.log.info("=======================================================");
+      const params = await this.readAllRaw(3003);
+      for (let i = 0; i < params.length; i++) {
+        this.log.info(`[RAW 3003] Index ${i.toString().padStart(3, " ")} = ${params[i]}`);
+      }
+      this.log.info(`--- ENDE LISTE 3003 (Insgesamt ${params.length} Indizes geloggt) ---`);
+      this.log.info("=======================================================");
+      this.log.info("START COMPACT RAW DUMP: LISTE 3004 (MESSWERTE)");
+      this.log.info("=======================================================");
+      const values = await this.readAllRaw(3004);
+      for (let i = 0; i < values.length; i++) {
+        this.log.info(`[RAW 3004] Index ${i.toString().padStart(3, " ")} = ${values[i]}`);
+      }
+      this.log.info(`--- ENDE LISTE 3004 (Insgesamt ${values.length} Indizes geloggt) ---`);
+      this.log.info("=======================================================");
+    } catch (err) {
+      this.log.error(`Fehler beim Ausf\xFChren des Raw-Dumps: ${err.message}`);
+    }
   }
   /**
    * Liest die komplette Liste (alle Parameter oder alle Messwerte) per TCP aus.

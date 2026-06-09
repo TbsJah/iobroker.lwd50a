@@ -128,6 +128,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value.temperature",
 		type: "number",
 		unit: "°C",
+		factor: 10,
 	},
 	LIN_UH: {
 		folder: "Informationen.Temperaturen",
@@ -135,6 +136,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value.temperature",
 		type: "number",
 		unit: "K",
+		factor: 10,
 	},
 	LIN_UH_Soll: {
 		folder: "Informationen.Temperaturen",
@@ -142,6 +144,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value.temperature",
 		type: "number",
 		unit: "K",
+		factor: 10,
 	},
 	Verdampfungstemp: {
 		folder: "Informationen.Temperaturen",

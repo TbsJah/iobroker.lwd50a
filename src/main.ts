@@ -41,6 +41,11 @@ class Lwd50a extends utils.Adapter {
 
 		await initializeVirtualStates(this);
 
+		// =================================================================
+		// NEU: Einmaligen kompletten Log-Dump aller Indizes anstoßen
+		// =================================================================
+		void this.dumpAllRawToLog();
+
 		// Hole das Intervall aus der Konfiguration (Standard: 30 Sekunden)
 		let intervalSeconds = this.config.interval || 30;
 
@@ -59,6 +64,37 @@ class Lwd50a extends utils.Adapter {
 		}, intervalSeconds * 1000);
 	}
 
+	/**
+	 * Führt einen einmaligen, vollständigen Dump aller rohen Indizes und Werte
+	 * aus 3003 und 3004 in das ioBroker-Log aus.
+	 */
+	private async dumpAllRawToLog(): Promise<void> {
+		try {
+			this.log.info("=======================================================");
+			this.log.info("START COMPACT RAW DUMP: LISTE 3003 (PARAMETER)");
+			this.log.info("=======================================================");
+
+			const params = await this.readAllRaw(3003);
+			for (let i = 0; i < params.length; i++) {
+				// Gibt JEDEN Index aus, ordentlich formatiert
+				this.log.info(`[RAW 3003] Index ${i.toString().padStart(3, " ")} = ${params[i]}`);
+			}
+			this.log.info(`--- ENDE LISTE 3003 (Insgesamt ${params.length} Indizes geloggt) ---`);
+
+			this.log.info("=======================================================");
+			this.log.info("START COMPACT RAW DUMP: LISTE 3004 (MESSWERTE)");
+			this.log.info("=======================================================");
+
+			const values = await this.readAllRaw(3004);
+			for (let i = 0; i < values.length; i++) {
+				this.log.info(`[RAW 3004] Index ${i.toString().padStart(3, " ")} = ${values[i]}`);
+			}
+			this.log.info(`--- ENDE LISTE 3004 (Insgesamt ${values.length} Indizes geloggt) ---`);
+			this.log.info("=======================================================");
+		} catch (err: any) {
+			this.log.error(`Fehler beim Ausführen des Raw-Dumps: ${err.message}`);
+		}
+	}
 	/**
 	 * Liest die komplette Liste (alle Parameter oder alle Messwerte) per TCP aus.
 	 *

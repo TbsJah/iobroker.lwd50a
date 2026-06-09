@@ -116,21 +116,24 @@ const STATE_MAPPING = {
     name: "LIN-Bus Hei\xDFgastemperatur Verdichter (VDH)",
     role: "value.temperature",
     type: "number",
-    unit: "\xB0C"
+    unit: "\xB0C",
+    factor: 10
   },
   LIN_UH: {
     folder: "Informationen.Temperaturen",
     name: "LIN-Bus \xDCberhitzung Ist (UH)",
     role: "value.temperature",
     type: "number",
-    unit: "K"
+    unit: "K",
+    factor: 10
   },
   LIN_UH_Soll: {
     folder: "Informationen.Temperaturen",
     name: "LIN-Bus \xDCberhitzung Soll",
     role: "value.temperature",
     type: "number",
-    unit: "K"
+    unit: "K",
+    factor: 10
   },
   Verdampfungstemp: {
     folder: "Informationen.Temperaturen",
