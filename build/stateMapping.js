@@ -315,6 +315,76 @@ const STATE_MAPPING = {
     states: { 0: "Aus", 1: "Ein" }
   },
   //Zeiten
+  Time_WPein_akt: {
+    folder: "Informationen.03_Timer",
+    name: "Aktuelle Einschaltzeit W\xE4rmepumpe",
+    role: "value",
+    type: "number",
+    unit: "s"
+  },
+  Time_ZWE1_akt: {
+    folder: "Informationen.03_Timer",
+    name: "Aktuelle Laufzeit ZWE1",
+    role: "value",
+    type: "number",
+    unit: "s"
+  },
+  Timer_EinschVerz: {
+    folder: "Informationen.03_Timer",
+    name: "Einschaltverz\xF6gerung Restzeit",
+    role: "value",
+    type: "number",
+    unit: "s"
+  },
+  Time_SSPAUS_akt: {
+    folder: "Informationen.03_Timer",
+    name: "Aktuelle Sperrzeit AUS",
+    role: "value",
+    type: "number",
+    unit: "s"
+  },
+  Time_SSPEIN_akt: {
+    folder: "Informationen.03_Timer",
+    name: "Aktuelle Sperrzeit EIN",
+    role: "value",
+    type: "number",
+    unit: "s"
+  },
+  Time_VDStd_akt: {
+    folder: "Informationen.03_Timer",
+    name: "Aktuelle Standzeit Verdichter",
+    role: "value",
+    type: "number",
+    unit: "s"
+  },
+  Time_HRM_akt: {
+    folder: "Informationen.03_Timer",
+    name: "Aktuelle Zeit HRM",
+    role: "value",
+    type: "number",
+    unit: "s"
+  },
+  Time_HRW_akt: {
+    folder: "Informationen.03_Timer",
+    name: "Aktuelle Zeit HRW",
+    role: "value",
+    type: "number",
+    unit: "s"
+  },
+  Time_Heissgas: {
+    folder: "Informationen.03_Timer",
+    name: "Zeit Hei\xDFgas\xFCberwachung",
+    role: "value",
+    type: "number",
+    unit: "s"
+  },
+  ahp_Zeit: {
+    folder: "Informationen.03_Timer",
+    name: "Zeit ahp-Stufe",
+    role: "value",
+    type: "number",
+    unit: "s"
+  },
   // ==========================================
   // EINSTELLUNGEN & PARAMETER (Beschreibbar)
   // ==========================================
@@ -786,98 +856,6 @@ const STATE_MAPPING = {
     luxWriteId: "thermalenergy_total",
     factor: 10
   },
-  Time_WPein_akt: {
-    folder: "Informationen.Timer",
-    name: "Aktuelle Einschaltzeit W\xE4rmepumpe",
-    role: "value",
-    type: "number",
-    unit: "s"
-  },
-  Time_ZWE1_akt: {
-    folder: "Informationen.Timer",
-    name: "Aktuelle Laufzeit ZWE1",
-    role: "value",
-    type: "number",
-    unit: "s"
-  },
-  Time_ZWE2_akt: {
-    folder: "Informationen.Timer",
-    name: "Aktuelle Laufzeit ZWE2",
-    role: "value",
-    type: "number",
-    unit: "s"
-  },
-  Timer_EinschVerz: {
-    folder: "Informationen.Timer",
-    name: "Einschaltverz\xF6gerung Restzeit",
-    role: "value",
-    type: "number",
-    unit: "s"
-  },
-  Time_SSPAUS_akt: {
-    folder: "Informationen.Timer",
-    name: "Aktuelle Sperrzeit AUS",
-    role: "value",
-    type: "number",
-    unit: "s"
-  },
-  Time_SSPEIN_akt: {
-    folder: "Informationen.Timer",
-    name: "Aktuelle Sperrzeit EIN",
-    role: "value",
-    type: "number",
-    unit: "s"
-  },
-  Time_VDStd_akt: {
-    folder: "Informationen.Timer",
-    name: "Aktuelle Standzeit Verdichter",
-    role: "value",
-    type: "number",
-    unit: "s"
-  },
-  Time_HRM_akt: {
-    folder: "Informationen.Timer",
-    name: "Aktuelle Zeit HRM",
-    role: "value",
-    type: "number",
-    unit: "s"
-  },
-  Time_HRW_akt: {
-    folder: "Informationen.Timer",
-    name: "Aktuelle Zeit HRW",
-    role: "value",
-    type: "number",
-    unit: "s"
-  },
-  Time_LGS_akt: {
-    folder: "Informationen.Timer",
-    name: "Aktuelle Zeit LGS",
-    role: "value",
-    type: "number",
-    unit: "s"
-  },
-  Time_SBW_akt: {
-    folder: "Informationen.Timer",
-    name: "Aktuelle Zeit SBW",
-    role: "value",
-    type: "number",
-    unit: "s"
-  },
-  heatSourceDefrostTimer: {
-    folder: "Informationen.Timer",
-    name: "Abtautimer W\xE4rmequelle",
-    role: "value",
-    type: "number",
-    unit: "s"
-  },
-  Time_Heissgas: {
-    folder: "Informationen.Timer",
-    name: "Zeit Hei\xDFgas\xFCberwachung",
-    role: "value",
-    type: "number",
-    unit: "s"
-  },
-  ahp_Zeit: { folder: "Informationen.Timer", name: "Zeit ahp-Stufe", role: "value", type: "number", unit: "s" },
   typeHeatpump: { folder: "Informationen.Systeminfo", name: "W\xE4rmepumpen-Typ", role: "text", type: "string" },
   firmware: { folder: "Informationen.Systeminfo", name: "Firmware-Version", role: "text", type: "string" },
   AdresseIP_akt: { folder: "Informationen.Systeminfo", name: "Aktuelle IP-Adresse", role: "info.ip", type: "string" },

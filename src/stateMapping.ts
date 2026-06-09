@@ -385,13 +385,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "s",
 	},
-	heatSourceDefrostTimer: {
-		folder: "Informationen.03_Timer",
-		name: "Abtautimer Wärmequelle",
-		role: "value",
-		type: "number",
-		unit: "s",
-	},
 	Time_Heissgas: {
 		folder: "Informationen.03_Timer",
 		name: "Zeit Heißgasüberwachung",
