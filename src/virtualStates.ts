@@ -1,7 +1,7 @@
 import { STATE_MAPPING } from "./stateMapping";
 
 // Moderner, linter-konformer ES6-Import (benötigt die luxtronik2.d.ts im src-Ordner)
-import * as luxtronikUtils from "luxtronik2/utils";
+import * as luxtronikTypes from "luxtronik2/types";
 
 /**
  * Erstellt alle virtuellen Datenpunkte dynamisch im ioBroker.
@@ -112,15 +112,15 @@ export async function updateErrorHistory(adapter: any, rawValues: number[]): Pro
 				let fehlerText = `Unbekannter Fehler (${errorCode})`;
 
 				// Stufenweise, crash-sichere Überprüfung des exportierten Bibliotheks-Objekts
-				if (luxtronikUtils) {
-					const utilsAny = luxtronikUtils;
+				if (luxtronikTypes) {
+					const TypesAny = luxtronikTypes;
 
-					if (utilsAny.errorCodes && utilsAny.errorCodes[errorCode]) {
-						fehlerText = utilsAny.errorCodes[errorCode];
-					} else if (utilsAny.codes && utilsAny.codes[errorCode]) {
-						fehlerText = utilsAny.codes[errorCode];
-					} else if (utilsAny[errorCode]) {
-						fehlerText = utilsAny[errorCode];
+					if (TypesAny.errorCodes && TypesAny.errorCodes[errorCode]) {
+						fehlerText = TypesAny.errorCodes[errorCode];
+					} else if (TypesAny.codes && TypesAny.codes[errorCode]) {
+						fehlerText = TypesAny.codes[errorCode];
+					} else if (TypesAny[errorCode]) {
+						fehlerText = TypesAny[errorCode];
 					}
 				}
 

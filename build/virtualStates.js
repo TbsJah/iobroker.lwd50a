@@ -33,7 +33,7 @@ __export(virtualStates_exports, {
 });
 module.exports = __toCommonJS(virtualStates_exports);
 var import_stateMapping = require("./stateMapping");
-var luxtronikUtils = __toESM(require("luxtronik2/utils"));
+var luxtronikTypes = __toESM(require("luxtronik2/types"));
 async function initializeVirtualStates(adapter) {
   try {
     for (const [key, definition] of Object.entries(import_stateMapping.STATE_MAPPING)) {
@@ -87,14 +87,14 @@ async function updateErrorHistory(adapter, rawValues) {
         const dateObject = new Date(errorTimestamp * 1e3);
         const readableDate = errorTimestamp > 0 ? dateObject.toLocaleString("de-DE") : "Unbekannt";
         let fehlerText = `Unbekannter Fehler (${errorCode})`;
-        if (luxtronikUtils) {
-          const utilsAny = luxtronikUtils;
-          if (utilsAny.errorCodes && utilsAny.errorCodes[errorCode]) {
-            fehlerText = utilsAny.errorCodes[errorCode];
-          } else if (utilsAny.codes && utilsAny.codes[errorCode]) {
-            fehlerText = utilsAny.codes[errorCode];
-          } else if (utilsAny[errorCode]) {
-            fehlerText = utilsAny[errorCode];
+        if (luxtronikTypes) {
+          const TypesAny = luxtronikTypes;
+          if (TypesAny.errorCodes && TypesAny.errorCodes[errorCode]) {
+            fehlerText = TypesAny.errorCodes[errorCode];
+          } else if (TypesAny.codes && TypesAny.codes[errorCode]) {
+            fehlerText = TypesAny.codes[errorCode];
+          } else if (TypesAny[errorCode]) {
+            fehlerText = TypesAny[errorCode];
           }
         }
         errorLogList.push({
