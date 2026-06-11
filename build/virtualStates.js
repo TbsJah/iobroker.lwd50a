@@ -28,13 +28,19 @@ async function initializeVirtualStates(adapter) {
   try {
     for (const [key, definition] of Object.entries(import_stateMapping.STATE_MAPPING)) {
       if (definition.isVirtual) {
-        const fullId = `${definition.folder}.${key}`;
-        adapter.log.info(`[Virtual DP] Erstelle/Pr\xFCfe virtuellen Datenpunkt: ${fullId}`);
+        const folderId = definition.folder;
+        const fullId = `${folderId}.${key}`;
+        await adapter.setObjectNotExistsAsync(folderId, {
+          type: "channel",
+          common: { name: folderId.split(".").pop() || folderId },
+          native: {}
+        });
+        const ioBrokerType = definition.type === "json" ? "string" : definition.type;
         await adapter.setObjectNotExistsAsync(fullId, {
           type: "state",
           common: {
             name: definition.name,
-            type: definition.type,
+            type: ioBrokerType,
             role: definition.role,
             unit: definition.unit,
             read: true,
@@ -45,17 +51,16 @@ async function initializeVirtualStates(adapter) {
         });
         const currentState = await adapter.getStateAsync(fullId);
         if (!currentState) {
-          const defaultVal = definition.type === "number" ? 0 : definition.type === "boolean" ? false : "";
+          const defaultVal = definition.type === "json" ? "[]" : definition.type === "number" ? 0 : false;
           await adapter.setStateAsync(fullId, { val: defaultVal, ack: true });
         }
         if (definition.write) {
           await adapter.subscribeStatesAsync(fullId);
-          adapter.log.info(`[Virtual DP] Schreib-Kanal abonniert f\xFCr: ${fullId}`);
         }
       }
     }
   } catch (err) {
-    adapter.log.error(`Fehler bei der automatischen Initialisierung der virtuellen Datenpunkte: ${err.message}`);
+    adapter.log.error(`Fehler bei der Initialisierung der virtuellen Datenpunkte: ${err.message}`);
   }
 }
 async function calculateTotalHours(adapter) {
@@ -92,7 +97,7 @@ async function updateErrorHistory(adapter, coolchipErrors) {
       }
     }
     const jsonString = JSON.stringify(errorLogList);
-    await adapter.setStateChangedAsync("Informationen.Fehlerspeicher.error_history", jsonString, true);
+    await adapter.setStateChangedAsync("Informationen.Fehlerspeicher.Fehlerspeicher", jsonString, true);
     adapter.log.debug(
       `[Virtual DP] Fehlerhistorie \xFCber Coolchip-Modul aktualisiert. ${errorLogList.length} Eintr\xE4ge.`
     );

@@ -9,18 +9,25 @@ import { STATE_MAPPING } from "./stateMapping";
 export async function initializeVirtualStates(adapter: any): Promise<void> {
 	try {
 		for (const [key, definition] of Object.entries(STATE_MAPPING)) {
-			// Nur verarbeiten, wenn der Datenpunkt als virtuell markiert ist
 			if (definition.isVirtual) {
-				const fullId = `${definition.folder}.${key}`;
+				const folderId = definition.folder;
+				const fullId = `${folderId}.${key}`;
 
-				adapter.log.info(`[Virtual DP] Erstelle/Prüfe virtuellen Datenpunkt: ${fullId}`);
+				// --- 1. NEU: Zuerst den Channel (Ordner) anlegen! ---
+				await adapter.setObjectNotExistsAsync(folderId, {
+					type: "channel",
+					common: { name: folderId.split(".").pop() || folderId },
+					native: {},
+				});
 
-				// 1. Objekt anlegen, falls es noch nicht existiert
+				// --- 2. Danach den eigentlichen Datenpunkt (State) anlegen ---
+				const ioBrokerType = definition.type === "json" ? "string" : definition.type;
+
 				await adapter.setObjectNotExistsAsync(fullId, {
 					type: "state",
 					common: {
 						name: definition.name,
-						type: definition.type,
+						type: ioBrokerType,
 						role: definition.role,
 						unit: definition.unit,
 						read: true,
@@ -30,22 +37,20 @@ export async function initializeVirtualStates(adapter: any): Promise<void> {
 					native: {},
 				});
 
-				// 2. Initialen Standardwert setzen, falls der Punkt komplett neu (null) ist
+				// --- 3. Initialwert setzen ---
 				const currentState = await adapter.getStateAsync(fullId);
 				if (!currentState) {
-					const defaultVal = definition.type === "number" ? 0 : definition.type === "boolean" ? false : "";
+					const defaultVal = definition.type === "json" ? "[]" : definition.type === "number" ? 0 : false;
 					await adapter.setStateAsync(fullId, { val: defaultVal, ack: true });
 				}
 
-				// 3. Wenn der virtuelle Punkt beschreibbar ist (wie Activate_Zip), den Status abonnieren
 				if (definition.write) {
 					await adapter.subscribeStatesAsync(fullId);
-					adapter.log.info(`[Virtual DP] Schreib-Kanal abonniert für: ${fullId}`);
 				}
 			}
 		}
 	} catch (err: any) {
-		adapter.log.error(`Fehler bei der automatischen Initialisierung der virtuellen Datenpunkte: ${err.message}`);
+		adapter.log.error(`Fehler bei der Initialisierung der virtuellen Datenpunkte: ${err.message}`);
 	}
 }
 
@@ -116,7 +121,7 @@ export async function updateErrorHistory(adapter: any, coolchipErrors: any[]): P
 		}
 
 		const jsonString = JSON.stringify(errorLogList);
-		await adapter.setStateChangedAsync("Informationen.Fehlerspeicher.error_history", jsonString, true);
+		await adapter.setStateChangedAsync("Informationen.Fehlerspeicher.Fehlerspeicher", jsonString, true);
 
 		adapter.log.debug(
 			`[Virtual DP] Fehlerhistorie über Coolchip-Modul aktualisiert. ${errorLogList.length} Einträge.`,

@@ -443,14 +443,14 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		unit: "h",
 	},
 
-	// errors: {
-	// 	folder: "Informationen.06_Fehler",
-	// 	name: "Fehlerstatus (aktuelles Fehlerobjekt)",
-	// 	role: "object",
-	// 	type: "json",
-	// 	write: false,
-	// 	luxWriteId: "errors",
-	// },
+	Fehlerspeicher: {
+		folder: "Informationen.06_Fehlerspeicher",
+		name: "Fehlerhistorie (Die letzten 5 Fehler)",
+		role: "json",
+		type: "json",
+		isVirtual: true, // <--- DAS IST ENTSCHEIDEND!
+	},
+
 	// ==========================================
 	// EINSTELLUNGEN & PARAMETER (Beschreibbar)
 	// ==========================================
