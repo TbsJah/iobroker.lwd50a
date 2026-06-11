@@ -137,7 +137,7 @@ export async function updateErrorHistory(adapter: any, rawValues: number[]): Pro
 
 		// Array in einen JSON-String konvertieren und im ioBroker speichern
 		const jsonString = JSON.stringify(errorLogList);
-		await adapter.setStateChangedAsync("Informationen.Fehlerspeicher.error_history", jsonString, true);
+		await adapter.setStateChangedAsync("Informationen.06_Fehlerspeicher.Fehlerspeicher", jsonString, true);
 
 		adapter.log.debug(`[Virtual DP] RAW-Fehlerhistorie aktualisiert. ${errorLogList.length} Einträge hinterlegt.`);
 	} catch (err: any) {

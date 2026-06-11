@@ -107,7 +107,7 @@ async function updateErrorHistory(adapter, rawValues) {
       }
     }
     const jsonString = JSON.stringify(errorLogList);
-    await adapter.setStateChangedAsync("Informationen.Fehlerspeicher.error_history", jsonString, true);
+    await adapter.setStateChangedAsync("Informationen.06_Fehlerspeicher.Fehlerspeicher", jsonString, true);
     adapter.log.debug(`[Virtual DP] RAW-Fehlerhistorie aktualisiert. ${errorLogList.length} Eintr\xE4ge hinterlegt.`);
   } catch (err) {
     adapter.log.error(`Fehler bei der Generierung der RAW-JSON-Fehlerhistorie: ${err.message}`);
