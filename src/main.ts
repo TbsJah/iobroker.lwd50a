@@ -6,7 +6,7 @@ import * as utils from "@iobroker/adapter-core";
 import * as luxtronik from "luxtronik2";
 import * as net from "net";
 import { STATE_MAPPING } from "./stateMapping";
-import { calculateTotalHours, initializeVirtualStates, updateErrorHistory } from "./virtualStates";
+import { initializeVirtualStates, updateErrorHistory } from "./virtualStates";
 
 class Lwd50a extends utils.Adapter {
 	private pollingInterval?: NodeJS.Timeout;
@@ -321,7 +321,7 @@ class Lwd50a extends utils.Adapter {
 				}
 
 				// Virtuelle / berechnete Datenpunkte aktualisieren
-				await calculateTotalHours(this);
+				//await calculateTotalHours(this);
 
 				// WICHTIG: Hier übergeben wir jetzt das rawValues Array!
 				await updateErrorHistory(this, rawValues);

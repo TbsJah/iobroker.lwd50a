@@ -1,7 +1,9 @@
 "use strict";
+var __create = Object.create;
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __export = (target, all) => {
   for (var name in all)
@@ -15,16 +17,23 @@ var __copyProps = (to, from, except, desc) => {
   }
   return to;
 };
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 var virtualStates_exports = {};
 __export(virtualStates_exports, {
-  calculateTotalHours: () => calculateTotalHours,
   initializeVirtualStates: () => initializeVirtualStates,
   updateErrorHistory: () => updateErrorHistory
 });
 module.exports = __toCommonJS(virtualStates_exports);
 var import_stateMapping = require("./stateMapping");
-const luxtronikUtils = require("luxtronik2/utils");
+var luxtronikUtils = __toESM(require("luxtronik2/utils"));
 async function initializeVirtualStates(adapter) {
   try {
     for (const [key, definition] of Object.entries(import_stateMapping.STATE_MAPPING)) {
@@ -64,18 +73,6 @@ async function initializeVirtualStates(adapter) {
     adapter.log.error(`Fehler bei der Initialisierung der virtuellen Datenpunkte: ${err.message}`);
   }
 }
-async function calculateTotalHours(adapter) {
-  try {
-    const heatingState = await adapter.getStateAsync("Informationen.Betriebsstunden.hours_heating");
-    const warmwaterState = await adapter.getStateAsync("Informationen.Betriebsstunden.hours_warmwater");
-    const hoursHeating = heatingState && typeof heatingState.val === "number" ? heatingState.val : 0;
-    const hoursWarmwater = warmwaterState && typeof warmwaterState.val === "number" ? warmwaterState.val : 0;
-    const totalHours = hoursHeating + hoursWarmwater;
-    await adapter.setStateAsync("Informationen.Betriebsstunden.Betriebsstunden_Gesamt", totalHours, true);
-  } catch (err) {
-    adapter.log.error(`Fehler bei der Berechnung der Gesamt-Betriebsstunden: ${err.message}`);
-  }
-}
 async function updateErrorHistory(adapter, rawValues) {
   try {
     if (!rawValues || rawValues.length < 105) {
@@ -89,7 +86,17 @@ async function updateErrorHistory(adapter, rawValues) {
       if (errorCode !== 0) {
         const dateObject = new Date(errorTimestamp * 1e3);
         const readableDate = errorTimestamp > 0 ? dateObject.toLocaleString("de-DE") : "Unbekannt";
-        const fehlerText = luxtronikUtils.errorCodes[errorCode] || "Unbekannter Fehler";
+        let fehlerText = `Unbekannter Fehler (${errorCode})`;
+        if (luxtronikUtils) {
+          const utilsAny = luxtronikUtils;
+          if (utilsAny.errorCodes && utilsAny.errorCodes[errorCode]) {
+            fehlerText = utilsAny.errorCodes[errorCode];
+          } else if (utilsAny.codes && utilsAny.codes[errorCode]) {
+            fehlerText = utilsAny.codes[errorCode];
+          } else if (utilsAny[errorCode]) {
+            fehlerText = utilsAny[errorCode];
+          }
+        }
         errorLogList.push({
           index: i + 1,
           code: errorCode,
@@ -108,7 +115,6 @@ async function updateErrorHistory(adapter, rawValues) {
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  calculateTotalHours,
   initializeVirtualStates,
   updateErrorHistory
 });

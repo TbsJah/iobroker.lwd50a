@@ -271,7 +271,6 @@ class Lwd50a extends utils.Adapter {
             await this.setStateChangedAsync(stateId, value, true);
           }
         }
-        await (0, import_virtualStates.calculateTotalHours)(this);
         await (0, import_virtualStates.updateErrorHistory)(this, rawValues);
       });
     } catch (catchErr) {

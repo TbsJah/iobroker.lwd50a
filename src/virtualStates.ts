@@ -1,11 +1,13 @@
 import { STATE_MAPPING } from "./stateMapping";
-const luxtronikUtils = require("luxtronik2/utils");
+
+// Moderner, linter-konformer ES6-Import (benötigt die luxtronik2.d.ts im src-Ordner)
+import * as luxtronikUtils from "luxtronik2/utils";
 
 /**
- * Erstellt alle virtuellen Datenpunkte dynamisch im ioBroker,
- * initialisiert deren Werte und abonniert Schreib-Kanäle.
+ * Erstellt alle virtuellen Datenpunkte dynamisch im ioBroker.
+ * Übersetzt den Typ "json" automatisch in ein ioBroker-konformes Objekt und erstellt Channels.
  *
- * @param adapter Die Instanz des aktuellen ioBroker-Adapters (this)
+ * @param adapter Beispiel: "this" innerhalb der Adapter-Klasse, damit die Methoden setObjectNotExistsAsync und setStateAsync verfügbar sind
  */
 export async function initializeVirtualStates(adapter: any): Promise<void> {
 	try {
@@ -14,14 +16,14 @@ export async function initializeVirtualStates(adapter: any): Promise<void> {
 				const folderId = definition.folder;
 				const fullId = `${folderId}.${key}`;
 
-				// --- 1. NEU: Zuerst den Channel (Ordner) anlegen! ---
+				// 1. Zuerst den Channel (Ordner) anlegen
 				await adapter.setObjectNotExistsAsync(folderId, {
 					type: "channel",
 					common: { name: folderId.split(".").pop() || folderId },
 					native: {},
 				});
 
-				// --- 2. Danach den eigentlichen Datenpunkt (State) anlegen ---
+				// 2. Danach den eigentlichen Datenpunkt (State) anlegen
 				const ioBrokerType = definition.type === "json" ? "string" : definition.type;
 
 				await adapter.setObjectNotExistsAsync(fullId, {
@@ -38,7 +40,7 @@ export async function initializeVirtualStates(adapter: any): Promise<void> {
 					native: {},
 				});
 
-				// --- 3. Initialwert setzen ---
+				// 3. Initialwert setzen, falls der Datenpunkt nagelneu ist
 				const currentState = await adapter.getStateAsync(fullId);
 				if (!currentState) {
 					const defaultVal = definition.type === "json" ? "[]" : definition.type === "number" ? 0 : false;
@@ -55,42 +57,33 @@ export async function initializeVirtualStates(adapter: any): Promise<void> {
 	}
 }
 
-/**
- * Berechnet die Gesamt-Betriebsstunden aus Heizung und Warmwasser
- * und schreibt das Ergebnis in den virtuellen Datenpunkt.
- *
- * @param adapter Die Instanz des aktuellen ioBroker-Adapters (this)
- */
-export async function calculateTotalHours(adapter: any): Promise<void> {
-	try {
-		// 1. Die beiden aktuellen Zustände aus dem ioBroker einlesen (über die übergebene Adapter-Instanz)
-		const heatingState = await adapter.getStateAsync("Informationen.Betriebsstunden.hours_heating");
-		const warmwaterState = await adapter.getStateAsync("Informationen.Betriebsstunden.hours_warmwater");
+// /**
+//  * Berechnet die Gesamt-Betriebsstunden aus Heizung und Warmwasser
+//  * und schreibt das Ergebnis in den virtuellen Datenpunkt.
+//  *
+//  * @param adapter Beispiel: "this" innerhalb der Adapter-Klasse, damit die Methoden setObjectNotExistsAsync und setStateAsync verfügbar sind
+//  */
+// export async function calculateTotalHours(adapter: any): Promise<void> {
+// 	try {
+// 		const heatingState = await adapter.getStateAsync("Informationen.Statistik.hours_heating");
+// 		const warmwaterState = await adapter.getStateAsync("Informationen.Statistik.hours_warmwater");
 
-		// 2. Werte prüfen und falls vorhanden als Zahl sichern (sonst Fallback auf 0)
-		const hoursHeating = heatingState && typeof heatingState.val === "number" ? heatingState.val : 0;
-		const hoursWarmwater = warmwaterState && typeof warmwaterState.val === "number" ? warmwaterState.val : 0;
+// 		const hoursHeating = heatingState && typeof heatingState.val === "number" ? heatingState.val : 0;
+// 		const hoursWarmwater = warmwaterState && typeof warmwaterState.val === "number" ? warmwaterState.val : 0;
 
-		// 3. Die magische Summe bilden
-		const totalHours = hoursHeating + hoursWarmwater;
+// 		const totalHours = hoursHeating + hoursWarmwater;
 
-		// 4. Den virtuellen Datenpunkt mit Bestätigung (ack: true) beschreiben
-		await adapter.setStateAsync("Informationen.Betriebsstunden.Betriebsstunden_Gesamt", totalHours, true);
-
-		//	adapter.log.debug(
-		//		`[Virtual DP] Gesamtstunden aktualisiert: ${totalHours}h (${hoursHeating}h Heizung + ${hoursWarmwater}h WW)`,
-		//	);
-	} catch (err: any) {
-		adapter.log.error(`Fehler bei der Berechnung der Gesamt-Betriebsstunden: ${err.message}`);
-	}
-}
+// 		await adapter.setStateChangedAsync("Informationen.Statistik.hours_total_calculated", totalHours, true);
+// 	} catch (err: any) {
+// 		adapter.log.error(`Fehler bei der Berechnung der Gesamt-Betriebsstunden: ${err.message}`);
+// 	}
+// }
 
 /**
- * Liest die Fehler-Indizes direkt aus der 3004-Liste (Messwerte) aus
- * und baut ein strukturiertes JSON-Array für den ioBroker.
+ * Liest die Fehler-Indizes direkt aus der 3004-Liste (Messwerte) aus,
+ * übersetzt die Fehlercodes in Klartext und baut ein strukturiertes JSON-Array.
  *
  * @param adapter Die Instanz des aktuellen ioBroker-Adapters
- * @param adapter
  * @param rawValues Das komplette Array des Befehls 3004
  */
 export async function updateErrorHistory(adapter: any, rawValues: number[]): Promise<void> {
@@ -103,21 +96,35 @@ export async function updateErrorHistory(adapter: any, rawValues: number[]): Pro
 
 		const errorLogList = [];
 
-		// Schleife läuft 5-mal (für Fehler 1 bis Fehler 5)
+		// Schleife läuft exakt 5-mal (für Fehler 1 bis Fehler 5)
 		for (let i = 0; i < 5; i++) {
-			// DEINE ZUORDNUNG:
-			const errorTimestamp = rawValues[95 + i]; // Index 95, 96, 97, 98, 99
-			const errorCode = rawValues[100 + i]; // Index 100, 101, 102, 103, 104
+			// ZUORDNUNG: 95-99 = Zeitstempel, 100-104 = Fehlercode
+			const errorTimestamp = rawValues[95 + i];
+			const errorCode = rawValues[100 + i];
 
-			// Nur verarbeiten, wenn auch wirklich ein Fehler hinterlegt ist (Code ungleich 0)
+			// Nur verarbeiten, wenn ein echter Fehlercode vorliegt (Code ungleich 0)
 			if (errorCode !== 0) {
-				// Unix-Timestamp in Millisekunden (* 1000) umwandeln und als deutsches Datum formatieren
+				// Unix-Timestamp in Millisekunden umrechnen und lokales deutsches Format erzeugen
 				const dateObject = new Date(errorTimestamp * 1000);
 				const readableDate = errorTimestamp > 0 ? dateObject.toLocaleString("de-DE") : "Unbekannt";
 
-				// Klartext-Beschreibung aus der Utils-Datei holen
-				const fehlerText = luxtronikUtils.errorCodes[errorCode] || "Unbekannter Fehler";
+				// Fallback-Text generieren, falls der Code gänzlich unbekannt ist
+				let fehlerText = `Unbekannter Fehler (${errorCode})`;
 
+				// Stufenweise, crash-sichere Überprüfung des exportierten Bibliotheks-Objekts
+				if (luxtronikUtils) {
+					const utilsAny = luxtronikUtils;
+
+					if (utilsAny.errorCodes && utilsAny.errorCodes[errorCode]) {
+						fehlerText = utilsAny.errorCodes[errorCode];
+					} else if (utilsAny.codes && utilsAny.codes[errorCode]) {
+						fehlerText = utilsAny.codes[errorCode];
+					} else if (utilsAny[errorCode]) {
+						fehlerText = utilsAny[errorCode];
+					}
+				}
+
+				// Strukturiertes Objekt in das Array pushen
 				errorLogList.push({
 					index: i + 1,
 					code: errorCode,
@@ -128,6 +135,7 @@ export async function updateErrorHistory(adapter: any, rawValues: number[]): Pro
 			}
 		}
 
+		// Array in einen JSON-String konvertieren und im ioBroker speichern
 		const jsonString = JSON.stringify(errorLogList);
 		await adapter.setStateChangedAsync("Informationen.Fehlerspeicher.error_history", jsonString, true);
 
