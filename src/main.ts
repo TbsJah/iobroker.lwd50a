@@ -323,8 +323,8 @@ class Lwd50a extends utils.Adapter {
 				// Virtuelle / berechnete Datenpunkte aktualisieren
 				await calculateTotalHours(this);
 
-				// JETZT NEU & EINFACH: Direkt das errors-Objekt von Coolchip übergeben
-				await updateErrorHistory(this, coolchipData.values.errors);
+				// WICHTIG: Hier übergeben wir jetzt das rawValues Array!
+				await updateErrorHistory(this, rawValues);
 			});
 		} catch (catchErr) {
 			this.log.error(`Fehler im updateData-Ablauf: ${(catchErr as Error).message}`);

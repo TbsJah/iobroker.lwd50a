@@ -24,6 +24,7 @@ __export(virtualStates_exports, {
 });
 module.exports = __toCommonJS(virtualStates_exports);
 var import_stateMapping = require("./stateMapping");
+const luxtronikUtils = require("luxtronik2/utils");
 async function initializeVirtualStates(adapter) {
   try {
     for (const [key, definition] of Object.entries(import_stateMapping.STATE_MAPPING)) {
@@ -75,37 +76,34 @@ async function calculateTotalHours(adapter) {
     adapter.log.error(`Fehler bei der Berechnung der Gesamt-Betriebsstunden: ${err.message}`);
   }
 }
-async function updateErrorHistory(adapter, coolchipErrors) {
+async function updateErrorHistory(adapter, rawValues) {
   try {
-    if (!coolchipErrors || !Array.isArray(coolchipErrors)) {
-      adapter.log.debug("[Virtual DP] Keine g\xFCltige Fehlerliste von Coolchip erhalten.");
+    if (!rawValues || rawValues.length < 105) {
+      adapter.log.debug("[Virtual DP] Fehlerhistorie \xFCbersprungen: Unvollst\xE4ndiges Raw-Array 3004.");
       return;
     }
     const errorLogList = [];
-    for (let i = 0; i < coolchipErrors.length; i++) {
-      const err = coolchipErrors[i];
-      adapter.log.debug(
-        err ? `[Virtual DP] Fehler ${i + 1}: Code=${err.code}, Timestamp=${err.timestamp}` : `[Virtual DP] Fehler ${i + 1}: Kein Fehler (Code=0)`
-      );
-      if (err && err.code && err.code !== 0) {
-        const errorTimestamp = err.timestamp;
+    for (let i = 0; i < 5; i++) {
+      const errorTimestamp = rawValues[95 + i];
+      const errorCode = rawValues[100 + i];
+      if (errorCode !== 0) {
         const dateObject = new Date(errorTimestamp * 1e3);
         const readableDate = errorTimestamp > 0 ? dateObject.toLocaleString("de-DE") : "Unbekannt";
+        const fehlerText = luxtronikUtils.errorCodes[errorCode] || "Unbekannter Fehler";
         errorLogList.push({
           index: i + 1,
-          code: err.code,
+          code: errorCode,
+          beschreibung: fehlerText,
           datum: readableDate,
           timestamp: errorTimestamp
         });
       }
     }
     const jsonString = JSON.stringify(errorLogList);
-    await adapter.setStateChangedAsync("Informationen.Fehlerspeicher.Fehlerspeicher", jsonString, true);
-    adapter.log.debug(
-      `[Virtual DP] Fehlerhistorie \xFCber Coolchip-Modul aktualisiert. ${errorLogList.length} Eintr\xE4ge.`
-    );
+    await adapter.setStateChangedAsync("Informationen.Fehlerspeicher.error_history", jsonString, true);
+    adapter.log.debug(`[Virtual DP] RAW-Fehlerhistorie aktualisiert. ${errorLogList.length} Eintr\xE4ge hinterlegt.`);
   } catch (err) {
-    adapter.log.error(`Fehler bei der JSON-Fehlerhistorie via Coolchip: ${err.message}`);
+    adapter.log.error(`Fehler bei der Generierung der RAW-JSON-Fehlerhistorie: ${err.message}`);
   }
 }
 // Annotate the CommonJS export names for ESM import in node:

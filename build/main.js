@@ -272,7 +272,7 @@ class Lwd50a extends utils.Adapter {
           }
         }
         await (0, import_virtualStates.calculateTotalHours)(this);
-        await (0, import_virtualStates.updateErrorHistory)(this, coolchipData.values.errors);
+        await (0, import_virtualStates.updateErrorHistory)(this, rawValues);
       });
     } catch (catchErr) {
       this.log.error(`Fehler im updateData-Ablauf: ${catchErr.message}`);

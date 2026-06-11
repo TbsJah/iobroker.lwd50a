@@ -1,4 +1,5 @@
 import { STATE_MAPPING } from "./stateMapping";
+const luxtronikUtils = require("luxtronik2/utils");
 
 /**
  * Erstellt alle virtuellen Datenpunkte dynamisch im ioBroker,
@@ -85,39 +86,42 @@ export async function calculateTotalHours(adapter: any): Promise<void> {
 }
 
 /**
- * Verarbeitet das fertige Fehler-Array der Coolchip-Bibliothek
+ * Liest die Fehler-Indizes direkt aus der 3004-Liste (Messwerte) aus
  * und baut ein strukturiertes JSON-Array für den ioBroker.
  *
  * @param adapter Die Instanz des aktuellen ioBroker-Adapters
- * @param coolchipErrors Das originale errors-Array aus pump.read()
+ * @param adapter
+ * @param rawValues Das komplette Array des Befehls 3004
  */
-export async function updateErrorHistory(adapter: any, coolchipErrors: any[]): Promise<void> {
+export async function updateErrorHistory(adapter: any, rawValues: number[]): Promise<void> {
 	try {
-		if (!coolchipErrors || !Array.isArray(coolchipErrors)) {
-			adapter.log.debug("[Virtual DP] Keine gültige Fehlerliste von Coolchip erhalten.");
+		// Sicherheits-Check: Ist das Raw-Array überhaupt groß genug?
+		if (!rawValues || rawValues.length < 105) {
+			adapter.log.debug("[Virtual DP] Fehlerhistorie übersprungen: Unvollständiges Raw-Array 3004.");
 			return;
 		}
 
 		const errorLogList = [];
 
-		// Wir laufen durch das von Coolchip gelieferte Array
-		for (let i = 0; i < coolchipErrors.length; i++) {
-			const err = coolchipErrors[i];
-			adapter.log.debug(
-				err
-					? `[Virtual DP] Fehler ${i + 1}: Code=${err.code}, Timestamp=${err.timestamp}`
-					: `[Virtual DP] Fehler ${i + 1}: Kein Fehler (Code=0)`,
-			);
-			// Nur hinzufügen, wenn ein echter Fehlercode existiert und ungleich 0 ist
-			if (err && err.code && err.code !== 0) {
-				// Coolchip liefert den Zeitstempel meistens als Unix-Timestamp (Sekunden)
-				const errorTimestamp = err.timestamp;
+		// Schleife läuft 5-mal (für Fehler 1 bis Fehler 5)
+		for (let i = 0; i < 5; i++) {
+			// DEINE ZUORDNUNG:
+			const errorTimestamp = rawValues[95 + i]; // Index 95, 96, 97, 98, 99
+			const errorCode = rawValues[100 + i]; // Index 100, 101, 102, 103, 104
+
+			// Nur verarbeiten, wenn auch wirklich ein Fehler hinterlegt ist (Code ungleich 0)
+			if (errorCode !== 0) {
+				// Unix-Timestamp in Millisekunden (* 1000) umwandeln und als deutsches Datum formatieren
 				const dateObject = new Date(errorTimestamp * 1000);
 				const readableDate = errorTimestamp > 0 ? dateObject.toLocaleString("de-DE") : "Unbekannt";
 
+				// Klartext-Beschreibung aus der Utils-Datei holen
+				const fehlerText = luxtronikUtils.errorCodes[errorCode] || "Unbekannter Fehler";
+
 				errorLogList.push({
 					index: i + 1,
-					code: err.code,
+					code: errorCode,
+					beschreibung: fehlerText,
 					datum: readableDate,
 					timestamp: errorTimestamp,
 				});
@@ -125,12 +129,10 @@ export async function updateErrorHistory(adapter: any, coolchipErrors: any[]): P
 		}
 
 		const jsonString = JSON.stringify(errorLogList);
-		await adapter.setStateChangedAsync("Informationen.Fehlerspeicher.Fehlerspeicher", jsonString, true);
+		await adapter.setStateChangedAsync("Informationen.Fehlerspeicher.error_history", jsonString, true);
 
-		adapter.log.debug(
-			`[Virtual DP] Fehlerhistorie über Coolchip-Modul aktualisiert. ${errorLogList.length} Einträge.`,
-		);
+		adapter.log.debug(`[Virtual DP] RAW-Fehlerhistorie aktualisiert. ${errorLogList.length} Einträge hinterlegt.`);
 	} catch (err: any) {
-		adapter.log.error(`Fehler bei der JSON-Fehlerhistorie via Coolchip: ${err.message}`);
+		adapter.log.error(`Fehler bei der Generierung der RAW-JSON-Fehlerhistorie: ${err.message}`);
 	}
 }
