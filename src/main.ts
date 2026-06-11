@@ -324,7 +324,7 @@ class Lwd50a extends utils.Adapter {
 				await calculateTotalHours(this);
 
 				// JETZT NEU & EINFACH: Direkt das errors-Objekt von Coolchip übergeben
-				await updateErrorHistory(this, coolchipData.errors);
+				await updateErrorHistory(this, coolchipData.values.errors);
 			});
 		} catch (catchErr) {
 			this.log.error(`Fehler im updateData-Ablauf: ${(catchErr as Error).message}`);
