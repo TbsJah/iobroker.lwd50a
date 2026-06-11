@@ -6,7 +6,7 @@ import * as utils from "@iobroker/adapter-core";
 import * as luxtronik from "luxtronik2";
 import * as net from "net";
 import { STATE_MAPPING } from "./stateMapping";
-import { initializeVirtualStates, updateErrorHistory } from "./virtualStates";
+import { initializeVirtualStates, updateErrorHistory, updateOutageHistory } from "./virtualStates";
 
 class Lwd50a extends utils.Adapter {
 	private pollingInterval?: NodeJS.Timeout;
@@ -325,6 +325,8 @@ class Lwd50a extends utils.Adapter {
 
 				// WICHTIG: Hier übergeben wir jetzt das rawValues Array!
 				await updateErrorHistory(this, rawValues);
+
+				await updateOutageHistory(this, rawValues);
 			});
 		} catch (catchErr) {
 			this.log.error(`Fehler im updateData-Ablauf: ${(catchErr as Error).message}`);

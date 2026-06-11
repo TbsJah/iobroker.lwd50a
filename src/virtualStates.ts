@@ -150,7 +150,6 @@ export async function updateErrorHistory(adapter: any, rawValues: number[]): Pro
  * übersetzt die Codes in Klartext und baut ein strukturiertes JSON-Array.
  *
  * @param adapter Die Instanz des aktuellen ioBroker-Adapters
- * @param adapter
  * @param rawValues Das komplette Array des Befehls 3004
  */
 export async function updateOutageHistory(adapter: any, rawValues: number[]): Promise<void> {
@@ -181,7 +180,7 @@ export async function updateOutageHistory(adapter: any, rawValues: number[]): Pr
 
 				// Stufenweise, crash-sichere Überprüfung der Bibliotheks-Utils
 				if (luxtronikTypes) {
-					const utilsAny = luxtronikTypes as any;
+					const utilsAny = luxtronikTypes;
 
 					if (utilsAny.outageCodes && utilsAny.outageCodes[outageCode]) {
 						abschaltText = utilsAny.outageCodes[outageCode];

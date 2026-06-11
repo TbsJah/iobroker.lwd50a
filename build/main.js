@@ -272,6 +272,7 @@ class Lwd50a extends utils.Adapter {
           }
         }
         await (0, import_virtualStates.updateErrorHistory)(this, rawValues);
+        await (0, import_virtualStates.updateOutageHistory)(this, rawValues);
       });
     } catch (catchErr) {
       this.log.error(`Fehler im updateData-Ablauf: ${catchErr.message}`);
