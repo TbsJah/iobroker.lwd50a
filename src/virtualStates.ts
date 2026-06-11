@@ -144,3 +144,72 @@ export async function updateErrorHistory(adapter: any, rawValues: number[]): Pro
 		adapter.log.error(`Fehler bei der Generierung der RAW-JSON-Fehlerhistorie: ${err.message}`);
 	}
 }
+
+/**
+ * Liest die Abschalt-Indizes direkt aus der 3004-Liste (Messwerte) aus,
+ * übersetzt die Codes in Klartext und baut ein strukturiertes JSON-Array.
+ *
+ * @param adapter Die Instanz des aktuellen ioBroker-Adapters
+ * @param adapter
+ * @param rawValues Das komplette Array des Befehls 3004
+ */
+export async function updateOutageHistory(adapter: any, rawValues: number[]): Promise<void> {
+	try {
+		// Sicherheits-Check: Ist das Raw-Array groß genug für Index 115? (Länge muss min. 116 sein)
+		if (!rawValues || rawValues.length < 116) {
+			adapter.log.debug("[Virtual DP] Abschalthistorie übersprungen: Unvollständiges Raw-Array 3004.");
+			return;
+		}
+
+		const outageLogList = [];
+
+		// Schleife läuft exakt 5-mal (für Abschaltung 1 bis 5)
+		for (let i = 0; i < 5; i++) {
+			// ZUORDNUNG LAUT DEINER PRÜFUNG:
+			// 106-110 = Abschaltcode, 111-115 = Zeitstempel
+			const outageCode = rawValues[106 + i];
+			const outageTimestamp = rawValues[111 + i];
+
+			// Nur verarbeiten, wenn ein echter Code vorliegt (ungleich 0)
+			if (outageCode !== 0) {
+				// Unix-Timestamp in Millisekunden umrechnen und lokales deutsches Format erzeugen
+				const dateObject = new Date(outageTimestamp * 1000);
+				const readableDate = outageTimestamp > 0 ? dateObject.toLocaleString("de-DE") : "Unbekannt";
+
+				// Fallback-Text generieren
+				let abschaltText = `Unbekannter Abschaltgrund (${outageCode})`;
+
+				// Stufenweise, crash-sichere Überprüfung der Bibliotheks-Utils
+				if (luxtronikTypes) {
+					const utilsAny = luxtronikTypes as any;
+
+					if (utilsAny.outageCodes && utilsAny.outageCodes[outageCode]) {
+						abschaltText = utilsAny.outageCodes[outageCode];
+					} else if (utilsAny.outages && utilsAny.outages[outageCode]) {
+						abschaltText = utilsAny.outages[outageCode];
+					} else if (utilsAny.switchOffCodes && utilsAny.switchOffCodes[outageCode]) {
+						abschaltText = utilsAny.switchOffCodes[outageCode];
+					}
+				}
+
+				outageLogList.push({
+					index: i + 1,
+					code: outageCode,
+					beschreibung: abschaltText,
+					datum: readableDate,
+					timestamp: outageTimestamp,
+				});
+			}
+		}
+
+		// Array in einen JSON-String konvertieren und im ioBroker speichern
+		const jsonString = JSON.stringify(outageLogList);
+		await adapter.setStateChangedAsync("Informationen.07_Abschaltungen.Abschaltungen", jsonString, true);
+
+		adapter.log.debug(
+			`[Virtual DP] RAW-Abschalthistorie aktualisiert. ${outageLogList.length} Einträge hinterlegt.`,
+		);
+	} catch (err: any) {
+		adapter.log.error(`Fehler bei der Generierung der RAW-JSON-Abschalthistorie: ${err.message}`);
+	}
+}

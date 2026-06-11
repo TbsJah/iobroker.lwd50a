@@ -29,7 +29,8 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 var virtualStates_exports = {};
 __export(virtualStates_exports, {
   initializeVirtualStates: () => initializeVirtualStates,
-  updateErrorHistory: () => updateErrorHistory
+  updateErrorHistory: () => updateErrorHistory,
+  updateOutageHistory: () => updateOutageHistory
 });
 module.exports = __toCommonJS(virtualStates_exports);
 var import_stateMapping = require("./stateMapping");
@@ -113,9 +114,52 @@ async function updateErrorHistory(adapter, rawValues) {
     adapter.log.error(`Fehler bei der Generierung der RAW-JSON-Fehlerhistorie: ${err.message}`);
   }
 }
+async function updateOutageHistory(adapter, rawValues) {
+  try {
+    if (!rawValues || rawValues.length < 116) {
+      adapter.log.debug("[Virtual DP] Abschalthistorie \xFCbersprungen: Unvollst\xE4ndiges Raw-Array 3004.");
+      return;
+    }
+    const outageLogList = [];
+    for (let i = 0; i < 5; i++) {
+      const outageCode = rawValues[106 + i];
+      const outageTimestamp = rawValues[111 + i];
+      if (outageCode !== 0) {
+        const dateObject = new Date(outageTimestamp * 1e3);
+        const readableDate = outageTimestamp > 0 ? dateObject.toLocaleString("de-DE") : "Unbekannt";
+        let abschaltText = `Unbekannter Abschaltgrund (${outageCode})`;
+        if (luxtronikTypes) {
+          const utilsAny = luxtronikTypes;
+          if (utilsAny.outageCodes && utilsAny.outageCodes[outageCode]) {
+            abschaltText = utilsAny.outageCodes[outageCode];
+          } else if (utilsAny.outages && utilsAny.outages[outageCode]) {
+            abschaltText = utilsAny.outages[outageCode];
+          } else if (utilsAny.switchOffCodes && utilsAny.switchOffCodes[outageCode]) {
+            abschaltText = utilsAny.switchOffCodes[outageCode];
+          }
+        }
+        outageLogList.push({
+          index: i + 1,
+          code: outageCode,
+          beschreibung: abschaltText,
+          datum: readableDate,
+          timestamp: outageTimestamp
+        });
+      }
+    }
+    const jsonString = JSON.stringify(outageLogList);
+    await adapter.setStateChangedAsync("Informationen.07_Abschaltungen.Abschaltungen", jsonString, true);
+    adapter.log.debug(
+      `[Virtual DP] RAW-Abschalthistorie aktualisiert. ${outageLogList.length} Eintr\xE4ge hinterlegt.`
+    );
+  } catch (err) {
+    adapter.log.error(`Fehler bei der Generierung der RAW-JSON-Abschalthistorie: ${err.message}`);
+  }
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   initializeVirtualStates,
-  updateErrorHistory
+  updateErrorHistory,
+  updateOutageHistory
 });
 //# sourceMappingURL=virtualStates.js.map

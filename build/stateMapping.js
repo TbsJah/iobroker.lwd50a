@@ -435,6 +435,14 @@ const STATE_MAPPING = {
     isVirtual: true
     // <--- DAS IST ENTSCHEIDEND!
   },
+  Abschaltungen: {
+    folder: "Informationen.07_Abschaltungen",
+    name: "Abschalthistorie (Die letzten 5 Abschaltungen)",
+    role: "string",
+    type: "json",
+    isVirtual: true
+    // <--- DAS IST ENTSCHEIDEND!
+  },
   // ==========================================
   // EINSTELLUNGEN & PARAMETER (Beschreibbar)
   // ==========================================
