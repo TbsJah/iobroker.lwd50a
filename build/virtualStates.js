@@ -84,6 +84,9 @@ async function updateErrorHistory(adapter, coolchipErrors) {
     const errorLogList = [];
     for (let i = 0; i < coolchipErrors.length; i++) {
       const err = coolchipErrors[i];
+      adapter.log.debug(
+        err ? `[Virtual DP] Fehler ${i + 1}: Code=${err.code}, Timestamp=${err.timestamp}` : `[Virtual DP] Fehler ${i + 1}: Kein Fehler (Code=0)`
+      );
       if (err && err.code && err.code !== 0) {
         const errorTimestamp = err.timestamp;
         const dateObject = new Date(errorTimestamp * 1e3);

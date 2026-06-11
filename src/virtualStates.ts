@@ -103,7 +103,11 @@ export async function updateErrorHistory(adapter: any, coolchipErrors: any[]): P
 		// Wir laufen durch das von Coolchip gelieferte Array
 		for (let i = 0; i < coolchipErrors.length; i++) {
 			const err = coolchipErrors[i];
-
+			adapter.log.debug(
+				err
+					? `[Virtual DP] Fehler ${i + 1}: Code=${err.code}, Timestamp=${err.timestamp}`
+					: `[Virtual DP] Fehler ${i + 1}: Kein Fehler (Code=0)`,
+			);
 			// Nur hinzufügen, wenn ein echter Fehlercode existiert und ungleich 0 ist
 			if (err && err.code && err.code !== 0) {
 				// Coolchip liefert den Zeitstempel meistens als Unix-Timestamp (Sekunden)
