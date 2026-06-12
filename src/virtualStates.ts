@@ -57,27 +57,28 @@ export async function initializeVirtualStates(adapter: any): Promise<void> {
 	}
 }
 
-// /**
-//  * Berechnet die Gesamt-Betriebsstunden aus Heizung und Warmwasser
-//  * und schreibt das Ergebnis in den virtuellen Datenpunkt.
-//  *
-//  * @param adapter Beispiel: "this" innerhalb der Adapter-Klasse, damit die Methoden setObjectNotExistsAsync und setStateAsync verfügbar sind
-//  */
-// export async function calculateTotalHours(adapter: any): Promise<void> {
-// 	try {
-// 		const heatingState = await adapter.getStateAsync("Informationen.Statistik.hours_heating");
-// 		const warmwaterState = await adapter.getStateAsync("Informationen.Statistik.hours_warmwater");
+/**
+ * Berechnet die Gesamt-Wärmemenge aus Heizung und Warmwasser
+ * und schreibt das Ergebnis in den virtuellen Datenpunkt.
+ *
+ * @param adapter Beispiel: "this" innerhalb der Adapter-Klasse, damit die Methoden setObjectNotExistsAsync und setStateAsync verfügbar sind
+ */
+export async function calculateTotalThermalEnergy(adapter: any): Promise<void> {
+	try {
+		const heatingState = await adapter.getStateAsync("Informationen.09_Wärmemenge.thermalenergy_heating");
+		const warmwaterState = await adapter.getStateAsync("Informationen.09_Wärmemenge.thermalenergy_warmwater");
 
-// 		const hoursHeating = heatingState && typeof heatingState.val === "number" ? heatingState.val : 0;
-// 		const hoursWarmwater = warmwaterState && typeof warmwaterState.val === "number" ? warmwaterState.val : 0;
+		const thermalEnergyHeating = heatingState && typeof heatingState.val === "number" ? heatingState.val : 0;
+		const thermalEnergyWarmwater =
+			warmwaterState && typeof warmwaterState.val === "number" ? warmwaterState.val : 0;
 
-// 		const totalHours = hoursHeating + hoursWarmwater;
+		const totalThermalEnergy = thermalEnergyHeating + thermalEnergyWarmwater;
 
-// 		await adapter.setStateChangedAsync("Informationen.Statistik.hours_total_calculated", totalHours, true);
-// 	} catch (err: any) {
-// 		adapter.log.error(`Fehler bei der Berechnung der Gesamt-Betriebsstunden: ${err.message}`);
-// 	}
-// }
+		await adapter.setStateChangedAsync("Informationen.09_Wärmemenge.thermalenergy_total", totalThermalEnergy, true);
+	} catch (err: any) {
+		adapter.log.error(`Fehler bei der Berechnung der Gesamt-Wärmemenge: ${err.message}`);
+	}
+}
 
 /**
  * Liest die Fehler-Indizes direkt aus der 3004-Liste (Messwerte) aus,

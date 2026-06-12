@@ -105,37 +105,40 @@ const STATE_MAPPING = {
     type: "number",
     unit: "\xB0C"
   },
-  LIN_TUE1: {
+  temperature_overheating_target: {
     folder: "Informationen.01_Temperaturen",
-    name: "LIN-Bus Ansaug VD",
+    name: "\xDCberhitzung Soll",
     role: "value.temperature",
     type: "number",
-    unit: "\xB0C",
-    factor: 10
+    unit: "K"
   },
-  LIN_VDH: {
+  temperature_compressor1_heating: {
     folder: "Informationen.01_Temperaturen",
-    name: "LIN-Bus Hei\xDFgastemperatur Verdichter (VDH)",
+    name: "Hei\xDFgas Kompressor 1",
     role: "value.temperature",
     type: "number",
-    unit: "\xB0C",
-    factor: 10
+    unit: "\xB0C"
   },
-  LIN_UH: {
+  temperature_overheating: {
     folder: "Informationen.01_Temperaturen",
-    name: "LIN-Bus \xDCberhitzung Ist (UH)",
+    name: "\xDCberhitzung Ist",
     role: "value.temperature",
     type: "number",
-    unit: "K",
-    factor: 10
+    unit: "\xB0C"
   },
-  LIN_UH_Soll: {
+  temperature_intake_compressor1: {
     folder: "Informationen.01_Temperaturen",
-    name: "LIN-Bus \xDCberhitzung Soll",
+    name: "Saugstatus Kompressor 1 Temperatur",
     role: "value.temperature",
     type: "number",
-    unit: "K",
-    factor: 10
+    unit: "\xB0C"
+  },
+  temperature_intake_evaporation: {
+    folder: "Informationen.01_Temperaturen",
+    name: "Saugstatus Verdampfer Temperatur",
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C"
   },
   // Eingänge
   ASDin: {
@@ -463,24 +466,6 @@ const STATE_MAPPING = {
       7: "K\xFChlung"
     }
   },
-  heatpump_state1: {
-    folder: "Informationen.08_Betriebszustand",
-    name: "W\xE4rmepumpen Status-Code 1",
-    role: "value",
-    type: "number"
-  },
-  heatpump_state2: {
-    folder: "Informationen.08_Betriebszustand",
-    name: "W\xE4rmepumpen Status-Code 2",
-    role: "value",
-    type: "number"
-  },
-  heatpump_state3: {
-    folder: "Informationen.08_Betriebszustand",
-    name: "W\xE4rmepumpen Status-Code 3",
-    role: "value",
-    type: "number"
-  },
   heatpump_extendet_state_string: {
     folder: "Informationen.08_Betriebszustand",
     name: "Erweiterter Status Text",
@@ -525,18 +510,27 @@ const STATE_MAPPING = {
     role: "text",
     type: "string"
   },
-  ahp_Stufe: {
-    folder: "Informationen.08_Betriebszustand",
-    name: "Aktuelle ahp-Stufe",
-    role: "value",
-    type: "number"
-  },
-  ahp_Temp: {
-    folder: "Informationen.08_Betriebszustand",
-    name: "Temperatur ahp-Stufe",
-    role: "value.temperature",
+  //Wärmemenge
+  thermalenergy_heating: {
+    folder: "Informationen.09_W\xE4rmemenge",
+    name: "W\xE4rmemenge Heizung Erzeugt",
+    role: "value.power.consumption",
     type: "number",
-    unit: "\xB0C"
+    unit: "kWh"
+  },
+  thermalenergy_warmwater: {
+    folder: "Informationen.09_W\xE4rmemenge",
+    name: "W\xE4rmemenge Warmwasser Erzeugt",
+    role: "value.power.consumption",
+    type: "number",
+    unit: "kWh"
+  },
+  thermalenergy_total: {
+    folder: "Informationen.09_W\xE4rmemenge",
+    name: "W\xE4rmemenge Gesamt Erzeugt",
+    role: "value.power.consumption",
+    type: "number",
+    unit: "kWh"
   },
   // ==========================================
   // EINSTELLUNGEN & PARAMETER (Beschreibbar)
@@ -771,79 +765,6 @@ const STATE_MAPPING = {
     write: true,
     luxWriteId: "869",
     unit: "\xB0C"
-  },
-  temperature_overheating_target: {
-    folder: "Informationen.Kaeltekreis",
-    name: "\xDCberhitzung Soll",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C"
-  },
-  temperature_compressor1_heating: {
-    folder: "Informationen.Kaeltekreis",
-    name: "Hei\xDFgas Kompressor 1",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C"
-  },
-  temperature_overheating: {
-    folder: "Informationen.Kaeltekreis",
-    name: "\xDCberhitzung Ist",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C"
-  },
-  temperature_intake_compressor1: {
-    folder: "Informationen.Kaeltekreis",
-    name: "Saugstatus Kompressor 1 Temperatur",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C"
-  },
-  temperature_intake_evaporation: {
-    folder: "Informationen.Kaeltekreis",
-    name: "Saugstatus Verdampfer Temperatur",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C"
-  },
-  thermalenergy_heating: {
-    folder: "Informationen.Statistik",
-    name: "W\xE4rmemenge Heizung Erzeugt",
-    role: "value.power.consumption",
-    type: "number",
-    unit: "kWh"
-  },
-  thermalenergy_warmwater: {
-    folder: "Informationen.Statistik",
-    name: "W\xE4rmemenge Warmwasser Erzeugt",
-    role: "value.power.consumption",
-    type: "number",
-    unit: "kWh"
-  },
-  thermalenergy_pool: {
-    folder: "Informationen.Statistik",
-    name: "W\xE4rmemenge Schwimmbad Erzeugt",
-    role: "value.power.consumption",
-    type: "number",
-    unit: "kWh"
-  },
-  thermalenergy_total: {
-    folder: "Informationen.Statistik",
-    name: "W\xE4rmemenge Gesamt Erzeugt",
-    role: "value.power.consumption",
-    type: "number",
-    unit: "kWh"
-  },
-  thermalenergyTotal: {
-    folder: "Informationen.Statistik",
-    name: "W\xE4rmemenge Gesamt Erzeugt",
-    role: "value.power.consumption",
-    type: "number",
-    unit: "kWh",
-    write: false,
-    luxWriteId: "thermalenergy_total",
-    factor: 10
   },
   typeHeatpump: { folder: "Informationen.Systeminfo", name: "W\xE4rmepumpen-Typ", role: "text", type: "string" },
   firmware: { folder: "Informationen.Systeminfo", name: "Firmware-Version", role: "text", type: "string" },

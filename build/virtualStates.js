@@ -28,6 +28,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 var virtualStates_exports = {};
 __export(virtualStates_exports, {
+  calculateTotalThermalEnergy: () => calculateTotalThermalEnergy,
   initializeVirtualStates: () => initializeVirtualStates,
   updateErrorHistory: () => updateErrorHistory,
   updateOutageHistory: () => updateOutageHistory
@@ -72,6 +73,18 @@ async function initializeVirtualStates(adapter) {
     }
   } catch (err) {
     adapter.log.error(`Fehler bei der Initialisierung der virtuellen Datenpunkte: ${err.message}`);
+  }
+}
+async function calculateTotalThermalEnergy(adapter) {
+  try {
+    const heatingState = await adapter.getStateAsync("Informationen.09_W\xE4rmemenge.thermalenergy_heating");
+    const warmwaterState = await adapter.getStateAsync("Informationen.09_W\xE4rmemenge.thermalenergy_warmwater");
+    const thermalEnergyHeating = heatingState && typeof heatingState.val === "number" ? heatingState.val : 0;
+    const thermalEnergyWarmwater = warmwaterState && typeof warmwaterState.val === "number" ? warmwaterState.val : 0;
+    const totalThermalEnergy = thermalEnergyHeating + thermalEnergyWarmwater;
+    await adapter.setStateChangedAsync("Informationen.09_W\xE4rmemenge.thermalenergy_total", totalThermalEnergy, true);
+  } catch (err) {
+    adapter.log.error(`Fehler bei der Berechnung der Gesamt-W\xE4rmemenge: ${err.message}`);
   }
 }
 async function updateErrorHistory(adapter, rawValues) {
@@ -154,6 +167,7 @@ async function updateOutageHistory(adapter, rawValues) {
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
+  calculateTotalThermalEnergy,
   initializeVirtualStates,
   updateErrorHistory,
   updateOutageHistory

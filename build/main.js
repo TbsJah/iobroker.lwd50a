@@ -271,6 +271,7 @@ class Lwd50a extends utils.Adapter {
             await this.setStateChangedAsync(stateId, value, true);
           }
         }
+        await (0, import_virtualStates.calculateTotalThermalEnergy)(this);
         await (0, import_virtualStates.updateErrorHistory)(this, rawValues);
         await (0, import_virtualStates.updateOutageHistory)(this, rawValues);
       });

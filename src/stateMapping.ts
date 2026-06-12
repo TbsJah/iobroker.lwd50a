@@ -116,37 +116,40 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "°C",
 	},
-	LIN_TUE1: {
+	temperature_overheating_target: {
 		folder: "Informationen.01_Temperaturen",
-		name: "LIN-Bus Ansaug VD",
-		role: "value.temperature",
-		type: "number",
-		unit: "°C",
-		factor: 10,
-	},
-	LIN_VDH: {
-		folder: "Informationen.01_Temperaturen",
-		name: "LIN-Bus Heißgastemperatur Verdichter (VDH)",
-		role: "value.temperature",
-		type: "number",
-		unit: "°C",
-		factor: 10,
-	},
-	LIN_UH: {
-		folder: "Informationen.01_Temperaturen",
-		name: "LIN-Bus Überhitzung Ist (UH)",
+		name: "Überhitzung Soll",
 		role: "value.temperature",
 		type: "number",
 		unit: "K",
-		factor: 10,
 	},
-	LIN_UH_Soll: {
+	temperature_compressor1_heating: {
 		folder: "Informationen.01_Temperaturen",
-		name: "LIN-Bus Überhitzung Soll",
+		name: "Heißgas Kompressor 1",
 		role: "value.temperature",
 		type: "number",
-		unit: "K",
-		factor: 10,
+		unit: "°C",
+	},
+	temperature_overheating: {
+		folder: "Informationen.01_Temperaturen",
+		name: "Überhitzung Ist",
+		role: "value.temperature",
+		type: "number",
+		unit: "°C",
+	},
+	temperature_intake_compressor1: {
+		folder: "Informationen.01_Temperaturen",
+		name: "Saugstatus Kompressor 1 Temperatur",
+		role: "value.temperature",
+		type: "number",
+		unit: "°C",
+	},
+	temperature_intake_evaporation: {
+		folder: "Informationen.01_Temperaturen",
+		name: "Saugstatus Verdampfer Temperatur",
+		role: "value.temperature",
+		type: "number",
+		unit: "°C",
 	},
 
 	// Eingänge
@@ -479,31 +482,12 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 			7: "Kühlung",
 		},
 	},
-	heatpump_state1: {
-		folder: "Informationen.08_Betriebszustand",
-		name: "Wärmepumpen Status-Code 1",
-		role: "value",
-		type: "number",
-	},
-	heatpump_state2: {
-		folder: "Informationen.08_Betriebszustand",
-		name: "Wärmepumpen Status-Code 2",
-		role: "value",
-		type: "number",
-	},
-	heatpump_state3: {
-		folder: "Informationen.08_Betriebszustand",
-		name: "Wärmepumpen Status-Code 3",
-		role: "value",
-		type: "number",
-	},
 	heatpump_extendet_state_string: {
 		folder: "Informationen.08_Betriebszustand",
 		name: "Erweiterter Status Text",
 		role: "text",
 		type: "string",
 	},
-
 	opStateHeating: {
 		folder: "Informationen.08_Betriebszustand",
 		name: "Betriebszustand Heizung",
@@ -543,19 +527,27 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "string",
 	},
 
-	ahp_Stufe: {
-		folder: "Informationen.08_Betriebszustand",
-		name: "Aktuelle ahp-Stufe",
-		role: "value",
+	//Wärmemenge
+	thermalenergy_heating: {
+		folder: "Informationen.09_Wärmemenge",
+		name: "Wärmemenge Heizung Erzeugt",
+		role: "value.power.consumption",
 		type: "number",
+		unit: "kWh",
 	},
-
-	ahp_Temp: {
-		folder: "Informationen.08_Betriebszustand",
-		name: "Temperatur ahp-Stufe",
-		role: "value.temperature",
+	thermalenergy_warmwater: {
+		folder: "Informationen.09_Wärmemenge",
+		name: "Wärmemenge Warmwasser Erzeugt",
+		role: "value.power.consumption",
 		type: "number",
-		unit: "°C",
+		unit: "kWh",
+	},
+	thermalenergy_total: {
+		folder: "Informationen.09_Wärmemenge",
+		name: "Wärmemenge Gesamt Erzeugt",
+		role: "value.power.consumption",
+		type: "number",
+		unit: "kWh",
 	},
 
 	// ==========================================
@@ -789,80 +781,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		write: true,
 		luxWriteId: "869",
 		unit: "°C",
-	},
-	temperature_overheating_target: {
-		folder: "Informationen.Kaeltekreis",
-		name: "Überhitzung Soll",
-		role: "value.temperature",
-		type: "number",
-		unit: "°C",
-	},
-	temperature_compressor1_heating: {
-		folder: "Informationen.Kaeltekreis",
-		name: "Heißgas Kompressor 1",
-		role: "value.temperature",
-		type: "number",
-		unit: "°C",
-	},
-	temperature_overheating: {
-		folder: "Informationen.Kaeltekreis",
-		name: "Überhitzung Ist",
-		role: "value.temperature",
-		type: "number",
-		unit: "°C",
-	},
-	temperature_intake_compressor1: {
-		folder: "Informationen.Kaeltekreis",
-		name: "Saugstatus Kompressor 1 Temperatur",
-		role: "value.temperature",
-		type: "number",
-		unit: "°C",
-	},
-	temperature_intake_evaporation: {
-		folder: "Informationen.Kaeltekreis",
-		name: "Saugstatus Verdampfer Temperatur",
-		role: "value.temperature",
-		type: "number",
-		unit: "°C",
-	},
-
-	thermalenergy_heating: {
-		folder: "Informationen.Statistik",
-		name: "Wärmemenge Heizung Erzeugt",
-		role: "value.power.consumption",
-		type: "number",
-		unit: "kWh",
-	},
-	thermalenergy_warmwater: {
-		folder: "Informationen.Statistik",
-		name: "Wärmemenge Warmwasser Erzeugt",
-		role: "value.power.consumption",
-		type: "number",
-		unit: "kWh",
-	},
-	thermalenergy_pool: {
-		folder: "Informationen.Statistik",
-		name: "Wärmemenge Schwimmbad Erzeugt",
-		role: "value.power.consumption",
-		type: "number",
-		unit: "kWh",
-	},
-	thermalenergy_total: {
-		folder: "Informationen.Statistik",
-		name: "Wärmemenge Gesamt Erzeugt",
-		role: "value.power.consumption",
-		type: "number",
-		unit: "kWh",
-	},
-	thermalenergyTotal: {
-		folder: "Informationen.Statistik",
-		name: "Wärmemenge Gesamt Erzeugt",
-		role: "value.power.consumption",
-		type: "number",
-		unit: "kWh",
-		write: false,
-		luxWriteId: "thermalenergy_total",
-		factor: 10,
 	},
 
 	typeHeatpump: { folder: "Informationen.Systeminfo", name: "Wärmepumpen-Typ", role: "text", type: "string" },
