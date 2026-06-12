@@ -550,6 +550,30 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		unit: "kWh",
 	},
 
+	//Energie
+	energy_heating: {
+		folder: "Informationen.09_Wärmemenge",
+		name: "Energie Heizung Erzeugt",
+		role: "value.power.consumption",
+		luxWriteId: "1136",
+		type: "number",
+		unit: "kWh",
+	},
+	energy_warmwater: {
+		folder: "Informationen.09_Wärmemenge",
+		name: "Energie Warmwasser Erzeugt",
+		role: "value.power.consumption",
+		type: "number",
+		luxWriteId: "1137",
+		unit: "kWh",
+	},
+	energy_total: {
+		folder: "Informationen.09_Wärmemenge",
+		name: "Energie Gesamt Erzeugt",
+		role: "value.power.consumption",
+		type: "number",
+		unit: "kWh",
+	},
 	// ==========================================
 	// EINSTELLUNGEN & PARAMETER (Beschreibbar)
 	// ==========================================

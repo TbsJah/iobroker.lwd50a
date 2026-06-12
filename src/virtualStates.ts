@@ -81,6 +81,28 @@ export async function calculateTotalThermalEnergy(adapter: any): Promise<void> {
 }
 
 /**
+ * Berechnet die Gesamt-Energie aus Heizung und Warmwasser
+ * und schreibt das Ergebnis in den virtuellen Datenpunkt.
+ *
+ * @param adapter Beispiel: "this" innerhalb der Adapter-Klasse, damit die Methoden setObjectNotExistsAsync und setStateAsync verfügbar sind
+ */
+export async function calculateTotalEnergy(adapter: any): Promise<void> {
+	try {
+		const heatingState = await adapter.getStateAsync("Informationen.09_Wärmemenge.energy_heating");
+		const warmwaterState = await adapter.getStateAsync("Informationen.09_Wärmemenge.energy_warmwater");
+
+		const EnergyHeating = heatingState && typeof heatingState.val === "number" ? heatingState.val : 0;
+		const EnergyWarmwater = warmwaterState && typeof warmwaterState.val === "number" ? warmwaterState.val : 0;
+
+		const totalEnergy = EnergyHeating + EnergyWarmwater;
+
+		await adapter.setStateChangedAsync("Informationen.09_Wärmemenge.energy_total", totalEnergy, true);
+	} catch (err: any) {
+		adapter.log.error(`Fehler bei der Berechnung der Gesamt-Energie: ${err.message}`);
+	}
+}
+
+/**
  * Liest die Fehler-Indizes direkt aus der 3004-Liste (Messwerte) aus,
  * übersetzt die Fehlercodes in Klartext und baut ein strukturiertes JSON-Array.
  *
