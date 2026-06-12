@@ -628,7 +628,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "kWh",
 		dataSource: "raw_parameter", // <--- HIER DER WECHSEL ZU 3003!
-		factor: 10,
+		factor: 100,
 	},
 	energy_warmwater: {
 		folder: "Informationen.10_Engergie",
@@ -638,7 +638,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "1137",
 		unit: "kWh",
 		dataSource: "raw_parameter", // <--- HIER DER WECHSEL ZU 3003!
-		factor: 10,
+		factor: 100,
 	},
 	energy_total: {
 		folder: "Informationen.10_Engergie",

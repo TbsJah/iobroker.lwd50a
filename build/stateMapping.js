@@ -607,7 +607,7 @@ const STATE_MAPPING = {
     unit: "kWh",
     dataSource: "raw_parameter",
     // <--- HIER DER WECHSEL ZU 3003!
-    factor: 10
+    factor: 100
   },
   energy_warmwater: {
     folder: "Informationen.10_Engergie",
@@ -618,7 +618,7 @@ const STATE_MAPPING = {
     unit: "kWh",
     dataSource: "raw_parameter",
     // <--- HIER DER WECHSEL ZU 3003!
-    factor: 10
+    factor: 100
   },
   energy_total: {
     folder: "Informationen.10_Engergie",
