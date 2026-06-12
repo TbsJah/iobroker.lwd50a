@@ -626,7 +626,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "1136",
 		type: "number",
 		unit: "kWh",
-		dataSource: "value",
+		dataSource: "parameter",
 	},
 	energy_warmwater: {
 		folder: "Informationen.10_Engergie",
@@ -635,7 +635,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		luxWriteId: "1137",
 		unit: "kWh",
-		dataSource: "value",
+		dataSource: "parameter",
 	},
 	energy_total: {
 		folder: "Informationen.10_Engergie",
@@ -643,7 +643,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value.power.consumption",
 		type: "number",
 		unit: "kWh",
-		dataSource: "value",
+		dataSource: "parameter",
 	},
 
 	// ==========================================

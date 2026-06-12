@@ -604,7 +604,7 @@ const STATE_MAPPING = {
     luxWriteId: "1136",
     type: "number",
     unit: "kWh",
-    dataSource: "value"
+    dataSource: "parameter"
   },
   energy_warmwater: {
     folder: "Informationen.10_Engergie",
@@ -613,7 +613,7 @@ const STATE_MAPPING = {
     type: "number",
     luxWriteId: "1137",
     unit: "kWh",
-    dataSource: "value"
+    dataSource: "parameter"
   },
   energy_total: {
     folder: "Informationen.10_Engergie",
@@ -621,7 +621,7 @@ const STATE_MAPPING = {
     role: "value.power.consumption",
     type: "number",
     unit: "kWh",
-    dataSource: "value"
+    dataSource: "parameter"
   },
   // ==========================================
   // EINSTELLUNGEN & PARAMETER (Beschreibbar)
