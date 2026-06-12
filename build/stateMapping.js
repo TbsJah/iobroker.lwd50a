@@ -632,8 +632,26 @@ const STATE_MAPPING = {
   // ==========================================
   // EINSTELLUNGEN & PARAMETER (Beschreibbar)
   // ==========================================
+  heating_operation_mode: {
+    folder: "Einstellungen.01_Betriebsmodus",
+    name: "Betriebsart Heizung",
+    role: "level.mode",
+    type: "number",
+    write: true,
+    states: { 0: "Automatik", 1: "Zweites WEZ", 2: "Party", 3: "Ferien", 4: "Aus" },
+    dataSource: "parameter"
+  },
+  warmwater_operation_mode: {
+    folder: "Einstellungen.01_Betriebsmodus",
+    name: "Betriebsart Warmwasser",
+    role: "level.mode",
+    type: "number",
+    write: true,
+    states: { 0: "Automatik", 1: "Zweites WEZ", 2: "Party", 3: "Ferien", 4: "Aus" },
+    dataSource: "parameter"
+  },
   heating_curve_end_point: {
-    folder: "Einstellungen.Heizung",
+    folder: "Einstellungen.02_Heizung",
     name: "Heizkurve Endpunkt (R\xFCcklauf)",
     role: "value.temperature",
     type: "number",
@@ -644,7 +662,7 @@ const STATE_MAPPING = {
     dataSource: "parameter"
   },
   heating_curve_parallel_offset: {
-    folder: "Einstellungen.Heizung",
+    folder: "Einstellungen.02_Heizung",
     name: "Heizkurve Fusspunkt",
     role: "value.temperature",
     type: "number",
@@ -655,7 +673,7 @@ const STATE_MAPPING = {
     dataSource: "parameter"
   },
   deltaHeatingReduction: {
-    folder: "Einstellungen.Heizung",
+    folder: "Einstellungen.02_Heizung",
     name: "Heizung Nachtabsenkung (Delta)",
     role: "value.temperature",
     type: "number",
@@ -667,7 +685,7 @@ const STATE_MAPPING = {
     dataSource: "parameter"
   },
   heating_temperature: {
-    folder: "Einstellungen.Heizung",
+    folder: "Einstellungen.02_Heizung",
     name: "Heizung Verschiebng Soll-Temperatur (Wunschwert)",
     role: "value.temperature",
     type: "number",
@@ -679,7 +697,7 @@ const STATE_MAPPING = {
     dataSource: "parameter"
   },
   returnTemperatureHysteresis: {
-    folder: "Einstellungen.Heizung",
+    folder: "Einstellungen.02_Heizung",
     name: "R\xFCcklauftemperatur Hysterese",
     role: "value.temperature",
     type: "number",
@@ -690,8 +708,29 @@ const STATE_MAPPING = {
     max: 5,
     dataSource: "parameter"
   },
+  thresholdHeatingLimit: {
+    folder: "Einstellungen.02_Heizung",
+    name: "Parameter 700 (ID_Einst_Heizgrenze_Temp)",
+    role: "value",
+    type: "number",
+    write: true,
+    luxWriteId: "700",
+    unit: "\xB0C",
+    factor: 10,
+    dataSource: "parameter"
+  },
+  heatingLimit: {
+    folder: "Einstellungen.02_Heizung",
+    name: "Parameter 699 (ID_Einst_Heizgrenze)",
+    write: true,
+    role: "value",
+    type: "number",
+    luxWriteId: "699",
+    states: { 0: "Aus", 1: "Ein" },
+    dataSource: "parameter"
+  },
   warmwater_temperature: {
-    folder: "Einstellungen.Warmwasser",
+    folder: "Einstellungen.03_Warmwasser",
     name: "Warmwasser Soll-Temperatur",
     role: "value.temperature",
     type: "number",
@@ -703,7 +742,7 @@ const STATE_MAPPING = {
     dataSource: "parameter"
   },
   hotWaterTemperatureHysteresis: {
-    folder: "Einstellungen.Warmwasser",
+    folder: "Einstellungen.03_Warmwasser",
     name: "Warmwasser Hysterese",
     role: "value.temperature",
     type: "number",
@@ -714,26 +753,8 @@ const STATE_MAPPING = {
     max: 15,
     dataSource: "parameter"
   },
-  heating_operation_mode: {
-    folder: "Einstellungen.Betriebsmodus",
-    name: "Betriebsart Heizung",
-    role: "level.mode",
-    type: "number",
-    write: true,
-    states: { 0: "Automatik", 1: "Zweites WEZ", 2: "Party", 3: "Ferien", 4: "Aus" },
-    dataSource: "parameter"
-  },
-  warmwater_operation_mode: {
-    folder: "Einstellungen.Betriebsmodus",
-    name: "Betriebsart Warmwasser",
-    role: "level.mode",
-    type: "number",
-    write: true,
-    states: { 0: "Automatik", 1: "Zweites WEZ", 2: "Party", 3: "Ferien", 4: "Aus" },
-    dataSource: "parameter"
-  },
   heating_system_circ_pump_voltage_nominal: {
-    folder: "Einstellungen.Pumpen",
+    folder: "Einstellungen.04_Pumpe",
     name: "Heizungsumw\xE4lzpumpe Nennspannung",
     role: "value.voltage",
     type: "number",
@@ -745,7 +766,7 @@ const STATE_MAPPING = {
     dataSource: "parameter"
   },
   heating_system_circ_pump_voltage_minimal: {
-    folder: "Einstellungen.Pumpen",
+    folder: "Einstellungen.04_Pumpe",
     name: "Heizungsumw\xE4lzpumpe Minimalspannung",
     role: "value.voltage",
     type: "number",
@@ -757,7 +778,7 @@ const STATE_MAPPING = {
     dataSource: "parameter"
   },
   runDeaerate: {
-    folder: "Einstellungen.Spezial",
+    folder: "Einstellungen.05_Spezial",
     name: "Entl\xFCftungsprogramm starten",
     role: "indicator",
     type: "boolean",
@@ -766,7 +787,7 @@ const STATE_MAPPING = {
     dataSource: "parameter"
   },
   hotWaterCircPumpDeaerate: {
-    folder: "Einstellungen.Spezial",
+    folder: "Einstellungen.05_Spezial",
     name: "Zirkulationspumpe entl\xFCften",
     role: "value",
     type: "number",
@@ -774,17 +795,8 @@ const STATE_MAPPING = {
     write: true,
     dataSource: "parameter"
   },
-  solarPumpDeaerate: {
-    folder: "Einstellungen.Spezial",
-    name: "Solarpumpe entl\xFCften",
-    role: "value",
-    type: "number",
-    states: { 0: "Aus", 1: "Ein" },
-    write: true,
-    dataSource: "parameter"
-  },
   Activate_Zip: {
-    folder: "Einstellungen.Spezial",
+    folder: "Einstellungen.05_Spezial",
     name: "Makro: ZIP Entl\xFCftung starten",
     role: "value",
     type: "number",
@@ -792,67 +804,6 @@ const STATE_MAPPING = {
     states: { 0: "Aus", 1: "Ein" },
     luxWriteId: "Activate_Zip",
     isVirtual: true
-  },
-  thresholdHeatingLimit: {
-    folder: "Einstellungen.System-Einstellung",
-    name: "Parameter 700 (ID_Einst_Heizgrenze_Temp)",
-    role: "value",
-    type: "number",
-    write: true,
-    luxWriteId: "700",
-    unit: "\xB0C",
-    factor: 10,
-    dataSource: "parameter"
-  },
-  heatingLimit: {
-    folder: "Einstellungen.System-Einstellung",
-    name: "Parameter 699 (ID_Einst_Heizgrenze)",
-    write: true,
-    role: "value",
-    type: "number",
-    luxWriteId: "699",
-    states: { 0: "Aus", 1: "Ein" },
-    dataSource: "parameter"
-  },
-  727: {
-    folder: "Einstellungen.System-Einstellung",
-    name: "Parameter 727 (ID_Laufvar_Heizgrenze)",
-    role: "value",
-    type: "number",
-    write: true,
-    luxWriteId: "727",
-    unit: "\xB0C",
-    dataSource: "parameter"
-  },
-  43: {
-    folder: "Einstellungen.System-Einstellung",
-    name: "Parameter 43 (ID_Einst_ABTLuft_akt)",
-    role: "value",
-    type: "number",
-    write: true,
-    luxWriteId: "43",
-    unit: "\xB0C",
-    dataSource: "raw_parameter"
-  },
-  44: {
-    folder: "Einstellungen.System-Einstellung",
-    name: "Parameter 44 (ID_Einst_ABTLuft_akt)",
-    role: "value",
-    type: "number",
-    write: true,
-    luxWriteId: "44",
-    unit: "\xB0C",
-    dataSource: "raw_parameter"
-  },
-  45: {
-    folder: "Einstellungen.System-Einstellung",
-    name: "Parameter 45 (ID_Einst_LAbtTime_akt)",
-    role: "value",
-    type: "number",
-    write: true,
-    luxWriteId: "45",
-    unit: "\xB0C",
-    dataSource: "raw_parameter"
   },
   697: {
     folder: "Einstellungen.System-Einstellung",
@@ -862,7 +813,7 @@ const STATE_MAPPING = {
     write: true,
     luxWriteId: "697",
     unit: "\xB0C",
-    dataSource: "parameter"
+    dataSource: "raw_parameter"
   },
   698: {
     folder: "Einstellungen.System-Einstellung",
@@ -872,7 +823,7 @@ const STATE_MAPPING = {
     write: true,
     luxWriteId: "698",
     unit: "\xB0C",
-    dataSource: "parameter"
+    dataSource: "raw_parameter"
   },
   869: {
     folder: "Einstellungen.System-Einstellung",
@@ -882,7 +833,7 @@ const STATE_MAPPING = {
     write: true,
     luxWriteId: "869",
     unit: "\xB0C",
-    dataSource: "parameter"
+    dataSource: "raw_parameter"
   },
   // Systeminfo
   typeHeatpump: {
@@ -953,126 +904,6 @@ const STATE_MAPPING = {
     name: "Berechnete Ger\xE4tezeit",
     role: "date",
     type: "string",
-    dataSource: "value"
-  },
-  // Status
-  status_heating: {
-    folder: "Informationen.Status",
-    name: "Status Heizbetrieb",
-    role: "indicator",
-    type: "boolean",
-    dataSource: "value"
-  },
-  Einst_Kurzprogramm: {
-    folder: "Informationen.Status",
-    name: "Einstellung Kurzprogramm",
-    role: "value",
-    type: "number",
-    dataSource: "value"
-  },
-  StatusSlave_1: {
-    folder: "Informationen.Status",
-    name: "Status Slave 1",
-    role: "value",
-    type: "number",
-    dataSource: "value"
-  },
-  StatusSlave_2: {
-    folder: "Informationen.Status",
-    name: "Status Slave 2",
-    role: "value",
-    type: "number",
-    dataSource: "value"
-  },
-  StatusSlave_3: {
-    folder: "Informationen.Status",
-    name: "Status Slave 3",
-    role: "value",
-    type: "number",
-    dataSource: "value"
-  },
-  StatusSlave_4: {
-    folder: "Informationen.Status",
-    name: "Status Slave 4",
-    role: "value",
-    type: "number",
-    dataSource: "value"
-  },
-  StatusSlave_5: {
-    folder: "Informationen.Status",
-    name: "Status Slave 5",
-    role: "value",
-    type: "number",
-    dataSource: "value"
-  },
-  SonderZeichen: {
-    folder: "Informationen.Status",
-    name: "Sonderzeichen Code",
-    role: "value",
-    type: "number",
-    dataSource: "value"
-  },
-  SH_ZIP: {
-    folder: "Informationen.Status",
-    name: "Status SH_ZIP",
-    role: "value",
-    type: "number",
-    dataSource: "value"
-  },
-  WebsrvProgrammWerteBeobarten: {
-    folder: "Informationen.Status",
-    name: "Webserver Programmwerte Beobachten",
-    role: "value",
-    type: "number",
-    dataSource: "value"
-  },
-  Durchfluss_WQ: {
-    folder: "Informationen.Status",
-    name: "Durchfluss W\xE4rmequelle",
-    role: "value",
-    type: "number",
-    dataSource: "value"
-  },
-  flowRate: {
-    folder: "Informationen.Status",
-    name: "Durchflussmenge",
-    role: "value",
-    type: "number",
-    dataSource: "value"
-  },
-  LIN_TUE: {
-    folder: "Informationen.Status",
-    name: "LIN-Bus Verdampfer-Ansaug (TUE)",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C",
-    factor: 10,
-    dataSource: "value"
-  },
-  LIN_HD: {
-    folder: "Informationen.Status",
-    name: "LIN-Bus Hochdruck",
-    role: "value.pressure",
-    type: "number",
-    unit: "bar",
-    factor: 100,
-    dataSource: "value"
-  },
-  LIN_ND: {
-    folder: "Informationen.Status",
-    name: "LIN-Bus Niederdruck",
-    role: "value.pressure",
-    type: "number",
-    unit: "bar",
-    factor: 100,
-    dataSource: "value"
-  },
-  LIN_VDH_out: {
-    folder: "Informationen.Status",
-    name: "LIN-Bus Verdichterkopfheizung Ansteuerung",
-    role: "value",
-    type: "number",
-    unit: "%",
     dataSource: "value"
   }
 };
