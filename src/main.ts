@@ -7,6 +7,7 @@ import * as luxtronik from "luxtronik2";
 import * as net from "net";
 import { STATE_MAPPING } from "./stateMapping";
 import {
+	calculateTotalEnergy,
 	calculateTotalThermalEnergy,
 	initializeVirtualStates,
 	updateErrorHistory,
@@ -327,6 +328,7 @@ class Lwd50a extends utils.Adapter {
 
 				// Virtuelle / berechnete Datenpunkte aktualisieren
 				await calculateTotalThermalEnergy(this);
+				await calculateTotalEnergy(this);
 
 				// WICHTIG: Hier übergeben wir jetzt das rawValues Array!
 				await updateErrorHistory(this, rawValues);

@@ -90,12 +90,12 @@ async function calculateTotalThermalEnergy(adapter) {
 }
 async function calculateTotalEnergy(adapter) {
   try {
-    const heatingState = await adapter.getStateAsync("Informationen.09_W\xE4rmemenge.energy_heating");
-    const warmwaterState = await adapter.getStateAsync("Informationen.09_W\xE4rmemenge.energy_warmwater");
+    const heatingState = await adapter.getStateAsync("Informationen.10_Engergie.energy_heating");
+    const warmwaterState = await adapter.getStateAsync("Informationen.10_Engergie.energy_warmwater");
     const EnergyHeating = heatingState && typeof heatingState.val === "number" ? heatingState.val : 0;
     const EnergyWarmwater = warmwaterState && typeof warmwaterState.val === "number" ? warmwaterState.val : 0;
     const totalEnergy = EnergyHeating + EnergyWarmwater;
-    await adapter.setStateChangedAsync("Informationen.09_W\xE4rmemenge.energy_total", totalEnergy, true);
+    await adapter.setStateChangedAsync("Informationen.10_Engergie.energy_total", totalEnergy, true);
   } catch (err) {
     adapter.log.error(`Fehler bei der Berechnung der Gesamt-Energie: ${err.message}`);
   }
