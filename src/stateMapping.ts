@@ -619,6 +619,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 	},
 
 	// Energie
+	// Energie
 	energy_heating: {
 		folder: "Informationen.10_Engergie",
 		name: "Energie Heizung Erzeugt",
@@ -626,7 +627,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "1136",
 		type: "number",
 		unit: "kWh",
-		dataSource: "parameter",
+		dataSource: "raw_value", // <--- KORREKTUR: raw_value statt value!
+		factor: 10, // Luxtronik liefert Energie oft in 0.1 kWh (falls die Zahl 10x zu groß ist)
 	},
 	energy_warmwater: {
 		folder: "Informationen.10_Engergie",
@@ -635,7 +637,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		luxWriteId: "1137",
 		unit: "kWh",
-		dataSource: "parameter",
+		dataSource: "raw_value", // <--- KORREKTUR: raw_value statt value!
+		factor: 10,
 	},
 	energy_total: {
 		folder: "Informationen.10_Engergie",
@@ -643,7 +646,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value.power.consumption",
 		type: "number",
 		unit: "kWh",
-		dataSource: "parameter",
+		isVirtual: true, // <--- KORREKTUR: Fehlte! Wird vom Adapter selbst addiert.
 	},
 
 	// ==========================================
