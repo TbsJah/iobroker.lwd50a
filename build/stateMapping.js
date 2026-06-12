@@ -110,7 +110,8 @@ const STATE_MAPPING = {
     name: "LIN-Bus Ansaug VD",
     role: "value.temperature",
     type: "number",
-    unit: "\xB0C"
+    unit: "\xB0C",
+    factor: 10
   },
   LIN_VDH: {
     folder: "Informationen.01_Temperaturen",
@@ -118,7 +119,7 @@ const STATE_MAPPING = {
     role: "value.temperature",
     type: "number",
     unit: "\xB0C",
-    factor: 1
+    factor: 10
   },
   LIN_UH: {
     folder: "Informationen.01_Temperaturen",
@@ -126,7 +127,7 @@ const STATE_MAPPING = {
     role: "value.temperature",
     type: "number",
     unit: "K",
-    factor: 1
+    factor: 10
   },
   LIN_UH_Soll: {
     folder: "Informationen.01_Temperaturen",
@@ -134,7 +135,7 @@ const STATE_MAPPING = {
     role: "value.temperature",
     type: "number",
     unit: "K",
-    factor: 1
+    factor: 10
   },
   // Eingänge
   ASDin: {
@@ -427,6 +428,7 @@ const STATE_MAPPING = {
     type: "number",
     unit: "h"
   },
+  //Fehlerspeicher
   Fehlerspeicher: {
     folder: "Informationen.06_Fehlerspeicher",
     name: "Fehlerhistorie (Die letzten 5 Fehler)",
@@ -435,6 +437,7 @@ const STATE_MAPPING = {
     isVirtual: true
     // <--- DAS IST ENTSCHEIDEND!
   },
+  //Abschaltungen
   Abschaltungen: {
     folder: "Informationen.07_Abschaltungen",
     name: "Abschalthistorie (Die letzten 5 Abschaltungen)",
@@ -442,6 +445,60 @@ const STATE_MAPPING = {
     type: "json",
     isVirtual: true
     // <--- DAS IST ENTSCHEIDEND!
+  },
+  //Betriebszustnd
+  WP_BZ_akt: {
+    folder: "Informationen.Betriebszustand",
+    name: "Aktueller Betriebszustand Code",
+    role: "value",
+    type: "number",
+    states: {
+      0: "Heizbetrieb",
+      1: "Trinkwarmwasser",
+      2: "Schwimmbad",
+      3: "EVU-Sperre",
+      4: "Abtauen",
+      5: "Leerlauf",
+      6: "Externe Energiequelle",
+      7: "K\xFChlung"
+    }
+  },
+  heatpump_state1: {
+    folder: "Informationen.Status",
+    name: "W\xE4rmepumpen Status-Code 1",
+    role: "value",
+    type: "number"
+  },
+  heatpump_state2: {
+    folder: "Informationen.Status",
+    name: "W\xE4rmepumpen Status-Code 2",
+    role: "value",
+    type: "number"
+  },
+  heatpump_state3: {
+    folder: "Informationen.Status",
+    name: "W\xE4rmepumpen Status-Code 3",
+    role: "value",
+    type: "number"
+  },
+  heatpump_extendet_state_string: {
+    folder: "Informationen.08_Betriebszustand",
+    name: "Erweiterter Status Text",
+    role: "text",
+    type: "string"
+  },
+  opStateHeating: {
+    folder: "Informationen.08_Betriebszustand",
+    name: "Betriebszustand Heizung",
+    role: "value",
+    type: "number",
+    states: { 0: "Aus", 1: "Normal", 2: "Abgesenkt", 3: "Heizgrenze", 4: "Frostschutz" }
+  },
+  opStateHotWater: {
+    folder: "Informationen.Status",
+    name: "Betriebszustand Warmwasser Code",
+    role: "value",
+    type: "number"
   },
   // ==========================================
   // EINSTELLUNGEN & PARAMETER (Beschreibbar)
@@ -523,103 +580,6 @@ const STATE_MAPPING = {
     min: 1,
     max: 15
   },
-  mk1_curve_end_point: {
-    folder: "Einstellungen.Mischkreis1",
-    name: "MK1 Heizkurve Endpunkt",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C",
-    write: true,
-    factor: 1,
-    min: 20,
-    max: 50
-  },
-  mk1_curve_parallel_offset: {
-    folder: "Einstellungen.Mischkreis1",
-    name: "MK1 Heizkurve Parallelverschiebung",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C",
-    write: true,
-    factor: 1,
-    min: 20,
-    max: 50
-  },
-  deltaMk1Reduction: {
-    folder: "Einstellungen.Mischkreis1",
-    name: "MK1 Nachtabsenkung (Delta)",
-    role: "value.temperature",
-    type: "number",
-    unit: "K",
-    write: true,
-    factor: 10,
-    min: -10,
-    max: 10
-  },
-  mk2_curve_end_point: {
-    folder: "Einstellungen.Mischkreis2",
-    name: "MK2 Heizkurve Endpunkt",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C",
-    write: true,
-    min: 20,
-    max: 50
-  },
-  mk2_curve_parallel_offset: {
-    folder: "Einstellungen.Mischkreis2",
-    name: "MK2 Heizkurve Parallelverschiebung",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C",
-    write: true,
-    factor: 1,
-    min: -5,
-    max: 5
-  },
-  deltaMk2Reduction: {
-    folder: "Einstellungen.Mischkreis2",
-    name: "MK2 Nachtabsenkung (Delta)",
-    role: "value.temperature",
-    type: "number",
-    unit: "K",
-    write: true,
-    factor: 10,
-    min: -10,
-    max: 10
-  },
-  mk3_curve_end_point: {
-    folder: "Einstellungen.Mischkreis3",
-    name: "MK3 Heizkurve Endpunkt",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C",
-    write: true,
-    min: 20,
-    max: 50
-  },
-  mk3_curve_parallel_offset: {
-    folder: "Einstellungen.Mischkreis3",
-    name: "MK3 Heizkurve Parallelverschiebung",
-    role: "value.temperature",
-    type: "number",
-    unit: "K",
-    write: true,
-    factor: 10,
-    min: -5,
-    max: 5
-  },
-  deltaMk3Reduction: {
-    folder: "Einstellungen.Mischkreis3",
-    name: "MK3 Nachtabsenkung (Delta)",
-    role: "value.temperature",
-    type: "number",
-    unit: "K",
-    write: true,
-    factor: 10,
-    min: -10,
-    max: 10
-  },
   heating_operation_mode: {
     folder: "Einstellungen.Betriebsmodus",
     name: "Betriebsart Heizung",
@@ -635,73 +595,6 @@ const STATE_MAPPING = {
     type: "number",
     write: true,
     states: { 0: "Automatik", 1: "Zweites WEZ", 2: "Party", 3: "Ferien", 4: "Aus" }
-  },
-  cooling_operation_mode: {
-    folder: "Einstellungen.Betriebsmodus",
-    name: "Betriebsart K\xFChlung",
-    role: "level.mode",
-    type: "number",
-    write: true,
-    states: { 0: "Aus", 1: "Automatik" }
-  },
-  cooling_release_temperature: {
-    folder: "Einstellungen.Kuehlung",
-    name: "K\xFChlung Freigabe-Temperatur",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C",
-    write: true,
-    luxWriteId: "cooling_release_temp",
-    min: 15,
-    max: 30
-  },
-  cooling_inlet_temp: {
-    folder: "Einstellungen.Kuehlung",
-    name: "K\xFChlung Vorlauf-Soll-Temperatur",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C",
-    write: true,
-    min: 15,
-    max: 25
-  },
-  cooling_start_after_hours: {
-    folder: "Einstellungen.Kuehlung",
-    name: "K\xFChlung Start-Temperatur",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C",
-    write: true,
-    luxWriteId: "cooling_start"
-  },
-  cooling_stop_after_hours: {
-    folder: "Einstellungen.Kuehlung",
-    name: "K\xFChlung Stopp-Temperatur",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C",
-    write: true,
-    luxWriteId: "cooling_stop"
-  },
-  heating_temperature_outside_2nd_compressor: {
-    folder: "Einstellungen.Verdichter",
-    name: "Freigabe 2. Verdichter (Au\xDFentemperatur)",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C",
-    write: true,
-    min: -20,
-    max: 10
-  },
-  hotwater_temperature_forerun_2nd_compressor: {
-    folder: "Einstellungen.Verdichter",
-    name: "Freigabe 2. Verdichter (Warmwasser-Vorlauf)",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C",
-    write: true,
-    min: 10,
-    max: 60
   },
   heating_system_circ_pump_voltage_nominal: {
     folder: "Einstellungen.Pumpen",
@@ -951,40 +844,6 @@ const STATE_MAPPING = {
       3: "Zus\xE4tzlicher W\xE4rmeerzeuger darf mitlaufen"
     }
   },
-  WP_BZ_akt: {
-    folder: "Informationen.Betriebszustand",
-    name: "Aktueller Betriebszustand Code",
-    role: "value",
-    type: "number",
-    states: {
-      0: "Heizbetrieb",
-      1: "Trinkwarmwasser",
-      2: "Schwimmbad",
-      3: "EVU-Sperre",
-      4: "Abtauen",
-      5: "Leerlauf",
-      6: "Externe Energiequelle",
-      7: "K\xFChlung"
-    }
-  },
-  heatpump_state1: {
-    folder: "Informationen.Status",
-    name: "W\xE4rmepumpen Status-Code 1",
-    role: "value",
-    type: "number"
-  },
-  heatpump_state2: {
-    folder: "Informationen.Status",
-    name: "W\xE4rmepumpen Status-Code 2",
-    role: "value",
-    type: "number"
-  },
-  heatpump_state3: {
-    folder: "Informationen.Status",
-    name: "W\xE4rmepumpen Status-Code 3",
-    role: "value",
-    type: "number"
-  },
   heatpump_duration: {
     folder: "Informationen.Status",
     name: "Dauer aktueller Zustand",
@@ -998,12 +857,6 @@ const STATE_MAPPING = {
     role: "text",
     type: "string"
   },
-  heatpump_extendet_state_string: {
-    folder: "Informationen.Status",
-    name: "Erweiterter Status Text",
-    role: "text",
-    type: "string"
-  },
   ahp_Stufe: { folder: "Informationen.Status", name: "Aktuelle ahp-Stufe", role: "value", type: "number" },
   ahp_Temp: {
     folder: "Informationen.Status",
@@ -1011,30 +864,6 @@ const STATE_MAPPING = {
     role: "value.temperature",
     type: "number",
     unit: "\xB0C"
-  },
-  opStateHotWater: {
-    folder: "Informationen.Status",
-    name: "Betriebszustand Warmwasser Code",
-    role: "value",
-    type: "number"
-  },
-  opStateMixer1: {
-    folder: "Informationen.Status",
-    name: "Betriebszustand Mischerkreis 1",
-    role: "value",
-    type: "number"
-  },
-  opStateMixer2: {
-    folder: "Informationen.Status",
-    name: "Betriebszustand Mischerkreis 2",
-    role: "value",
-    type: "number"
-  },
-  opStateMixer3: {
-    folder: "Informationen.Status",
-    name: "Betriebszustand Mischerkreis 3",
-    role: "value",
-    type: "number"
   },
   Einst_Kurzprogramm: {
     folder: "Informationen.Status",
@@ -1047,8 +876,6 @@ const STATE_MAPPING = {
   StatusSlave_3: { folder: "Informationen.Status", name: "Status Slave 3", role: "value", type: "number" },
   StatusSlave_4: { folder: "Informationen.Status", name: "Status Slave 4", role: "value", type: "number" },
   StatusSlave_5: { folder: "Informationen.Status", name: "Status Slave 5", role: "value", type: "number" },
-  SH_SW: { folder: "Informationen.Status", name: "Status SH_SW", role: "value", type: "number" },
-  FreigabKuehl: { folder: "Informationen.Status", name: "Freigabe K\xFChlung", role: "value", type: "number" },
   SonderZeichen: { folder: "Informationen.Status", name: "Sonderzeichen Code", role: "value", type: "number" },
   SH_ZIP: { folder: "Informationen.Status", name: "Status SH_ZIP", role: "value", type: "number" },
   WebsrvProgrammWerteBeobarten: {
@@ -1089,31 +916,6 @@ const STATE_MAPPING = {
     role: "value",
     type: "number",
     unit: "%"
-  },
-  opStateHotWaterString: {
-    folder: "Informationen.Warmwasser",
-    name: "Status Warmwasser Text",
-    role: "text",
-    type: "string"
-  },
-  opStateHotWaterS: {
-    folder: "Informationen.Warmwasser",
-    name: "Status Warmwasser",
-    role: "value",
-    type: "number"
-  },
-  opStateHeating: {
-    folder: "Informationen.Heizung",
-    name: "Betriebszustand Heizung Code",
-    role: "value",
-    type: "number",
-    states: { 0: "Abgesenkt", 1: "Normal", 2: "Aus" }
-  },
-  opStateHeatingString: {
-    folder: "Informationen.Heizung",
-    name: "Betriebszustand Heizung Text",
-    role: "text",
-    type: "string"
   }
 };
 for (const key of Object.keys(STATE_MAPPING)) {
