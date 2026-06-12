@@ -7,7 +7,7 @@ import * as luxtronikTypes from "luxtronik2/types";
  * Erstellt alle virtuellen Datenpunkte dynamisch im ioBroker.
  * Übersetzt den Typ "json" automatisch in ein ioBroker-konformes Objekt und erstellt Channels.
  *
- * @param adapter Beispiel: "this" innerhalb der Adapter-Klasse, damit die Methoden setObjectNotExistsAsync und setStateAsync verfügbar sind
+ * @param adapter Die Instanz des ioBroker-Adapters (this)
  */
 export async function initializeVirtualStates(adapter: any): Promise<void> {
 	try {
@@ -57,179 +57,176 @@ export async function initializeVirtualStates(adapter: any): Promise<void> {
 	}
 }
 
+// ==========================================
+// BERECHNUNGEN (DRY-Prinzip)
+// ==========================================
+
 /**
- * Berechnet die Gesamt-Wärmemenge aus Heizung und Warmwasser
- * und schreibt das Ergebnis in den virtuellen Datenpunkt.
+ * Universelle Hilfsfunktion, um zwei Werte aus dem ioBroker zu addieren.
  *
- * @param adapter Beispiel: "this" innerhalb der Adapter-Klasse, damit die Methoden setObjectNotExistsAsync und setStateAsync verfügbar sind
+ * @param adapter Die Instanz des ioBroker-Adapters (this)
+ * @param sourceId1 Die ioBroker-ID des ersten Summanden
+ * @param sourceId2 Die ioBroker-ID des zweiten Summanden
+ * @param targetId Die ioBroker-ID des Ziel-Datenpunkts, in den das Ergebnis geschrieben wird
+ * @param logName Der Anzeigename für das ioBroker-Log im Fehlerfall
+ */
+async function calculateSum(
+	adapter: any,
+	sourceId1: string,
+	sourceId2: string,
+	targetId: string,
+	logName: string,
+): Promise<void> {
+	try {
+		const state1 = await adapter.getStateAsync(sourceId1);
+		const state2 = await adapter.getStateAsync(sourceId2);
+
+		const val1 = state1 && typeof state1.val === "number" ? state1.val : 0;
+		const val2 = state2 && typeof state2.val === "number" ? state2.val : 0;
+
+		await adapter.setStateChangedAsync(targetId, val1 + val2, true);
+	} catch (err: any) {
+		adapter.log.error(`Fehler bei der Berechnung der ${logName}: ${err.message}`);
+	}
+}
+
+/**
+ * Berechnet die Gesamt-Wärmemenge aus Heizung und Warmwasser.
+ *
+ * @param adapter Die Instanz des ioBroker-Adapters (this)
  */
 export async function calculateTotalThermalEnergy(adapter: any): Promise<void> {
-	try {
-		const heatingState = await adapter.getStateAsync("Informationen.09_Wärmemenge.thermalenergy_heating");
-		const warmwaterState = await adapter.getStateAsync("Informationen.09_Wärmemenge.thermalenergy_warmwater");
-
-		const thermalEnergyHeating = heatingState && typeof heatingState.val === "number" ? heatingState.val : 0;
-		const thermalEnergyWarmwater =
-			warmwaterState && typeof warmwaterState.val === "number" ? warmwaterState.val : 0;
-
-		const totalThermalEnergy = thermalEnergyHeating + thermalEnergyWarmwater;
-
-		await adapter.setStateChangedAsync("Informationen.09_Wärmemenge.thermalenergy_total", totalThermalEnergy, true);
-	} catch (err: any) {
-		adapter.log.error(`Fehler bei der Berechnung der Gesamt-Wärmemenge: ${err.message}`);
-	}
+	await calculateSum(
+		adapter,
+		"Informationen.09_Wärmemenge.thermalenergy_heating",
+		"Informationen.09_Wärmemenge.thermalenergy_warmwater",
+		"Informationen.09_Wärmemenge.thermalenergy_total",
+		"Gesamt-Wärmemenge",
+	);
 }
 
 /**
- * Berechnet die Gesamt-Energie aus Heizung und Warmwasser
- * und schreibt das Ergebnis in den virtuellen Datenpunkt.
+ * Berechnet die Gesamt-Energie aus Heizung und Warmwasser.
  *
- * @param adapter Beispiel: "this" innerhalb der Adapter-Klasse, damit die Methoden setObjectNotExistsAsync und setStateAsync verfügbar sind
+ * @param adapter Die Instanz des ioBroker-Adapters (this)
  */
 export async function calculateTotalEnergy(adapter: any): Promise<void> {
+	await calculateSum(
+		adapter,
+		"Informationen.10_Engergie.energy_heating",
+		"Informationen.10_Engergie.energy_warmwater",
+		"Informationen.10_Engergie.energy_total",
+		"Gesamt-Energie",
+	);
+}
+
+// ==========================================
+// HISTORIEN & LOGS (DRY-Prinzip)
+// ==========================================
+
+/**
+ * Universelle Hilfsfunktion, um Arrays aus Befehl 3004 in ein JSON-Objekt zu übersetzen.
+ *
+ * @param adapter Die Instanz des ioBroker-Adapters (this)
+ * @param rawValues Das Array der rohen Messwerte (Befehl 3004)
+ * @param startIdxTime Der Array-Index für den ersten Zeitstempel
+ * @param startIdxCode Der Array-Index für den ersten Fehler-/Abschaltcode
+ * @param targetId Die ioBroker-ID des Ziel-Datenpunkts (JSON)
+ * @param dictKeys Array mit möglichen Objekt-Schlüsseln für das Wörterbuch im Luxtronik-Modul
+ * @param fallbackPrefix Präfix für den Text, falls der Code gänzlich unbekannt ist
+ */
+async function updateHistory(
+	adapter: any,
+	rawValues: number[],
+	startIdxTime: number,
+	startIdxCode: number,
+	targetId: string,
+	dictKeys: string[],
+	fallbackPrefix: string,
+): Promise<void> {
 	try {
-		const heatingState = await adapter.getStateAsync("Informationen.10_Engergie.energy_heating");
-		const warmwaterState = await adapter.getStateAsync("Informationen.10_Engergie.energy_warmwater");
+		// Prüfen, ob das Array groß genug ist (höchster benötigter Index + 5 Iterationen)
+		const requiredLength = Math.max(startIdxTime, startIdxCode) + 5;
+		if (!rawValues || rawValues.length < requiredLength) {
+			adapter.log.debug(`[Virtual DP] Historie für ${targetId} übersprungen: Unvollständiges Raw-Array.`);
+			return;
+		}
 
-		const EnergyHeating = heatingState && typeof heatingState.val === "number" ? heatingState.val : 0;
-		const EnergyWarmwater = warmwaterState && typeof warmwaterState.val === "number" ? warmwaterState.val : 0;
+		const logList = [];
+		const typesAny = luxtronikTypes;
 
-		const totalEnergy = EnergyHeating + EnergyWarmwater;
+		// Schleife läuft exakt 5-mal
+		for (let i = 0; i < 5; i++) {
+			const timestamp = rawValues[startIdxTime + i];
+			const code = rawValues[startIdxCode + i];
 
-		await adapter.setStateChangedAsync("Informationen.10_Engergie.energy_total", totalEnergy, true);
+			// Nur verarbeiten, wenn ein Code ungleich 0 vorliegt
+			if (code !== 0) {
+				const dateObject = new Date(timestamp * 1000);
+				const readableDate = timestamp > 0 ? dateObject.toLocaleString("de-DE") : "Unbekannt";
+
+				let beschreibung = `${fallbackPrefix} (${code})`;
+
+				// Dynamische Durchsuchung aller übergebenen Wörterbuch-Schlüssel in der Luxtronik-Lib
+				for (const dictKey of dictKeys) {
+					if (typesAny[dictKey] && typesAny[dictKey][code]) {
+						beschreibung = typesAny[dictKey][code];
+						break; // Text gefunden, Schleife abbrechen
+					} else if (typesAny[code]) {
+						beschreibung = typesAny[code]; // Letzter Fallback
+						break;
+					}
+				}
+
+				logList.push({
+					index: i + 1,
+					code: code,
+					beschreibung: beschreibung,
+					datum: readableDate,
+					timestamp: timestamp,
+				});
+			}
+		}
+
+		const jsonString = JSON.stringify(logList);
+		await adapter.setStateChangedAsync(targetId, jsonString, true);
 	} catch (err: any) {
-		adapter.log.error(`Fehler bei der Berechnung der Gesamt-Energie: ${err.message}`);
+		adapter.log.error(`Fehler bei der Generierung der JSON-Historie für ${targetId}: ${err.message}`);
 	}
 }
 
 /**
- * Liest die Fehler-Indizes direkt aus der 3004-Liste (Messwerte) aus,
- * übersetzt die Fehlercodes in Klartext und baut ein strukturiertes JSON-Array.
+ * Aktualisiert die Fehlerhistorie (JSON) im ioBroker.
  *
- * @param adapter Die Instanz des aktuellen ioBroker-Adapters
- * @param rawValues Das komplette Array des Befehls 3004
+ * @param adapter Die Instanz des ioBroker-Adapters (this)
+ * @param rawValues Das Array der rohen Messwerte (Befehl 3004)
  */
 export async function updateErrorHistory(adapter: any, rawValues: number[]): Promise<void> {
-	try {
-		// Sicherheits-Check: Ist das Raw-Array überhaupt groß genug?
-		if (!rawValues || rawValues.length < 105) {
-			adapter.log.debug("[Virtual DP] Fehlerhistorie übersprungen: Unvollständiges Raw-Array 3004.");
-			return;
-		}
-
-		const errorLogList = [];
-
-		// Schleife läuft exakt 5-mal (für Fehler 1 bis Fehler 5)
-		for (let i = 0; i < 5; i++) {
-			// ZUORDNUNG: 95-99 = Zeitstempel, 100-104 = Fehlercode
-			const errorTimestamp = rawValues[95 + i];
-			const errorCode = rawValues[100 + i];
-
-			// Nur verarbeiten, wenn ein echter Fehlercode vorliegt (Code ungleich 0)
-			if (errorCode !== 0) {
-				// Unix-Timestamp in Millisekunden umrechnen und lokales deutsches Format erzeugen
-				const dateObject = new Date(errorTimestamp * 1000);
-				const readableDate = errorTimestamp > 0 ? dateObject.toLocaleString("de-DE") : "Unbekannt";
-
-				// Fallback-Text generieren, falls der Code gänzlich unbekannt ist
-				let fehlerText = `Unbekannter Fehler (${errorCode})`;
-
-				// Stufenweise, crash-sichere Überprüfung des exportierten Bibliotheks-Objekts
-				if (luxtronikTypes) {
-					const TypesAny = luxtronikTypes;
-
-					if (TypesAny.errorCodes && TypesAny.errorCodes[errorCode]) {
-						fehlerText = TypesAny.errorCodes[errorCode];
-					} else if (TypesAny.codes && TypesAny.codes[errorCode]) {
-						fehlerText = TypesAny.codes[errorCode];
-					} else if (TypesAny[errorCode]) {
-						fehlerText = TypesAny[errorCode];
-					}
-				}
-
-				// Strukturiertes Objekt in das Array pushen
-				errorLogList.push({
-					index: i + 1,
-					code: errorCode,
-					beschreibung: fehlerText,
-					datum: readableDate,
-					timestamp: errorTimestamp,
-				});
-			}
-		}
-
-		// Array in einen JSON-String konvertieren und im ioBroker speichern
-		const jsonString = JSON.stringify(errorLogList);
-		await adapter.setStateChangedAsync("Informationen.06_Fehlerspeicher.Fehlerspeicher", jsonString, true);
-
-		//	adapter.log.debug(`[Virtual DP] RAW-Fehlerhistorie aktualisiert. ${errorLogList.length} Einträge hinterlegt.`);
-	} catch (err: any) {
-		adapter.log.error(`Fehler bei der Generierung der RAW-JSON-Fehlerhistorie: ${err.message}`);
-	}
+	await updateHistory(
+		adapter,
+		rawValues,
+		95, // Start-Index für Zeitstempel
+		100, // Start-Index für Codes
+		"Informationen.06_Fehlerspeicher.Fehlerspeicher",
+		["errorCodes", "codes"],
+		"Unbekannter Fehler",
+	);
 }
 
 /**
- * Liest die Abschalt-Indizes direkt aus der 3004-Liste (Messwerte) aus,
- * übersetzt die Codes in Klartext und baut ein strukturiertes JSON-Array.
+ * Aktualisiert die Abschalthistorie (JSON) im ioBroker.
  *
- * @param adapter Die Instanz des aktuellen ioBroker-Adapters
- * @param rawValues Das komplette Array des Befehls 3004
+ * @param adapter Die Instanz des ioBroker-Adapters (this)
+ * @param rawValues Das Array der rohen Messwerte (Befehl 3004)
  */
 export async function updateOutageHistory(adapter: any, rawValues: number[]): Promise<void> {
-	try {
-		// Sicherheits-Check: Ist das Raw-Array groß genug für Index 115? (Länge muss min. 116 sein)
-		if (!rawValues || rawValues.length < 116) {
-			adapter.log.debug("[Virtual DP] Abschalthistorie übersprungen: Unvollständiges Raw-Array 3004.");
-			return;
-		}
-
-		const outageLogList = [];
-
-		// Schleife läuft exakt 5-mal (für Abschaltung 1 bis 5)
-		for (let i = 0; i < 5; i++) {
-			// ZUORDNUNG LAUT DEINER PRÜFUNG:
-			// 106-110 = Abschaltcode, 111-115 = Zeitstempel
-			const outageCode = rawValues[106 + i];
-			const outageTimestamp = rawValues[111 + i];
-
-			// Nur verarbeiten, wenn ein echter Code vorliegt (ungleich 0)
-			if (outageCode !== 0) {
-				// Unix-Timestamp in Millisekunden umrechnen und lokales deutsches Format erzeugen
-				const dateObject = new Date(outageTimestamp * 1000);
-				const readableDate = outageTimestamp > 0 ? dateObject.toLocaleString("de-DE") : "Unbekannt";
-
-				// Fallback-Text generieren
-				let abschaltText = `Unbekannter Abschaltgrund (${outageCode})`;
-
-				// Stufenweise, crash-sichere Überprüfung der Bibliotheks-Utils
-				if (luxtronikTypes) {
-					const utilsAny = luxtronikTypes;
-
-					if (utilsAny.outageCodes && utilsAny.outageCodes[outageCode]) {
-						abschaltText = utilsAny.outageCodes[outageCode];
-					} else if (utilsAny.outages && utilsAny.outages[outageCode]) {
-						abschaltText = utilsAny.outages[outageCode];
-					} else if (utilsAny.switchOffCodes && utilsAny.switchOffCodes[outageCode]) {
-						abschaltText = utilsAny.switchOffCodes[outageCode];
-					}
-				}
-
-				outageLogList.push({
-					index: i + 1,
-					code: outageCode,
-					beschreibung: abschaltText,
-					datum: readableDate,
-					timestamp: outageTimestamp,
-				});
-			}
-		}
-
-		// Array in einen JSON-String konvertieren und im ioBroker speichern
-		const jsonString = JSON.stringify(outageLogList);
-		await adapter.setStateChangedAsync("Informationen.07_Abschaltungen.Abschaltungen", jsonString, true);
-
-		//adapter.log.debug(`[Virtual DP] RAW-Abschalthistorie aktualisiert. ${outageLogList.length} Einträge hinterlegt.`,);
-	} catch (err: any) {
-		adapter.log.error(`Fehler bei der Generierung der RAW-JSON-Abschalthistorie: ${err.message}`);
-	}
+	await updateHistory(
+		adapter,
+		rawValues,
+		111, // Start-Index für Zeitstempel
+		106, // Start-Index für Codes
+		"Informationen.07_Abschaltungen.Abschaltungen",
+		["outageCodes", "outages", "switchOffCodes"],
+		"Unbekannter Abschaltgrund",
+	);
 }

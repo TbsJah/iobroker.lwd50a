@@ -29,9 +29,6 @@ class Lwd50a extends utils.Adapter {
 		this.on("unload", this.onUnload.bind(this));
 	}
 
-	/**
-	 * Wird aufgerufen, sobald der Adapter mit den ioBroker-Datenbanken verbunden ist.
-	 */
 	private async onReady(): Promise<void> {
 		const ip = this.config.host;
 		const port = this.config.port || 8889;
@@ -42,20 +39,14 @@ class Lwd50a extends utils.Adapter {
 		// Alle virtuellen Datenpunkte aus dem Mapping vorab generieren
 		await initializeVirtualStates(this);
 
-		// Erste Abfrage sofort starten (Da onReady "async" ist, können wir hier direkt awaiten!)
+		// Erste Abfrage sofort starten
 		await this.updateData();
 
-		await initializeVirtualStates(this);
-
-		// =================================================================
-		// NEU: Einmaligen kompletten Log-Dump aller Indizes anstoßen
-		// =================================================================
+		// Einmaligen kompletten Log-Dump anstoßen
 		void this.dumpAllRawToLog();
 
-		// Hole das Intervall aus der Konfiguration (Standard: 30 Sekunden)
+		// Intervall aus der Konfiguration (Minimum 10 Sekunden)
 		let intervalSeconds = this.config.interval || 30;
-
-		// Sicherheitssperre
 		if (intervalSeconds < 10) {
 			intervalSeconds = 10;
 			this.log.warn("Eingestelltes Intervall war zu kurz. Wurde zum Schutz auf 10 Sekunden korrigiert.");
@@ -64,53 +55,36 @@ class Lwd50a extends utils.Adapter {
 		this.log.info(`Starte Polling-Intervall. Lese Daten alle ${intervalSeconds} Sekunden aus.`);
 
 		this.pollingInterval = setInterval(() => {
-			// Mit dem Wörtchen "void" signalisieren wir TypeScript explizit:
-			// "Ja, wir wissen, dass hier ein Promise kommt, aber wir ignorieren es hier absichtlich!"
 			void this.updateData();
 		}, intervalSeconds * 1000);
 	}
 
-	/**
-	 * Führt einen einmaligen, vollständigen Dump aller rohen Indizes und Werte
-	 * aus 3003 und 3004 in das ioBroker-Log aus.
-	 */
 	private async dumpAllRawToLog(): Promise<void> {
 		try {
-			this.log.info("=======================================================");
-			this.log.info("START COMPACT RAW DUMP: LISTE 3003 (PARAMETER)");
-			this.log.info("=======================================================");
+			const dumpList = async (command: number, title: string): Promise<void> => {
+				this.log.info("=======================================================");
+				this.log.info(`START COMPACT RAW DUMP: LISTE ${command} (${title})`);
+				this.log.info("=======================================================");
+				const data = await this.readAllRaw(command);
+				for (let i = 0; i < data.length; i++) {
+					this.log.info(`[RAW ${command}] Index ${i.toString().padStart(3, " ")} = ${data[i]}`);
+				}
+				this.log.info(`--- ENDE LISTE ${command} (Insgesamt ${data.length} Indizes geloggt) ---`);
+				this.log.info("=======================================================");
+			};
 
-			const params = await this.readAllRaw(3003);
-			for (let i = 0; i < params.length; i++) {
-				// Gibt JEDEN Index aus, ordentlich formatiert
-				this.log.info(`[RAW 3003] Index ${i.toString().padStart(3, " ")} = ${params[i]}`);
-			}
-			this.log.info(`--- ENDE LISTE 3003 (Insgesamt ${params.length} Indizes geloggt) ---`);
-
-			this.log.info("=======================================================");
-			this.log.info("START COMPACT RAW DUMP: LISTE 3004 (MESSWERTE)");
-			this.log.info("=======================================================");
-
-			const values = await this.readAllRaw(3004);
-			for (let i = 0; i < values.length; i++) {
-				this.log.info(`[RAW 3004] Index ${i.toString().padStart(3, " ")} = ${values[i]}`);
-			}
-			this.log.info(`--- ENDE LISTE 3004 (Insgesamt ${values.length} Indizes geloggt) ---`);
-			this.log.info("=======================================================");
+			await dumpList(3003, "PARAMETER");
+			await dumpList(3004, "MESSWERTE");
 		} catch (err: any) {
 			this.log.error(`Fehler beim Ausführen des Raw-Dumps: ${err.message}`);
 		}
 	}
-	/**
-	 * Liest die komplette Liste (alle Parameter oder alle Messwerte) per TCP aus.
-	 *
-	 * @param command 3003 (Parameter) oder 3004 (Messwerte)
-	 */
+
 	private readAllRaw(command: number): Promise<number[]> {
 		return new Promise((resolve, reject) => {
 			const client = new net.Socket();
 			const host = this.config.host;
-			const port = 8888; // Raw-Port ist standardmäßig immer 8888
+			const port = 8888;
 
 			let responseData = Buffer.alloc(0);
 
@@ -161,31 +135,46 @@ class Lwd50a extends utils.Adapter {
 		});
 	}
 
-	/**
-	 * Rechnet eine Sekundenzahl in das lesbare Format hh:mm:ss um.
-	 *
-	 * @param totalSeconds Die Sekunden als reine Zahl
-	 */
 	private formatSecondsToHMS(totalSeconds: number): string {
 		if (totalSeconds < 0 || isNaN(totalSeconds)) {
 			return "00:00:00";
 		}
-
 		const hours = Math.floor(totalSeconds / 3600);
 		const minutes = Math.floor((totalSeconds % 3600) / 60);
 		const seconds = totalSeconds % 60;
-
-		const hh = hours.toString().padStart(2, "0");
-		const mm = minutes.toString().padStart(2, "0");
-		const ss = seconds.toString().padStart(2, "0");
-
-		return `${hh}:${mm}:${ss}`;
+		return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 	}
 
-	/**
-	 * Holt alle Daten von der Wärmepumpe ab und verteilt sie im ioBroker.
-	 * Konvertiert Sekunden automatisch in das lesbare hh:mm:ss Format.
-	 */
+	private readPumpAsync(): Promise<any> {
+		return new Promise((resolve, reject) => {
+			this.pump.read((err: any, data: any): void => {
+				if (err) {
+					reject(err instanceof Error ? err : new Error(String(err)));
+				} else {
+					resolve(data);
+				}
+			});
+		});
+	}
+
+	private writePumpAsync(cmd: string | number, val: any, isRaw = false): Promise<void> {
+		return new Promise((resolve, reject) => {
+			const cb = (err: any): void => {
+				if (err) {
+					reject(err instanceof Error ? err : new Error(String(err)));
+				} else {
+					resolve();
+				}
+			};
+
+			if (isRaw) {
+				this.pump.writeRaw(cmd, val, cb);
+			} else {
+				this.pump.write(cmd, val, cb);
+			}
+		});
+	}
+
 	private async updateData(): Promise<void> {
 		if (!this.pump) {
 			this.log.error("Abfrage abgebrochen: Keine aktive Verbindung zur Wärmepumpe vorhanden.");
@@ -193,158 +182,179 @@ class Lwd50a extends utils.Adapter {
 		}
 
 		try {
-			// 1. Beide Raw-Listen parallel im Hintergrund via TCP anfordern
-			const rawParams = await this.readAllRaw(3003).catch(err => {
-				this.log.debug(`Raw-Parameter (3003) nicht verfügbar: ${err.message}`);
-				return [] as number[];
-			});
-			const rawValues = await this.readAllRaw(3004).catch(err => {
-				this.log.debug(`Raw-Messwerte (3004) nicht verfügbar: ${err.message}`);
-				return [] as number[];
-			});
-
-			// 2. Standard-Abfrage über die Coolchip-Bibliothek ausführen
-			this.pump.read(async (err: Error | null, coolchipData: any) => {
-				if (err) {
-					if (err.message && err.message.toLowerCase().includes("busy")) {
+			// Echte Parallelisierung: Alle 3 Datenquellen gleichzeitig abfragen
+			const [rawParams, rawValues, coolchipData] = await Promise.all([
+				this.readAllRaw(3003).catch(err => {
+					this.log.debug(`Raw-Parameter (3003) nicht verfügbar: ${err.message}`);
+					return [] as number[];
+				}),
+				this.readAllRaw(3004).catch(err => {
+					this.log.debug(`Raw-Messwerte (3004) nicht verfügbar: ${err.message}`);
+					return [] as number[];
+				}),
+				this.readPumpAsync().catch(err => {
+					if (err.message?.toLowerCase().includes("busy")) {
 						this.log.warn("Wärmepumpe ist ausgelastet (busy). Überspringe diesen Abfrage-Zyklus.");
-						return;
+					} else {
+						this.log.error(`Verbindungsfehler beim Einlesen der Daten: ${err.message}`);
 					}
-					this.log.error(`Verbindungsfehler beim Einlesen der Daten: ${err.message}`);
-					return;
+					return null;
+				}),
+			]);
+
+			if (!coolchipData) {
+				return;
+			}
+
+			for (const [key, definition] of Object.entries(STATE_MAPPING)) {
+				if (definition.isVirtual) {
+					continue;
 				}
 
-				// Schleife über das gesamte Mapping-Wörterbuch
-				for (const [key, definition] of Object.entries(STATE_MAPPING)) {
-					if (definition.isVirtual) {
-						continue;
-					}
+				const configWithDynamicKeys = this.config as Record<string, any>;
+				if (configWithDynamicKeys[`sync_${key}`] === false) {
+					continue;
+				}
 
-					// Synchronisations-Check aus der Adapter-Konfiguration
-					const configWithDynamicKeys = this.config as Record<string, any>;
-					if (configWithDynamicKeys[`sync_${key}`] === false) {
-						continue;
-					}
+				const luxId = definition.luxWriteId || key;
+				let value: any = undefined;
 
-					const luxId = definition.luxWriteId || key;
+				// =========================================================
+				// STRATEGIE 1: ABSOLUT PRÄZISE WEICHE ANHAND DER DATA_SOURCE
+				// =========================================================
+				if (definition.dataSource) {
+					switch (definition.dataSource) {
+						case "raw_parameter": {
+							const index = parseInt(luxId, 10);
+							if (!isNaN(index) && rawParams?.[index] !== undefined) {
+								value = rawParams[index];
+								if (definition.factor) {
+									value /= definition.factor;
+								}
+							}
+							break;
+						}
+						case "raw_value": {
+							const index = parseInt(luxId, 10);
+							if (!isNaN(index) && rawValues?.[index] !== undefined) {
+								value = rawValues[index];
+								if (definition.factor) {
+									value /= definition.factor;
+								}
+							}
+							break;
+						}
+						case "parameter":
+							value = coolchipData?.parameters?.[luxId];
+							break;
+						case "value":
+							value = coolchipData?.values?.[luxId];
+							break;
+						case "additional":
+							value = coolchipData?.additional?.[luxId];
+							break;
+					}
+				} else {
+					// =========================================================
+					// STRATEGIE 2: ABWÄRTSKOMPATIBLER FALLBACK (Heuristik)
+					// =========================================================
 					const isRawNumber = /^\d+$/.test(luxId);
-					let value: any = undefined;
-
-					// --- ENTSCHEIDUNG: RAW-WERT ODER COOLCHIP-TEXT-MAPPING ---
 					if (isRawNumber) {
 						const index = parseInt(luxId, 10);
-						if (definition.folder.startsWith("Einstellungen")) {
-							if (rawParams && index < rawParams.length) {
+						if (!isNaN(index)) {
+							if (definition.folder.startsWith("Einstellungen") && rawParams?.[index] !== undefined) {
 								value = rawParams[index];
-							}
-						} else if (definition.folder.startsWith("Informationen")) {
-							if (rawValues && index < rawValues.length) {
+							} else if (
+								definition.folder.startsWith("Informationen") &&
+								rawValues?.[index] !== undefined
+							) {
 								value = rawValues[index];
 							}
-						}
-
-						// Rohen Wert per Faktor anpassen (z.B. 200 / 10 = 20 °C)
-						if (value !== undefined && typeof value === "number" && definition.factor) {
-							value = value / definition.factor;
+							if (value !== undefined && typeof value === "number" && definition.factor) {
+								value = value / definition.factor;
+							}
 						}
 					} else {
-						if (coolchipData.values && coolchipData.values[luxId] !== undefined) {
-							value = coolchipData.values[luxId];
-						} else if (coolchipData.parameters && coolchipData.parameters[luxId] !== undefined) {
-							value = coolchipData.parameters[luxId];
-						} else if (coolchipData.additional && coolchipData.additional[luxId] !== undefined) {
-							value = coolchipData.additional[luxId];
-						}
-					}
-
-					if (value !== undefined) {
-						// Standard-Typenkorrekturen für ioBroker vornehmen
-						if (definition.type === "number" && typeof value === "string") {
-							const textVal = value.toLowerCase();
-							value = textVal === "ein" ? 1 : textVal === "aus" ? 0 : parseFloat(value);
-						} else if (definition.type === "boolean") {
-							if (typeof value === "string") {
-								const textVal = value.toLowerCase();
-								value = textVal === "ein" || textVal === "true" || textVal === "1";
-							} else {
-								value = value === true || value === 1;
-							}
-						}
-
-						// --- DYNAMISCHE ZEITUMWANDLUNG FÜR SEKUNDEN & JSON-SCHUTZ ---
-						// Typ-Weiche für ioBroker: Falls im Mapping "json" steht, machen wir für ioBroker ein "string" daraus
-						let targetType: ioBroker.CommonType = definition.type === "json" ? "string" : definition.type;
-						let targetRole = definition.role;
-						let targetUnit = definition.unit;
-
-						if (definition.unit === "s") {
-							const totalSeconds = typeof value === "number" ? value : parseInt(value, 10);
-							if (!isNaN(totalSeconds)) {
-								value = this.formatSecondsToHMS(totalSeconds);
-								targetType = "string"; // Typ zwingend auf string ändern
-								targetRole = "text"; // Passende Rolle für Text-Uhrzeit
-								targetUnit = undefined; // Einheit "s" entfernen, da kein Zahlenwert mehr
-							}
-						}
-						const folderId = definition.folder;
-						const stateId = `${folderId}.${key}`;
-
-						// Dynamische Objekterstellung beim ersten Durchlauf
-						if (!this.createdStates.has(stateId)) {
-							// Übergeordneten Channel/Ordner anlegen
-							await this.setObjectNotExistsAsync(folderId, {
-								type: "channel",
-								common: { name: folderId.split(".").pop() || folderId },
-								native: {},
-							});
-
-							// Datenpunkt selbst anlegen (jetzt mit dynamischen Typvariablen)
-							await this.setObjectNotExistsAsync(stateId, {
-								type: "state",
-								common: {
-									name: definition.name,
-									type: targetType,
-									role: targetRole,
-									unit: targetUnit,
-									read: true,
-									write: definition.write || false,
-									min: definition.min,
-									max: definition.max,
-									states: definition.states,
-								},
-								native: {},
-							});
-
-							if (definition.write) {
-								await this.subscribeStatesAsync(stateId);
-							}
-							this.createdStates.add(stateId);
-						}
-
-						// Wert nur bei echter Änderung in DB schreiben (schont Systemressourcen)
-						await this.setStateChangedAsync(stateId, value, true);
+						value =
+							coolchipData?.values?.[luxId] ??
+							coolchipData?.parameters?.[luxId] ??
+							coolchipData?.additional?.[luxId];
 					}
 				}
 
-				// Virtuelle / berechnete Datenpunkte aktualisieren
-				await calculateTotalThermalEnergy(this);
-				await calculateTotalEnergy(this);
+				// --- Formatierung & Typenkorrektur ---
+				if (value !== undefined) {
+					if (definition.type === "number" && typeof value === "string") {
+						const textVal = value.toLowerCase();
+						value = textVal === "ein" ? 1 : textVal === "aus" ? 0 : parseFloat(value);
+					} else if (definition.type === "boolean") {
+						if (typeof value === "string") {
+							const textVal = value.toLowerCase();
+							value = textVal === "ein" || textVal === "true" || textVal === "1";
+						} else {
+							value = value === true || value === 1;
+						}
+					}
 
-				// WICHTIG: Hier übergeben wir jetzt das rawValues Array!
-				await updateErrorHistory(this, rawValues);
+					let targetType: ioBroker.CommonType = definition.type === "json" ? "string" : definition.type;
+					let targetRole = definition.role;
+					let targetUnit = definition.unit;
 
-				await updateOutageHistory(this, rawValues);
-			});
-		} catch (catchErr) {
-			this.log.error(`Fehler im updateData-Ablauf: ${(catchErr as Error).message}`);
+					if (definition.unit === "s") {
+						const totalSeconds = typeof value === "number" ? value : parseInt(value, 10);
+						if (!isNaN(totalSeconds)) {
+							value = this.formatSecondsToHMS(totalSeconds);
+							targetType = "string";
+							targetRole = "text";
+							targetUnit = undefined;
+						}
+					}
+
+					const folderId = definition.folder;
+					const stateId = `${folderId}.${key}`;
+
+					if (!this.createdStates.has(stateId)) {
+						await this.setObjectNotExistsAsync(folderId, {
+							type: "channel",
+							common: { name: folderId.split(".").pop() || folderId },
+							native: {},
+						});
+
+						await this.setObjectNotExistsAsync(stateId, {
+							type: "state",
+							common: {
+								name: definition.name,
+								type: targetType,
+								role: targetRole,
+								unit: targetUnit,
+								read: true,
+								write: definition.write || false,
+								min: definition.min,
+								max: definition.max,
+								states: definition.states,
+							},
+							native: {},
+						});
+
+						if (definition.write) {
+							await this.subscribeStatesAsync(stateId);
+						}
+						this.createdStates.add(stateId);
+					}
+
+					await this.setStateChangedAsync(stateId, value, true);
+				}
+			}
+
+			await calculateTotalThermalEnergy(this);
+			await calculateTotalEnergy(this);
+			await updateErrorHistory(this, rawValues);
+			await updateOutageHistory(this, rawValues);
+		} catch (catchErr: any) {
+			this.log.error(`Fehler im updateData-Ablauf: ${catchErr.message}`);
 		}
 	}
 
-	/**
-	 * Wird aufgerufen, wenn der Adapter gestoppt oder neugestartet wird.
-	 *
-	 * @param callback Callback-Funktion, die aufgerufen werden muss, wenn das Beenden abgeschlossen ist.
-	 */
 	private onUnload(callback: () => void): void {
 		try {
 			if (this.pollingInterval) {
@@ -359,18 +369,12 @@ class Lwd50a extends utils.Adapter {
 
 			this.log.info("Adapter wurde sauber beendet.");
 			callback();
-		} catch (err) {
-			this.log.error(`Fehler beim Beenden des Adapters: ${(err as Error).message}`);
+		} catch (err: any) {
+			this.log.error(`Fehler beim Beenden des Adapters: ${err.message}`);
 			callback();
 		}
 	}
 
-	/**
-	 * Verarbeitet vom Benutzer im ioBroker geänderte Werte und sendet sie an die Wärmepumpe.
-	 *
-	 * @param id Die ID des geänderten State
-	 * @param state Der neue State-Wert
-	 */
 	private async onStateChange(id: string, state: ioBroker.State | null | undefined): Promise<void> {
 		if (!state || state.ack) {
 			if (!state) {
@@ -393,95 +397,78 @@ class Lwd50a extends utils.Adapter {
 			return;
 		}
 
-		// --- VIRTUELLES MAKRO: ZIP ENTLÜFTUNG ---
-		if (mappingKey === "Activate_Zip") {
-			const zipOutState = await this.getStateAsync("Informationen.Ausgaenge.ZIPout");
-			const isCurrentlyRunning = zipOutState ? zipOutState.val === 1 || zipOutState.val === true : false;
+		try {
+			// --- VIRTUELLES MAKRO: ZIP ENTLÜFTUNG ---
+			if (mappingKey === "Activate_Zip") {
+				const zipOutState = await this.getStateAsync("Informationen.Ausgaenge.ZIPout");
+				const isCurrentlyRunning = zipOutState ? zipOutState.val === 1 || zipOutState.val === true : false;
 
-			const targetVal = isCurrentlyRunning ? 0 : 1;
-			const actionText = targetVal === 1 ? "Aktiviere" : "Deaktiviere";
+				const targetVal = isCurrentlyRunning ? 0 : 1;
+				const actionText = targetVal === 1 ? "Aktiviere" : "Deaktiviere";
 
-			this.log.info(`Makro gestartet: ${actionText} ZIP Entlüftung basierend auf ZIPout...`);
+				this.log.info(`Makro gestartet: ${actionText} ZIP Entlüftung basierend auf ZIPout...`);
 
-			this.pump.write("runDeaerate", targetVal, async (err1: any) => {
-				if (err1) {
-					this.log.error(`Makro Fehler bei Schritt 1 (runDeaerate): ${err1.message}`);
+				await this.writePumpAsync("runDeaerate", targetVal);
+				await new Promise(resolve => setTimeout(resolve, 1000));
+				await this.writePumpAsync("hotWaterCircPumpDeaerate", targetVal);
+
+				this.log.info(`Makro erfolgreich: ZIP Entlüftungsprogramm wurde auf ${targetVal} gesetzt.`);
+				await this.setStateAsync(id, { val: targetVal, ack: true });
+				await this.updateData();
+
+				return;
+			}
+
+			if (!definition.luxWriteId || definition.write !== true) {
+				this.log.warn(`Kein Schreib-Mapping für ${mappingKey} vorhanden oder erlaubt.`);
+				return;
+			}
+
+			if (typeof state.val === "number") {
+				if (definition.min !== undefined && state.val < definition.min) {
+					this.log.warn(`Wert ${state.val} unterschreitet Minimum von ${definition.min}. Abgebrochen.`);
 					return;
 				}
-
-				await new Promise(resolve => setTimeout(resolve, 1000));
-				this.pump.write("hotWaterCircPumpDeaerate", targetVal, async (err2: any) => {
-					if (err2) {
-						this.log.error(`Makro Fehler bei Schritt 2 (hotWaterCircPumpDeaerate): ${err2.message}`);
-						return;
-					}
-
-					this.log.info(`Makro erfolgreich: ZIP Entlüftungsprogramm wurde auf ${targetVal} gesetzt.`);
-					await this.setState(id, { val: targetVal, ack: true });
-
-					// FIX: Hier das "await" ergänzen, damit das Promise ordnungsgemäß verarbeitet wird
-					await this.updateData();
-				});
-			});
-			return;
-		}
-
-		// Schreibschutz- und Validierungsprüfung
-		if (!definition.luxWriteId || definition.write !== true) {
-			this.log.warn(`Kein Schreib-Mapping für ${mappingKey} vorhanden oder erlaubt.`);
-			return;
-		}
-
-		if (typeof state.val === "number") {
-			if (definition.min !== undefined && state.val < definition.min) {
-				this.log.warn(`Wert ${state.val} unterschreitet Minimum von ${definition.min}. Abgebrochen.`);
-				return;
+				if (definition.max !== undefined && state.val > definition.max) {
+					this.log.warn(`Wert ${state.val} überschreitet Maximum von ${definition.max}. Abgebrochen.`);
+					return;
+				}
 			}
-			if (definition.max !== undefined && state.val > definition.max) {
-				this.log.warn(`Wert ${state.val} überschreitet Maximum von ${definition.max}. Abgebrochen.`);
-				return;
+
+			let valueToWrite = state.val as number;
+			if (definition.factor && typeof state.val === "number") {
+				valueToWrite = state.val * definition.factor;
 			}
-		}
 
-		let valueToWrite = state.val as number;
-		if (definition.factor && typeof state.val === "number") {
-			valueToWrite = state.val * definition.factor;
-		}
+			const luxWriteId = definition.luxWriteId;
 
-		const luxWriteId = definition.luxWriteId;
-		const isRawNumber = /^\d+$/.test(luxWriteId);
+			// Evaluierung ob Raw-Write anhand der neuen Definition
+			const isRawWrite =
+				definition.dataSource === "raw_parameter" ||
+				definition.dataSource === "raw_value" ||
+				(!definition.dataSource && /^\d+$/.test(luxWriteId || ""));
 
-		// Spezialschutz für rohe Registertemperaturen (falls im Mapping kein Faktor definiert ist)
-		if (isRawNumber && definition.unit === "°C" && !definition.factor && typeof state.val === "number") {
-			this.log.info(`Raw-Temperatur erkannt. Multipliziere Wert ${state.val} mit Faktor 10 für Luxtronik.`);
-			valueToWrite = state.val * 10;
-		}
+			if (isRawWrite && definition.unit === "°C" && !definition.factor && typeof state.val === "number") {
+				this.log.info(`Raw-Temperatur erkannt. Multipliziere Wert ${state.val} mit Faktor 10 für Luxtronik.`);
+				valueToWrite = state.val * 10;
+			}
 
-		// Synchroner, linter-konformer Callback für den Schreibvorgang
-		const handleWriteResult = (err: any, _result: any): void => {
-			if (err) {
-				this.log.error(`Fehler beim Schreiben an Luxtronik via [${luxWriteId}]: ${err.message}`);
-				return;
+			if (isRawWrite) {
+				const paramId = parseInt(luxWriteId, 10);
+				this.log.info(`Sende RAW-NUMBER an Luxtronik: ID ${paramId} = ${valueToWrite}`);
+				await this.writePumpAsync(paramId, valueToWrite, true);
+			} else {
+				this.log.info(`Sende STANDARD-STRING an Luxtronik: Name "${luxWriteId}" = ${valueToWrite}`);
+				await this.writePumpAsync(luxWriteId, valueToWrite, false);
 			}
 
 			this.log.info(`Wert ${state.val} erfolgreich via [${luxWriteId}] an Wärmepumpe übertragen.`);
 
-			this.setState(id, state.val, true)
-				.then(() => new Promise(resolve => setTimeout(resolve, 500)))
-				.then(() => this.updateData())
-				.catch((setStateErr: any) => {
-					this.log.error(`Fehler beim Bestätigen des Status im ioBroker: ${setStateErr.message}`);
-				});
-		};
-
-		// Datentransfer-Weiche abfeuern
-		if (isRawNumber) {
-			const paramId = parseInt(luxWriteId, 10);
-			this.log.info(`Sende RAW-NUMBER an Luxtronik: ID ${paramId} = ${valueToWrite}`);
-			this.pump.writeRaw(paramId, valueToWrite, handleWriteResult);
-		} else {
-			this.log.info(`Sende STANDARD-STRING an Luxtronik: Name "${luxWriteId}" = ${valueToWrite}`);
-			this.pump.write(luxWriteId, valueToWrite, handleWriteResult);
+			await this.setStateAsync(id, state.val, true);
+			await new Promise(resolve => setTimeout(resolve, 500));
+			await this.updateData();
+		} catch (err: any) {
+			this.log.error(`Fehler bei der Befehlsausführung: ${err.message}`);
 		}
 	}
 }

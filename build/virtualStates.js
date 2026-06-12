@@ -76,107 +76,100 @@ async function initializeVirtualStates(adapter) {
     adapter.log.error(`Fehler bei der Initialisierung der virtuellen Datenpunkte: ${err.message}`);
   }
 }
-async function calculateTotalThermalEnergy(adapter) {
+async function calculateSum(adapter, sourceId1, sourceId2, targetId, logName) {
   try {
-    const heatingState = await adapter.getStateAsync("Informationen.09_W\xE4rmemenge.thermalenergy_heating");
-    const warmwaterState = await adapter.getStateAsync("Informationen.09_W\xE4rmemenge.thermalenergy_warmwater");
-    const thermalEnergyHeating = heatingState && typeof heatingState.val === "number" ? heatingState.val : 0;
-    const thermalEnergyWarmwater = warmwaterState && typeof warmwaterState.val === "number" ? warmwaterState.val : 0;
-    const totalThermalEnergy = thermalEnergyHeating + thermalEnergyWarmwater;
-    await adapter.setStateChangedAsync("Informationen.09_W\xE4rmemenge.thermalenergy_total", totalThermalEnergy, true);
+    const state1 = await adapter.getStateAsync(sourceId1);
+    const state2 = await adapter.getStateAsync(sourceId2);
+    const val1 = state1 && typeof state1.val === "number" ? state1.val : 0;
+    const val2 = state2 && typeof state2.val === "number" ? state2.val : 0;
+    await adapter.setStateChangedAsync(targetId, val1 + val2, true);
   } catch (err) {
-    adapter.log.error(`Fehler bei der Berechnung der Gesamt-W\xE4rmemenge: ${err.message}`);
+    adapter.log.error(`Fehler bei der Berechnung der ${logName}: ${err.message}`);
   }
 }
+async function calculateTotalThermalEnergy(adapter) {
+  await calculateSum(
+    adapter,
+    "Informationen.09_W\xE4rmemenge.thermalenergy_heating",
+    "Informationen.09_W\xE4rmemenge.thermalenergy_warmwater",
+    "Informationen.09_W\xE4rmemenge.thermalenergy_total",
+    "Gesamt-W\xE4rmemenge"
+  );
+}
 async function calculateTotalEnergy(adapter) {
+  await calculateSum(
+    adapter,
+    "Informationen.10_Engergie.energy_heating",
+    "Informationen.10_Engergie.energy_warmwater",
+    "Informationen.10_Engergie.energy_total",
+    "Gesamt-Energie"
+  );
+}
+async function updateHistory(adapter, rawValues, startIdxTime, startIdxCode, targetId, dictKeys, fallbackPrefix) {
   try {
-    const heatingState = await adapter.getStateAsync("Informationen.10_Engergie.energy_heating");
-    const warmwaterState = await adapter.getStateAsync("Informationen.10_Engergie.energy_warmwater");
-    const EnergyHeating = heatingState && typeof heatingState.val === "number" ? heatingState.val : 0;
-    const EnergyWarmwater = warmwaterState && typeof warmwaterState.val === "number" ? warmwaterState.val : 0;
-    const totalEnergy = EnergyHeating + EnergyWarmwater;
-    await adapter.setStateChangedAsync("Informationen.10_Engergie.energy_total", totalEnergy, true);
+    const requiredLength = Math.max(startIdxTime, startIdxCode) + 5;
+    if (!rawValues || rawValues.length < requiredLength) {
+      adapter.log.debug(`[Virtual DP] Historie f\xFCr ${targetId} \xFCbersprungen: Unvollst\xE4ndiges Raw-Array.`);
+      return;
+    }
+    const logList = [];
+    const typesAny = luxtronikTypes;
+    for (let i = 0; i < 5; i++) {
+      const timestamp = rawValues[startIdxTime + i];
+      const code = rawValues[startIdxCode + i];
+      if (code !== 0) {
+        const dateObject = new Date(timestamp * 1e3);
+        const readableDate = timestamp > 0 ? dateObject.toLocaleString("de-DE") : "Unbekannt";
+        let beschreibung = `${fallbackPrefix} (${code})`;
+        for (const dictKey of dictKeys) {
+          if (typesAny[dictKey] && typesAny[dictKey][code]) {
+            beschreibung = typesAny[dictKey][code];
+            break;
+          } else if (typesAny[code]) {
+            beschreibung = typesAny[code];
+            break;
+          }
+        }
+        logList.push({
+          index: i + 1,
+          code,
+          beschreibung,
+          datum: readableDate,
+          timestamp
+        });
+      }
+    }
+    const jsonString = JSON.stringify(logList);
+    await adapter.setStateChangedAsync(targetId, jsonString, true);
   } catch (err) {
-    adapter.log.error(`Fehler bei der Berechnung der Gesamt-Energie: ${err.message}`);
+    adapter.log.error(`Fehler bei der Generierung der JSON-Historie f\xFCr ${targetId}: ${err.message}`);
   }
 }
 async function updateErrorHistory(adapter, rawValues) {
-  try {
-    if (!rawValues || rawValues.length < 105) {
-      adapter.log.debug("[Virtual DP] Fehlerhistorie \xFCbersprungen: Unvollst\xE4ndiges Raw-Array 3004.");
-      return;
-    }
-    const errorLogList = [];
-    for (let i = 0; i < 5; i++) {
-      const errorTimestamp = rawValues[95 + i];
-      const errorCode = rawValues[100 + i];
-      if (errorCode !== 0) {
-        const dateObject = new Date(errorTimestamp * 1e3);
-        const readableDate = errorTimestamp > 0 ? dateObject.toLocaleString("de-DE") : "Unbekannt";
-        let fehlerText = `Unbekannter Fehler (${errorCode})`;
-        if (luxtronikTypes) {
-          const TypesAny = luxtronikTypes;
-          if (TypesAny.errorCodes && TypesAny.errorCodes[errorCode]) {
-            fehlerText = TypesAny.errorCodes[errorCode];
-          } else if (TypesAny.codes && TypesAny.codes[errorCode]) {
-            fehlerText = TypesAny.codes[errorCode];
-          } else if (TypesAny[errorCode]) {
-            fehlerText = TypesAny[errorCode];
-          }
-        }
-        errorLogList.push({
-          index: i + 1,
-          code: errorCode,
-          beschreibung: fehlerText,
-          datum: readableDate,
-          timestamp: errorTimestamp
-        });
-      }
-    }
-    const jsonString = JSON.stringify(errorLogList);
-    await adapter.setStateChangedAsync("Informationen.06_Fehlerspeicher.Fehlerspeicher", jsonString, true);
-  } catch (err) {
-    adapter.log.error(`Fehler bei der Generierung der RAW-JSON-Fehlerhistorie: ${err.message}`);
-  }
+  await updateHistory(
+    adapter,
+    rawValues,
+    95,
+    // Start-Index für Zeitstempel
+    100,
+    // Start-Index für Codes
+    "Informationen.06_Fehlerspeicher.Fehlerspeicher",
+    ["errorCodes", "codes"],
+    "Unbekannter Fehler"
+  );
 }
 async function updateOutageHistory(adapter, rawValues) {
-  try {
-    if (!rawValues || rawValues.length < 116) {
-      adapter.log.debug("[Virtual DP] Abschalthistorie \xFCbersprungen: Unvollst\xE4ndiges Raw-Array 3004.");
-      return;
-    }
-    const outageLogList = [];
-    for (let i = 0; i < 5; i++) {
-      const outageCode = rawValues[106 + i];
-      const outageTimestamp = rawValues[111 + i];
-      if (outageCode !== 0) {
-        const dateObject = new Date(outageTimestamp * 1e3);
-        const readableDate = outageTimestamp > 0 ? dateObject.toLocaleString("de-DE") : "Unbekannt";
-        let abschaltText = `Unbekannter Abschaltgrund (${outageCode})`;
-        if (luxtronikTypes) {
-          const utilsAny = luxtronikTypes;
-          if (utilsAny.outageCodes && utilsAny.outageCodes[outageCode]) {
-            abschaltText = utilsAny.outageCodes[outageCode];
-          } else if (utilsAny.outages && utilsAny.outages[outageCode]) {
-            abschaltText = utilsAny.outages[outageCode];
-          } else if (utilsAny.switchOffCodes && utilsAny.switchOffCodes[outageCode]) {
-            abschaltText = utilsAny.switchOffCodes[outageCode];
-          }
-        }
-        outageLogList.push({
-          index: i + 1,
-          code: outageCode,
-          beschreibung: abschaltText,
-          datum: readableDate,
-          timestamp: outageTimestamp
-        });
-      }
-    }
-    const jsonString = JSON.stringify(outageLogList);
-    await adapter.setStateChangedAsync("Informationen.07_Abschaltungen.Abschaltungen", jsonString, true);
-  } catch (err) {
-    adapter.log.error(`Fehler bei der Generierung der RAW-JSON-Abschalthistorie: ${err.message}`);
-  }
+  await updateHistory(
+    adapter,
+    rawValues,
+    111,
+    // Start-Index für Zeitstempel
+    106,
+    // Start-Index für Codes
+    "Informationen.07_Abschaltungen.Abschaltungen",
+    ["outageCodes", "outages", "switchOffCodes"],
+    "Unbekannter Abschaltgrund"
+  );
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
