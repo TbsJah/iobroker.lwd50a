@@ -509,14 +509,14 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "Betriebszustand Heizung",
 		role: "value",
 		type: "number",
-		states: { 0: "Aus", 1: "Normal", 2: "Abgesenkt", 3: "Heizgrenze", 4: "Frostschutz" },
+		states: { 0: "Abgesenkt", 1: "Normal", 2: "Heizgrenze", 3: "Aus", 4: "Frostschutz" },
 	},
 	opStateHotWater: {
 		folder: "Informationen.08_Betriebszustand",
 		name: "Betriebszustand Warmwasser",
 		role: "value",
 		type: "number",
-		states: { 0: "Aus", 1: "Aufheizen", 2: "Temp. OK", 3: "Sperrzeit" },
+		states: { 0: "Aufheizen", 1: "Temp. OK", 2: "Aus", 3: "Sperrzeit" },
 	},
 	bivalentLevel: {
 		folder: "Informationen.08_Betriebszustand",

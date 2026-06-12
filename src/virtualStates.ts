@@ -139,7 +139,7 @@ export async function updateErrorHistory(adapter: any, rawValues: number[]): Pro
 		const jsonString = JSON.stringify(errorLogList);
 		await adapter.setStateChangedAsync("Informationen.06_Fehlerspeicher.Fehlerspeicher", jsonString, true);
 
-		adapter.log.debug(`[Virtual DP] RAW-Fehlerhistorie aktualisiert. ${errorLogList.length} Einträge hinterlegt.`);
+		//	adapter.log.debug(`[Virtual DP] RAW-Fehlerhistorie aktualisiert. ${errorLogList.length} Einträge hinterlegt.`);
 	} catch (err: any) {
 		adapter.log.error(`Fehler bei der Generierung der RAW-JSON-Fehlerhistorie: ${err.message}`);
 	}
@@ -205,9 +205,7 @@ export async function updateOutageHistory(adapter: any, rawValues: number[]): Pr
 		const jsonString = JSON.stringify(outageLogList);
 		await adapter.setStateChangedAsync("Informationen.07_Abschaltungen.Abschaltungen", jsonString, true);
 
-		adapter.log.debug(
-			`[Virtual DP] RAW-Abschalthistorie aktualisiert. ${outageLogList.length} Einträge hinterlegt.`,
-		);
+		//adapter.log.debug(`[Virtual DP] RAW-Abschalthistorie aktualisiert. ${outageLogList.length} Einträge hinterlegt.`,);
 	} catch (err: any) {
 		adapter.log.error(`Fehler bei der Generierung der RAW-JSON-Abschalthistorie: ${err.message}`);
 	}
