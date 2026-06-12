@@ -738,7 +738,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "700",
 		unit: "°C",
 		factor: 10,
-		dataSource: "parameter",
+		dataSource: "raw_parameter",
 	},
 	heatingLimit: {
 		folder: "Einstellungen.02_Heizung",
@@ -748,7 +748,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		luxWriteId: "699",
 		states: { 0: "Aus", 1: "Ein" },
-		dataSource: "parameter",
+		dataSource: "raw_parameter",
 	},
 	warmwater_temperature: {
 		folder: "Einstellungen.03_Warmwasser",
@@ -826,26 +826,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "Activate_Zip",
 		isVirtual: true,
 	},
-	697: {
-		folder: "Einstellungen.System-Einstellung",
-		name: "Parameter 697 (ID_Einst_Zirk_Ein_akt)",
-		role: "value",
-		type: "number",
-		write: true,
-		luxWriteId: "697",
-		unit: "°C",
-		dataSource: "raw_parameter",
-	},
-	698: {
-		folder: "Einstellungen.System-Einstellung",
-		name: "Parameter 698 (ID_Einst_Zirk_Aus_akt)",
-		role: "value",
-		type: "number",
-		write: true,
-		luxWriteId: "698",
-		unit: "°C",
-		dataSource: "raw_parameter",
-	},
 	869: {
 		folder: "Einstellungen.System-Einstellung",
 		name: "Parameter 869 (ID_Einst_Effizienzpumpe_akt)",
@@ -853,7 +833,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		write: true,
 		luxWriteId: "869",
-		unit: "°C",
 		dataSource: "raw_parameter",
 	},
 
