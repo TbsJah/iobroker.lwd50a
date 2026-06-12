@@ -464,7 +464,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 
 	//Betriebszustnd
 	WP_BZ_akt: {
-		folder: "Informationen.Betriebszustand",
+		folder: "Informationen.08_Betriebszustand",
 		name: "Aktueller Betriebszustand Code",
 		role: "value",
 		type: "number",
@@ -480,19 +480,19 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		},
 	},
 	heatpump_state1: {
-		folder: "Informationen.Status",
+		folder: "Informationen.08_Betriebszustand",
 		name: "Wärmepumpen Status-Code 1",
 		role: "value",
 		type: "number",
 	},
 	heatpump_state2: {
-		folder: "Informationen.Status",
+		folder: "Informationen.08_Betriebszustand",
 		name: "Wärmepumpen Status-Code 2",
 		role: "value",
 		type: "number",
 	},
 	heatpump_state3: {
-		folder: "Informationen.Status",
+		folder: "Informationen.08_Betriebszustand",
 		name: "Wärmepumpen Status-Code 3",
 		role: "value",
 		type: "number",
@@ -512,7 +512,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		states: { 0: "Aus", 1: "Normal", 2: "Abgesenkt", 3: "Heizgrenze", 4: "Frostschutz" },
 	},
 	opStateHotWater: {
-		folder: "Informationen.Status",
+		folder: "Informationen.08_Betriebszustand",
 		name: "Betriebszustand Warmwasser Code",
 		role: "value",
 		type: "number",

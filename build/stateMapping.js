@@ -448,7 +448,7 @@ const STATE_MAPPING = {
   },
   //Betriebszustnd
   WP_BZ_akt: {
-    folder: "Informationen.Betriebszustand",
+    folder: "Informationen.08_Betriebszustand",
     name: "Aktueller Betriebszustand Code",
     role: "value",
     type: "number",
@@ -464,19 +464,19 @@ const STATE_MAPPING = {
     }
   },
   heatpump_state1: {
-    folder: "Informationen.Status",
+    folder: "Informationen.08_Betriebszustand",
     name: "W\xE4rmepumpen Status-Code 1",
     role: "value",
     type: "number"
   },
   heatpump_state2: {
-    folder: "Informationen.Status",
+    folder: "Informationen.08_Betriebszustand",
     name: "W\xE4rmepumpen Status-Code 2",
     role: "value",
     type: "number"
   },
   heatpump_state3: {
-    folder: "Informationen.Status",
+    folder: "Informationen.08_Betriebszustand",
     name: "W\xE4rmepumpen Status-Code 3",
     role: "value",
     type: "number"
@@ -495,7 +495,7 @@ const STATE_MAPPING = {
     states: { 0: "Aus", 1: "Normal", 2: "Abgesenkt", 3: "Heizgrenze", 4: "Frostschutz" }
   },
   opStateHotWater: {
-    folder: "Informationen.Status",
+    folder: "Informationen.08_Betriebszustand",
     name: "Betriebszustand Warmwasser Code",
     role: "value",
     type: "number"
