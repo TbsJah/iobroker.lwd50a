@@ -513,10 +513,51 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 	},
 	opStateHotWater: {
 		folder: "Informationen.08_Betriebszustand",
-		name: "Betriebszustand Warmwasser Code",
+		name: "Betriebszustand Warmwasser",
+		role: "value",
+		type: "number",
+		states: { 0: "Aus", 1: "Aufheizen", 2: "Temp. OK", 3: "Sperrzeit" },
+	},
+	bivalentLevel: {
+		folder: "Informationen.08_Betriebszustand",
+		name: "Bivalenzstufe",
+		role: "value",
+		type: "number",
+		states: {
+			1: "Ein Verdichter darf laufen",
+			2: "Zwei Verdichter dürfen laufen",
+			3: "Zusätzlicher Wärmeerzeuger darf mitlaufen",
+		},
+	},
+	heatpump_duration: {
+		folder: "Informationen.08_Betriebszustand",
+		name: "Dauer aktueller Zustand",
+		role: "value",
+		type: "number",
+		unit: "s",
+	},
+	heatpump_state_string: {
+		folder: "Informationen.08_Betriebszustand",
+		name: "Wärmepumpen Status Text",
+		role: "text",
+		type: "string",
+	},
+
+	ahp_Stufe: {
+		folder: "Informationen.08_Betriebszustand",
+		name: "Aktuelle ahp-Stufe",
 		role: "value",
 		type: "number",
 	},
+
+	ahp_Temp: {
+		folder: "Informationen.08_Betriebszustand",
+		name: "Temperatur ahp-Stufe",
+		role: "value.temperature",
+		type: "number",
+		unit: "°C",
+	},
+
 	// ==========================================
 	// EINSTELLUNGEN & PARAMETER (Beschreibbar)
 	// ==========================================
@@ -850,39 +891,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "string",
 	},
 	status_heating: { folder: "Informationen.Status", name: "Status Heizbetrieb", role: "indicator", type: "boolean" },
-	bivalentLevel: {
-		folder: "Informationen.Status",
-		name: "Bivalenzstufe",
-		role: "value",
-		type: "number",
-		states: {
-			1: "Ein Verdichter darf laufen",
-			2: "Zwei Verdichter dürfen laufen",
-			3: "Zusätzlicher Wärmeerzeuger darf mitlaufen",
-		},
-	},
-	heatpump_duration: {
-		folder: "Informationen.Status",
-		name: "Dauer aktueller Zustand",
-		role: "value",
-		type: "number",
-		unit: "s",
-	},
-	heatpump_state_string: {
-		folder: "Informationen.Status",
-		name: "Wärmepumpen Status Text",
-		role: "text",
-		type: "string",
-	},
-
-	ahp_Stufe: { folder: "Informationen.Status", name: "Aktuelle ahp-Stufe", role: "value", type: "number" },
-	ahp_Temp: {
-		folder: "Informationen.Status",
-		name: "Temperatur ahp-Stufe",
-		role: "value.temperature",
-		type: "number",
-		unit: "°C",
-	},
 
 	Einst_Kurzprogramm: {
 		folder: "Informationen.Status",
