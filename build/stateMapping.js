@@ -605,10 +605,9 @@ const STATE_MAPPING = {
     luxWriteId: "1136",
     type: "number",
     unit: "kWh",
-    dataSource: "raw_value",
-    // <--- KORREKTUR: raw_value statt value!
+    dataSource: "raw_parameter",
+    // <--- HIER DER WECHSEL ZU 3003!
     factor: 10
-    // Luxtronik liefert Energie oft in 0.1 kWh (falls die Zahl 10x zu groß ist)
   },
   energy_warmwater: {
     folder: "Informationen.10_Engergie",
@@ -617,8 +616,8 @@ const STATE_MAPPING = {
     type: "number",
     luxWriteId: "1137",
     unit: "kWh",
-    dataSource: "raw_value",
-    // <--- KORREKTUR: raw_value statt value!
+    dataSource: "raw_parameter",
+    // <--- HIER DER WECHSEL ZU 3003!
     factor: 10
   },
   energy_total: {
