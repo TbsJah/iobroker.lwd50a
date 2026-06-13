@@ -609,6 +609,16 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		unit: "kWh",
 		dataSource: "value",
 	},
+	thermalenergy_ZWE1: {
+		folder: "Informationen.09_Wärmemenge",
+		name: "Wärmemenge Heizstab Erzeugt",
+		role: "value.power.consumption",
+		type: "number",
+		luxWriteId: "1059",
+		unit: "kWh",
+		dataSource: "raw_parameter", // <--- HIER DER WECHSEL ZU 3003!
+		factor: 100,
+	},
 	thermalenergy_total: {
 		folder: "Informationen.09_Wärmemenge",
 		name: "Wärmemenge Gesamt Erzeugt",
@@ -618,7 +628,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: "value",
 	},
 
-	// Energie
 	// Energie
 	energy_heating: {
 		folder: "Informationen.10_Engergie",
@@ -640,6 +649,16 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: "raw_parameter", // <--- HIER DER WECHSEL ZU 3003!
 		factor: 100,
 	},
+	energy_ZWE1: {
+		folder: "Informationen.10_Engergie",
+		name: "Energie Heizstab Erzeugt",
+		role: "value.power.consumption",
+		type: "number",
+		luxWriteId: "1059",
+		unit: "kWh",
+		dataSource: "raw_parameter", // <--- HIER DER WECHSEL ZU 3003!
+		factor: 100,
+	},
 	energy_total: {
 		folder: "Informationen.10_Engergie",
 		name: "Energie Gesamt Erzeugt",
@@ -652,6 +671,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 	// ==========================================
 	// EINSTELLUNGEN & PARAMETER (Beschreibbar)
 	// ==========================================
+	//Betriebsmodus
 	heating_operation_mode: {
 		folder: "Einstellungen.01_Betriebsmodus",
 		name: "Betriebsart Heizung",
@@ -671,6 +691,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: "parameter",
 	},
 
+	//Heizung
 	heating_curve_end_point: {
 		folder: "Einstellungen.02_Heizung",
 		name: "Heizkurve Endpunkt (Rücklauf)",
@@ -750,6 +771,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		states: { 0: "Aus", 1: "Ein" },
 		dataSource: "raw_parameter",
 	},
+
+	// Warmwasser
 	warmwater_temperature: {
 		folder: "Einstellungen.03_Warmwasser",
 		name: "Warmwasser Soll-Temperatur",
@@ -798,6 +821,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		max: 10,
 		dataSource: "parameter",
 	},
+
+	//Zip
 	runDeaerate: {
 		folder: "Einstellungen.05_Spezial",
 		name: "Entlüftungsprogramm starten",
@@ -826,82 +851,85 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "Activate_Zip",
 		isVirtual: true,
 	},
-	869: {
-		folder: "Einstellungen.System-Einstellung",
+
+	//Systemeinstellungen
+	Effizienzpumpe: {
+		folder: "Einstellungen.06_System-Einstellung",
 		name: "Parameter 869 (ID_Einst_Effizienzpumpe_akt)",
 		role: "value",
 		type: "number",
 		write: true,
 		luxWriteId: "869",
 		dataSource: "raw_parameter",
+		states: { 0: "Aus", 1: "Ein" },
 	},
 
-	// Systeminfo
+	// 08_Systeminfo
 	typeHeatpump: {
-		folder: "Informationen.Systeminfo",
+		folder: "Informationen.08_Systeminfo",
 		name: "Wärmepumpen-Typ",
 		role: "text",
 		type: "string",
-		dataSource: "additional",
+		dataSource: "value",
 	},
 	firmware: {
-		folder: "Informationen.Systeminfo",
+		folder: "Informationen.08_Systeminfo",
 		name: "Firmware-Version",
 		role: "text",
 		type: "string",
-		dataSource: "additional",
+		dataSource: "value",
 	},
 	AdresseIP_akt: {
-		folder: "Informationen.Systeminfo",
+		folder: "Informationen.08_Systeminfo",
 		name: "Aktuelle IP-Adresse",
 		role: "info.ip",
 		type: "string",
-		dataSource: "additional",
+		dataSource: "value",
 	},
 	SubNetMask_akt: {
-		folder: "Informationen.Systeminfo",
+		folder: "Informationen.08_Systeminfo",
 		name: "Subnetzmaske",
 		role: "info.ip",
 		type: "string",
-		dataSource: "additional",
+		dataSource: "value",
 	},
 	Add_Broadcast: {
-		folder: "Informationen.Systeminfo",
+		folder: "Informationen.08_Systeminfo",
 		name: "Broadcast-Adresse",
 		role: "info.ip",
 		type: "string",
-		dataSource: "additional",
+		dataSource: "value",
 	},
 	Add_StdGateway: {
-		folder: "Informationen.Systeminfo",
+		folder: "Informationen.08_Systeminfo",
 		name: "Standard-Gateway",
 		role: "info.ip",
 		type: "string",
-		dataSource: "additional",
+		dataSource: "value",
 	},
 	Comfort_exists: {
-		folder: "Informationen.Systeminfo",
+		folder: "Informationen.08_Systeminfo",
 		name: "Comfort-Platine vorhanden",
 		role: "value",
 		type: "number",
 		dataSource: "value",
 	},
 	Compact_exists: {
-		folder: "Informationen.Systeminfo",
+		folder: "Informationen.08_Systeminfo",
 		name: "Compact-Bauform vorhanden",
 		role: "value",
 		type: "number",
 		dataSource: "value",
 	},
 	LIN_exists: {
-		folder: "Informationen.Systeminfo",
+		folder: "Informationen.08_Systeminfo",
 		name: "LIN-Bus vorhanden",
 		role: "indicator",
 		type: "boolean",
 		dataSource: "value",
 	},
 	rawDeviceTimeCalc: {
-		folder: "Informationen.Systeminfo",
+		folder: "Informationen.08_Systeminfo",
 		name: "Berechnete Gerätezeit",
 		role: "date",
 		type: "string",
