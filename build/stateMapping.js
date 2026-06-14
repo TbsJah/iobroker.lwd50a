@@ -663,7 +663,7 @@ const STATE_MAPPING = {
     name: "Aktuell ausgew\xE4hlte Tabelle Heizbetrieb Timer",
     role: "value",
     type: "number",
-    dataSource: "value",
+    dataSource: "parameter",
     states: { 0: "Woche (Mo-So)", 1: "5+2 (Mo-Fr, Sa-So)", 2: "Tage (Mo, Di, ...)" }
   },
   hotWaterCircPumpTimerTableSelected: {
@@ -671,7 +671,7 @@ const STATE_MAPPING = {
     name: "Aktuell ausgew\xE4hlte Tabelle Warmwasserbetrieb Timer",
     role: "value",
     type: "number",
-    dataSource: "value",
+    dataSource: "parameter",
     states: { 0: "Woche (Mo-So)", 1: "5+2 (Mo-Fr, Sa-So)", 2: "Tage (Mo, Di, ...)" }
   },
   heatingOperationTimerTable52MonFri: {

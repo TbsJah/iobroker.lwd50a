@@ -681,7 +681,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "Aktuell ausgewählte Tabelle Heizbetrieb Timer",
 		role: "value",
 		type: "number",
-		dataSource: "value",
+		dataSource: "parameter",
 		states: { 0: "Woche (Mo-So)", 1: "5+2 (Mo-Fr, Sa-So)", 2: "Tage (Mo, Di, ...)" },
 	},
 	hotWaterCircPumpTimerTableSelected: {
@@ -689,7 +689,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "Aktuell ausgewählte Tabelle Warmwasserbetrieb Timer",
 		role: "value",
 		type: "number",
-		dataSource: "value",
+		dataSource: "parameter",
 		states: { 0: "Woche (Mo-So)", 1: "5+2 (Mo-Fr, Sa-So)", 2: "Tage (Mo, Di, ...)" },
 	},
 
