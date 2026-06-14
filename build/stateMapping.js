@@ -536,12 +536,19 @@ const STATE_MAPPING = {
     states: { 0: "Abgesenkt", 1: "Normal", 2: "Heizgrenze", 3: "Aus", 4: "Frostschutz" },
     dataSource: "value"
   },
+  opStateHeatingString: {
+    folder: "Informationen.08_Betriebszustand",
+    name: "Betriebszustand Heizung",
+    role: "text",
+    type: "string",
+    dataSource: "value"
+  },
   opStateHotWater: {
     folder: "Informationen.08_Betriebszustand",
     name: "Betriebszustand Warmwasser",
     role: "value",
     type: "number",
-    states: { 0: "Aufheizen", 1: "Temp. OK", 2: "Aus", 3: "Sperrzeit" },
+    states: { 0: "Temp. OK", 1: "Aufheizen", 2: "Aus", 3: "Sperrzeit" },
     dataSource: "value"
   },
   bivalentLevel: {
@@ -649,6 +656,220 @@ const STATE_MAPPING = {
     unit: "kWh",
     isVirtual: true
     // <--- KORREKTUR: Fehlte! Wird vom Adapter selbst addiert.
+  },
+  // 11_Tabellen
+  heatingOperationTimerTableSelected: {
+    folder: "Informationen.11_Tabellen",
+    name: "Aktuell ausgew\xE4hlte Tabelle Heizbetrieb Timer",
+    role: "value",
+    type: "number",
+    dataSource: "value",
+    states: { 0: "Woche (Mo-So)", 1: "5+2 (Mo-Fr, Sa-So)", 2: "Tage (Mo, Di, ...)" }
+  },
+  hotWaterCircPumpTimerTableSelected: {
+    folder: "Informationen.11_Tabellen",
+    name: "Aktuell ausgew\xE4hlte Tabelle Warmwasserbetrieb Timer",
+    role: "value",
+    type: "number",
+    dataSource: "value",
+    states: { 0: "Woche (Mo-So)", 1: "5+2 (Mo-Fr, Sa-So)", 2: "Tage (Mo, Di, ...)" }
+  },
+  heatingOperationTimerTable52MonFri: {
+    folder: "Informationen.11_Tabellen.Heizen",
+    name: "Heizbetrieb Timer Tabelle Mo-Fr (5+2)",
+    role: "string",
+    type: "json",
+    dataSource: "value"
+  },
+  heatingOperationTimerTable52SatSun: {
+    folder: "Informationen.11_Tabellen.Heizen",
+    name: "Heizbetrieb Timer Tabelle Sa-So (5+2)",
+    role: "string",
+    type: "json",
+    dataSource: "value"
+  },
+  heatingOperationTimerTableDayFriday: {
+    folder: "Informationen.11_Tabellen.Heizen",
+    name: "Heizbetrieb Timer Tabelle Fr (Day Friday)",
+    role: "string",
+    type: "json",
+    dataSource: "value"
+  },
+  heatingOperationTimerTableDayMonday: {
+    folder: "Informationen.11_Tabellen.Heizen",
+    name: "Heizbetrieb Timer Tabelle Mo (Day Monday)",
+    role: "string",
+    type: "json",
+    dataSource: "value"
+  },
+  heatingOperationTimerTableDaySaturday: {
+    folder: "Informationen.11_Tabellen.Heizen",
+    name: "Heizbetrieb Timer Tabelle Sa (Day Saturday)",
+    role: "string",
+    type: "json",
+    dataSource: "value"
+  },
+  heatingOperationTimerTableDaySunday: {
+    folder: "Informationen.11_Tabellen.Heizen",
+    name: "Heizbetrieb Timer Tabelle So (Day Sunday)",
+    role: "string",
+    type: "json",
+    dataSource: "value"
+  },
+  heatingOperationTimerTableDayThursday: {
+    folder: "Informationen.11_Tabellen.Heizen",
+    name: "Heizbetrieb Timer Tabelle Do (Day Thursday)",
+    role: "string",
+    type: "json",
+    dataSource: "value"
+  },
+  heatingOperationTimerTableDayTuesday: {
+    folder: "Informationen.11_Tabellen.Heizen",
+    name: "Heizbetrieb Timer Tabelle Di (Day Tuesday)",
+    role: "string",
+    type: "json",
+    dataSource: "value"
+  },
+  heatingOperationTimerTableDayWednesday: {
+    folder: "Informationen.11_Tabellen.Heizen",
+    name: "Heizbetrieb Timer Tabelle Mi (Day Wednesday)",
+    role: "string",
+    type: "json",
+    dataSource: "value"
+  },
+  heatingOperationTimerTableWeek: {
+    folder: "Informationen.11_Tabellen.Heizen",
+    name: "Heizbetrieb Timer Tabelle Wo (Day Week)",
+    role: "string",
+    type: "json",
+    dataSource: "value"
+  },
+  hotWaterCircPumpTimerTable52MonFri: {
+    folder: "Informationen.11_Tabellen.Warmwasser",
+    name: "Warmwasserbetrieb Timer Tabelle Mo-Fr (5+2)",
+    role: "string",
+    type: "json",
+    dataSource: "value"
+  },
+  hotWaterCircPumpTimerTable52SatSun: {
+    folder: "Informationen.11_Tabellen.Warmwasser",
+    name: "Warmwasserbetrieb Timer Tabelle Sa-So (5+2)",
+    role: "string",
+    type: "json",
+    dataSource: "value"
+  },
+  hotWaterCircPumpTimerTableDayFriday: {
+    folder: "Informationen.11_Tabellen.Warmwasser",
+    name: "Warmwasserbetrieb Timer Tabelle Fr (Day Friday)",
+    role: "string",
+    type: "json",
+    dataSource: "value"
+  },
+  hotWaterCircPumpTimerTableDayMonday: {
+    folder: "Informationen.11_Tabellen.Warmwasser",
+    name: "Warmwasserbetrieb Timer Tabelle Mo (Day Monday)",
+    role: "string",
+    type: "json",
+    dataSource: "value"
+  },
+  hotWaterCircPumpTimerTableDaySaturday: {
+    folder: "Informationen.11_Tabellen.Warmwasser",
+    name: "Warmwasserbetrieb Timer Tabelle Sa (Day Saturday)",
+    role: "string",
+    type: "json",
+    dataSource: "value"
+  },
+  hotWaterCircPumpTimerTableDaySunday: {
+    folder: "Informationen.11_Tabellen.Warmwasser",
+    name: "Warmwasserbetrieb Timer Tabelle So (Day Sunday)",
+    role: "string",
+    type: "json",
+    dataSource: "value"
+  },
+  hotWaterCircPumpTimerTableDayThursday: {
+    folder: "Informationen.11_Tabellen.Warmwasser",
+    name: "Warmwasserbetrieb Timer Tabelle Do (Day Thursday)",
+    role: "string",
+    type: "json",
+    dataSource: "value"
+  },
+  hotWaterCircPumpTimerTableDayTuesday: {
+    folder: "Informationen.11_Tabellen.Warmwasser",
+    name: "Warmwasserbetrieb Timer Tabelle Di (Day Tuesday)",
+    role: "string",
+    type: "json",
+    dataSource: "value"
+  },
+  hotWaterCircPumpTimerTableDayWednesday: {
+    folder: "Informationen.11_Tabellen.Warmwasser",
+    name: "Warmwasserbetrieb Timer Tabelle Mi (Day Wednesday)",
+    role: "string",
+    type: "json",
+    dataSource: "value"
+  },
+  hotWaterCircPumpTimerTableWeek: {
+    folder: "Informationen.11_Tabellen.Warmwasser",
+    name: "Warmwasserbetrieb Timer Tabelle Wo (Day Week)",
+    role: "string",
+    type: "json",
+    dataSource: "value"
+  },
+  // 12_Systeminfo
+  typeHeatpump: {
+    folder: "Informationen.12_Systeminfo",
+    name: "W\xE4rmepumpen-Typ",
+    role: "text",
+    type: "string",
+    dataSource: "value"
+  },
+  firmware: {
+    folder: "Informationen.12_Systeminfo",
+    name: "Firmware-Version",
+    role: "text",
+    type: "string",
+    dataSource: "value"
+  },
+  AdresseIP_akt: {
+    folder: "Informationen.12_Systeminfo",
+    name: "Aktuelle IP-Adresse",
+    role: "info.ip",
+    type: "string",
+    dataSource: "value"
+  },
+  SubNetMask_akt: {
+    folder: "Informationen.12_Systeminfo",
+    name: "Subnetzmaske",
+    role: "info.ip",
+    type: "string",
+    dataSource: "value"
+  },
+  Add_Broadcast: {
+    folder: "Informationen.12_Systeminfo",
+    name: "Broadcast-Adresse",
+    role: "info.ip",
+    type: "string",
+    dataSource: "value"
+  },
+  Add_StdGateway: {
+    folder: "Informationen.12_Systeminfo",
+    name: "Standard-Gateway",
+    role: "info.ip",
+    type: "string",
+    dataSource: "value"
+  },
+  LIN_exists: {
+    folder: "Informationen.12_Systeminfo",
+    name: "LIN-Bus vorhanden",
+    role: "indicator",
+    type: "boolean",
+    dataSource: "value"
+  },
+  rawDeviceTimeCalc: {
+    folder: "Informationen.12_Systeminfo",
+    name: "Berechnete Ger\xE4tezeit",
+    role: "date",
+    type: "string",
+    dataSource: "value"
   },
   // ==========================================
   // EINSTELLUNGEN & PARAMETER (Beschreibbar)
@@ -831,87 +1052,28 @@ const STATE_MAPPING = {
     isVirtual: true
   },
   //Systemeinstellungen
-  Effizienzpumpe: {
+  Pumpenoptimierung: {
     folder: "Einstellungen.06_System-Einstellung",
-    name: "Parameter 869 (ID_Einst_Effizienzpumpe_akt)",
+    name: "Parameter 49 (ID_Einst_Popt_akt)",
     role: "value",
     type: "number",
     write: true,
-    luxWriteId: "869",
+    luxWriteId: "49",
     dataSource: "raw_parameter",
     states: { 0: "Aus", 1: "Ein" }
   },
-  // 08_Systeminfo
-  typeHeatpump: {
-    folder: "Informationen.08_Systeminfo",
-    name: "W\xE4rmepumpen-Typ",
-    role: "text",
-    type: "string",
-    dataSource: "value"
-  },
-  firmware: {
-    folder: "Informationen.08_Systeminfo",
-    name: "Firmware-Version",
-    role: "text",
-    type: "string",
-    dataSource: "value"
-  },
-  AdresseIP_akt: {
-    folder: "Informationen.08_Systeminfo",
-    name: "Aktuelle IP-Adresse",
-    role: "info.ip",
-    type: "string",
-    dataSource: "value"
-  },
-  SubNetMask_akt: {
-    folder: "Informationen.08_Systeminfo",
-    name: "Subnetzmaske",
-    role: "info.ip",
-    type: "string",
-    dataSource: "value"
-  },
-  Add_Broadcast: {
-    folder: "Informationen.08_Systeminfo",
-    name: "Broadcast-Adresse",
-    role: "info.ip",
-    type: "string",
-    dataSource: "value"
-  },
-  Add_StdGateway: {
-    folder: "Informationen.08_Systeminfo",
-    name: "Standard-Gateway",
-    role: "info.ip",
-    type: "string",
-    dataSource: "value"
-  },
-  Comfort_exists: {
-    folder: "Informationen.08_Systeminfo",
-    name: "Comfort-Platine vorhanden",
+  Pumpen_Nachlauf: {
+    folder: "Einstellungen.06_System-Einstellung",
+    name: "Parameter 864 (ID_Einst_Popt_Nachlauf_akt)",
     role: "value",
     type: "number",
-    dataSource: "value"
-  },
-  Compact_exists: {
-    folder: "Informationen.08_Systeminfo",
-    name: "Compact-Bauform vorhanden",
-    role: "value",
-    type: "number",
-    dataSource: "value"
-  },
-  LIN_exists: {
-    folder: "Informationen.08_Systeminfo",
-    name: "LIN-Bus vorhanden",
-    role: "indicator",
-    type: "boolean",
-    dataSource: "value"
-  },
-  rawDeviceTimeCalc: {
-    folder: "Informationen.08_Systeminfo",
-    name: "Berechnete Ger\xE4tezeit",
-    role: "date",
-    type: "string",
-    dataSource: "value"
+    write: true,
+    luxWriteId: "864",
+    dataSource: "raw_parameter",
+    unit: "\xB0C",
+    factor: 1
   }
+  //Timer Table
 };
 for (const key of Object.keys(STATE_MAPPING)) {
   if (!STATE_MAPPING[key].luxWriteId) {
