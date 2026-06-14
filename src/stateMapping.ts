@@ -698,7 +698,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "Heizbetrieb Timer Tabelle Mo-Fr (5+2)",
 		role: "string",
 		type: "json",
-		dataSource: "value",
+		dataSource: "parameter",
 	},
 
 	heatingOperationTimerTable52SatSun: {
@@ -706,7 +706,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "Heizbetrieb Timer Tabelle Sa-So (5+2)",
 		role: "string",
 		type: "json",
-		dataSource: "value",
+		dataSource: "parameter",
 	},
 
 	heatingOperationTimerTableDayFriday: {
@@ -714,7 +714,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "Heizbetrieb Timer Tabelle Fr (Day Friday)",
 		role: "string",
 		type: "json",
-		dataSource: "value",
+		dataSource: "parameter",
 	},
 
 	heatingOperationTimerTableDayMonday: {
@@ -722,7 +722,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "Heizbetrieb Timer Tabelle Mo (Day Monday)",
 		role: "string",
 		type: "json",
-		dataSource: "value",
+		dataSource: "parameter",
 	},
 
 	heatingOperationTimerTableDaySaturday: {
@@ -730,7 +730,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "Heizbetrieb Timer Tabelle Sa (Day Saturday)",
 		role: "string",
 		type: "json",
-		dataSource: "value",
+		dataSource: "parameter",
 	},
 
 	heatingOperationTimerTableDaySunday: {
@@ -738,7 +738,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "Heizbetrieb Timer Tabelle So (Day Sunday)",
 		role: "string",
 		type: "json",
-		dataSource: "value",
+		dataSource: "parameter",
 	},
 
 	heatingOperationTimerTableDayThursday: {
@@ -746,7 +746,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "Heizbetrieb Timer Tabelle Do (Day Thursday)",
 		role: "string",
 		type: "json",
-		dataSource: "value",
+		dataSource: "parameter",
 	},
 
 	heatingOperationTimerTableDayTuesday: {
@@ -754,7 +754,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "Heizbetrieb Timer Tabelle Di (Day Tuesday)",
 		role: "string",
 		type: "json",
-		dataSource: "value",
+		dataSource: "parameter",
 	},
 
 	heatingOperationTimerTableDayWednesday: {
@@ -762,7 +762,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "Heizbetrieb Timer Tabelle Mi (Day Wednesday)",
 		role: "string",
 		type: "json",
-		dataSource: "value",
+		dataSource: "parameter",
 	},
 
 	heatingOperationTimerTableWeek: {
@@ -770,7 +770,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "Heizbetrieb Timer Tabelle Wo (Day Week)",
 		role: "string",
 		type: "json",
-		dataSource: "value",
+		dataSource: "parameter",
 	},
 
 	hotWaterCircPumpTimerTable52MonFri: {
@@ -778,7 +778,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "Warmwasserbetrieb Timer Tabelle Mo-Fr (5+2)",
 		role: "string",
 		type: "json",
-		dataSource: "value",
+		dataSource: "parameter",
 	},
 
 	hotWaterCircPumpTimerTable52SatSun: {
@@ -786,7 +786,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "Warmwasserbetrieb Timer Tabelle Sa-So (5+2)",
 		role: "string",
 		type: "json",
-		dataSource: "value",
+		dataSource: "parameter",
 	},
 
 	hotWaterCircPumpTimerTableDayFriday: {
@@ -794,7 +794,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "Warmwasserbetrieb Timer Tabelle Fr (Day Friday)",
 		role: "string",
 		type: "json",
-		dataSource: "value",
+		dataSource: "parameter",
 	},
 
 	hotWaterCircPumpTimerTableDayMonday: {
@@ -802,7 +802,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "Warmwasserbetrieb Timer Tabelle Mo (Day Monday)",
 		role: "string",
 		type: "json",
-		dataSource: "value",
+		dataSource: "parameter",
 	},
 
 	hotWaterCircPumpTimerTableDaySaturday: {
@@ -810,7 +810,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "Warmwasserbetrieb Timer Tabelle Sa (Day Saturday)",
 		role: "string",
 		type: "json",
-		dataSource: "value",
+		dataSource: "parameter",
 	},
 
 	hotWaterCircPumpTimerTableDaySunday: {
@@ -818,7 +818,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "Warmwasserbetrieb Timer Tabelle So (Day Sunday)",
 		role: "string",
 		type: "json",
-		dataSource: "value",
+		dataSource: "parameter",
 	},
 
 	hotWaterCircPumpTimerTableDayThursday: {
@@ -826,7 +826,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "Warmwasserbetrieb Timer Tabelle Do (Day Thursday)",
 		role: "string",
 		type: "json",
-		dataSource: "value",
+		dataSource: "parameter",
 	},
 
 	hotWaterCircPumpTimerTableDayTuesday: {
@@ -834,7 +834,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "Warmwasserbetrieb Timer Tabelle Di (Day Tuesday)",
 		role: "string",
 		type: "json",
-		dataSource: "value",
+		dataSource: "parameter",
 	},
 
 	hotWaterCircPumpTimerTableDayWednesday: {
@@ -842,7 +842,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "Warmwasserbetrieb Timer Tabelle Mi (Day Wednesday)",
 		role: "string",
 		type: "json",
-		dataSource: "value",
+		dataSource: "parameter",
 	},
 
 	hotWaterCircPumpTimerTableWeek: {
@@ -850,7 +850,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "Warmwasserbetrieb Timer Tabelle Wo (Day Week)",
 		role: "string",
 		type: "json",
-		dataSource: "value",
+		dataSource: "parameter",
 	},
 
 	// 12_Systeminfo

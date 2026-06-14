@@ -294,12 +294,17 @@ class Lwd50a extends utils.Adapter {
 						} else {
 							value = value === true || value === 1;
 						}
+					} else if (definition.type === "json" && typeof value === "object") {
+						// ==========================================
+						// NEU: OBJEKTE FÜR JSON-DATENPUNKTE UMWANDELN
+						// ==========================================
+						value = JSON.stringify(value);
 					}
+					// ==========================================
 
 					let targetType: ioBroker.CommonType = definition.type === "json" ? "string" : definition.type;
 					let targetRole = definition.role;
 					let targetUnit = definition.unit;
-
 					if (definition.unit === "s") {
 						const totalSeconds = typeof value === "number" ? value : parseInt(value, 10);
 						if (!isNaN(totalSeconds)) {

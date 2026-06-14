@@ -679,140 +679,140 @@ const STATE_MAPPING = {
     name: "Heizbetrieb Timer Tabelle Mo-Fr (5+2)",
     role: "string",
     type: "json",
-    dataSource: "value"
+    dataSource: "parameter"
   },
   heatingOperationTimerTable52SatSun: {
     folder: "Informationen.11_Tabellen.Heizen",
     name: "Heizbetrieb Timer Tabelle Sa-So (5+2)",
     role: "string",
     type: "json",
-    dataSource: "value"
+    dataSource: "parameter"
   },
   heatingOperationTimerTableDayFriday: {
     folder: "Informationen.11_Tabellen.Heizen",
     name: "Heizbetrieb Timer Tabelle Fr (Day Friday)",
     role: "string",
     type: "json",
-    dataSource: "value"
+    dataSource: "parameter"
   },
   heatingOperationTimerTableDayMonday: {
     folder: "Informationen.11_Tabellen.Heizen",
     name: "Heizbetrieb Timer Tabelle Mo (Day Monday)",
     role: "string",
     type: "json",
-    dataSource: "value"
+    dataSource: "parameter"
   },
   heatingOperationTimerTableDaySaturday: {
     folder: "Informationen.11_Tabellen.Heizen",
     name: "Heizbetrieb Timer Tabelle Sa (Day Saturday)",
     role: "string",
     type: "json",
-    dataSource: "value"
+    dataSource: "parameter"
   },
   heatingOperationTimerTableDaySunday: {
     folder: "Informationen.11_Tabellen.Heizen",
     name: "Heizbetrieb Timer Tabelle So (Day Sunday)",
     role: "string",
     type: "json",
-    dataSource: "value"
+    dataSource: "parameter"
   },
   heatingOperationTimerTableDayThursday: {
     folder: "Informationen.11_Tabellen.Heizen",
     name: "Heizbetrieb Timer Tabelle Do (Day Thursday)",
     role: "string",
     type: "json",
-    dataSource: "value"
+    dataSource: "parameter"
   },
   heatingOperationTimerTableDayTuesday: {
     folder: "Informationen.11_Tabellen.Heizen",
     name: "Heizbetrieb Timer Tabelle Di (Day Tuesday)",
     role: "string",
     type: "json",
-    dataSource: "value"
+    dataSource: "parameter"
   },
   heatingOperationTimerTableDayWednesday: {
     folder: "Informationen.11_Tabellen.Heizen",
     name: "Heizbetrieb Timer Tabelle Mi (Day Wednesday)",
     role: "string",
     type: "json",
-    dataSource: "value"
+    dataSource: "parameter"
   },
   heatingOperationTimerTableWeek: {
     folder: "Informationen.11_Tabellen.Heizen",
     name: "Heizbetrieb Timer Tabelle Wo (Day Week)",
     role: "string",
     type: "json",
-    dataSource: "value"
+    dataSource: "parameter"
   },
   hotWaterCircPumpTimerTable52MonFri: {
     folder: "Informationen.11_Tabellen.Warmwasser",
     name: "Warmwasserbetrieb Timer Tabelle Mo-Fr (5+2)",
     role: "string",
     type: "json",
-    dataSource: "value"
+    dataSource: "parameter"
   },
   hotWaterCircPumpTimerTable52SatSun: {
     folder: "Informationen.11_Tabellen.Warmwasser",
     name: "Warmwasserbetrieb Timer Tabelle Sa-So (5+2)",
     role: "string",
     type: "json",
-    dataSource: "value"
+    dataSource: "parameter"
   },
   hotWaterCircPumpTimerTableDayFriday: {
     folder: "Informationen.11_Tabellen.Warmwasser",
     name: "Warmwasserbetrieb Timer Tabelle Fr (Day Friday)",
     role: "string",
     type: "json",
-    dataSource: "value"
+    dataSource: "parameter"
   },
   hotWaterCircPumpTimerTableDayMonday: {
     folder: "Informationen.11_Tabellen.Warmwasser",
     name: "Warmwasserbetrieb Timer Tabelle Mo (Day Monday)",
     role: "string",
     type: "json",
-    dataSource: "value"
+    dataSource: "parameter"
   },
   hotWaterCircPumpTimerTableDaySaturday: {
     folder: "Informationen.11_Tabellen.Warmwasser",
     name: "Warmwasserbetrieb Timer Tabelle Sa (Day Saturday)",
     role: "string",
     type: "json",
-    dataSource: "value"
+    dataSource: "parameter"
   },
   hotWaterCircPumpTimerTableDaySunday: {
     folder: "Informationen.11_Tabellen.Warmwasser",
     name: "Warmwasserbetrieb Timer Tabelle So (Day Sunday)",
     role: "string",
     type: "json",
-    dataSource: "value"
+    dataSource: "parameter"
   },
   hotWaterCircPumpTimerTableDayThursday: {
     folder: "Informationen.11_Tabellen.Warmwasser",
     name: "Warmwasserbetrieb Timer Tabelle Do (Day Thursday)",
     role: "string",
     type: "json",
-    dataSource: "value"
+    dataSource: "parameter"
   },
   hotWaterCircPumpTimerTableDayTuesday: {
     folder: "Informationen.11_Tabellen.Warmwasser",
     name: "Warmwasserbetrieb Timer Tabelle Di (Day Tuesday)",
     role: "string",
     type: "json",
-    dataSource: "value"
+    dataSource: "parameter"
   },
   hotWaterCircPumpTimerTableDayWednesday: {
     folder: "Informationen.11_Tabellen.Warmwasser",
     name: "Warmwasserbetrieb Timer Tabelle Mi (Day Wednesday)",
     role: "string",
     type: "json",
-    dataSource: "value"
+    dataSource: "parameter"
   },
   hotWaterCircPumpTimerTableWeek: {
     folder: "Informationen.11_Tabellen.Warmwasser",
     name: "Warmwasserbetrieb Timer Tabelle Wo (Day Week)",
     role: "string",
     type: "json",
-    dataSource: "value"
+    dataSource: "parameter"
   },
   // 12_Systeminfo
   typeHeatpump: {

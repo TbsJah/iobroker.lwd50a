@@ -257,6 +257,8 @@ class Lwd50a extends utils.Adapter {
             } else {
               value = value === true || value === 1;
             }
+          } else if (definition.type === "json" && typeof value === "object") {
+            value = JSON.stringify(value);
           }
           let targetType = definition.type === "json" ? "string" : definition.type;
           let targetRole = definition.role;
