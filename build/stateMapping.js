@@ -819,7 +819,7 @@ const STATE_MAPPING = {
     name: "Heizen Timer Tabelle Start 1 Woche (Mo-So)",
     role: "text",
     type: "string",
-    dataSource: "parameter",
+    dataSource: "raw_parameter",
     luxWriteId: "223",
     write: true
   },
@@ -828,7 +828,7 @@ const STATE_MAPPING = {
     name: "Heizen Timer Tabelle Ende 1 Woche (Mo-So)",
     role: "text",
     type: "string",
-    dataSource: "parameter",
+    dataSource: "raw_parameter",
     luxWriteId: "224",
     write: true
   },
@@ -837,7 +837,7 @@ const STATE_MAPPING = {
     name: "Heizen Timer Tabelle Start 1 Woche (Mo-So)",
     role: "text",
     type: "string",
-    dataSource: "parameter",
+    dataSource: "raw_parameter",
     luxWriteId: "225",
     write: true
   },
@@ -846,7 +846,7 @@ const STATE_MAPPING = {
     name: "Heizen Timer Tabelle Ende 1 Woche (Mo-So)",
     role: "text",
     type: "string",
-    dataSource: "parameter",
+    dataSource: "raw_parameter",
     luxWriteId: "226",
     write: true
   },
@@ -855,7 +855,7 @@ const STATE_MAPPING = {
     name: "Heizen Timer Tabelle Start 1 Woche (Mo-So)",
     role: "text",
     type: "string",
-    dataSource: "parameter",
+    dataSource: "raw_parameter",
     luxWriteId: "227",
     write: true
   },
@@ -864,7 +864,7 @@ const STATE_MAPPING = {
     name: "Heizen Timer Tabelle Ende 1 Woche (Mo-So)",
     role: "text",
     type: "string",
-    dataSource: "parameter",
+    dataSource: "raw_parameter",
     luxWriteId: "228",
     write: true
   },
