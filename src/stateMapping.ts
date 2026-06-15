@@ -853,6 +853,65 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: "parameter",
 	},
 
+	223: {
+		folder: "Informationen.11_Tabellen.Heizen.Parameter.",
+		name: "Heizen Timer Tabelle Start 1 Woche (Mo-So)",
+		role: "text",
+		type: "string",
+		dataSource: "parameter",
+		luxWriteId: "223",
+		write: true,
+	},
+
+	224: {
+		folder: "Informationen.11_Tabellen.Heizen.Parameter.",
+		name: "Heizen Timer Tabelle Ende 1 Woche (Mo-So)",
+		role: "text",
+		type: "string",
+		dataSource: "parameter",
+		luxWriteId: "224",
+		write: true,
+	},
+
+	225: {
+		folder: "Informationen.11_Tabellen.Heizen.Parameter.",
+		name: "Heizen Timer Tabelle Start 1 Woche (Mo-So)",
+		role: "text",
+		type: "string",
+		dataSource: "parameter",
+		luxWriteId: "225",
+		write: true,
+	},
+
+	226: {
+		folder: "Informationen.11_Tabellen.Heizen.Parameter.",
+		name: "Heizen Timer Tabelle Ende 1 Woche (Mo-So)",
+		role: "text",
+		type: "string",
+		dataSource: "parameter",
+		luxWriteId: "226",
+		write: true,
+	},
+	227: {
+		folder: "Informationen.11_Tabellen.Heizen.Parameter.",
+		name: "Heizen Timer Tabelle Start 1 Woche (Mo-So)",
+		role: "text",
+		type: "string",
+		dataSource: "parameter",
+		luxWriteId: "227",
+		write: true,
+	},
+
+	228: {
+		folder: "Informationen.11_Tabellen.Heizen.Parameter.",
+		name: "Heizen Timer Tabelle Ende 1 Woche (Mo-So)",
+		role: "text",
+		type: "string",
+		dataSource: "parameter",
+		luxWriteId: "228",
+		write: true,
+	},
+
 	// 12_Systeminfo
 	typeHeatpump: {
 		folder: "Informationen.12_Systeminfo",
