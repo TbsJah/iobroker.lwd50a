@@ -815,7 +815,7 @@ const STATE_MAPPING = {
     dataSource: "parameter"
   },
   223: {
-    folder: "Informationen.11_Tabellen.Heizen.Parameter.",
+    folder: "Informationen.11_Tabellen.Heizen.Parameter.Mo-So",
     name: "Heizen Timer Tabelle Start 1 Woche (Mo-So)",
     role: "text",
     type: "string",
@@ -824,7 +824,7 @@ const STATE_MAPPING = {
     write: true
   },
   224: {
-    folder: "Informationen.11_Tabellen.Heizen.Parameter.",
+    folder: "Informationen.11_Tabellen.Heizen.Parameter.Mo-So",
     name: "Heizen Timer Tabelle Ende 1 Woche (Mo-So)",
     role: "text",
     type: "string",
@@ -833,7 +833,7 @@ const STATE_MAPPING = {
     write: true
   },
   225: {
-    folder: "Informationen.11_Tabellen.Heizen.Parameter.",
+    folder: "Informationen.11_Tabellen.Heizen.Parameter.Mo-So",
     name: "Heizen Timer Tabelle Start 1 Woche (Mo-So)",
     role: "text",
     type: "string",
@@ -842,7 +842,7 @@ const STATE_MAPPING = {
     write: true
   },
   226: {
-    folder: "Informationen.11_Tabellen.Heizen.Parameter.",
+    folder: "Informationen.11_Tabellen.Heizen.Parameter.Mo-So",
     name: "Heizen Timer Tabelle Ende 1 Woche (Mo-So)",
     role: "text",
     type: "string",
@@ -851,7 +851,7 @@ const STATE_MAPPING = {
     write: true
   },
   227: {
-    folder: "Informationen.11_Tabellen.Heizen.Parameter.",
+    folder: "Informationen.11_Tabellen.Heizen.Parameter.Mo-So",
     name: "Heizen Timer Tabelle Start 1 Woche (Mo-So)",
     role: "text",
     type: "string",
@@ -860,7 +860,7 @@ const STATE_MAPPING = {
     write: true
   },
   228: {
-    folder: "Informationen.11_Tabellen.Heizen.Parameter.",
+    folder: "Informationen.11_Tabellen.Heizen.Parameter.Mo-So",
     name: "Heizen Timer Tabelle Ende 1 Woche (Mo-So)",
     role: "text",
     type: "string",
