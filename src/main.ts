@@ -311,10 +311,22 @@ class Lwd50a extends utils.Adapter {
 							targetUnit = undefined;
 						}
 					} else if (definition.role === "value.datetime") {
-						// --- NEU: DATETIME AUSLESEN (Unix Sekunden zu Text) ---
+						// --- DATETIME AUSLESEN (Uhrzeit oder Unix-Timestamp) ---
 						const totalSeconds = typeof value === "number" ? value : parseInt(value, 10);
-						if (!isNaN(totalSeconds) && totalSeconds > 0) {
-							value = new Date(totalSeconds * 1000).toLocaleString("de-DE");
+						if (!isNaN(totalSeconds) && totalSeconds >= 0) {
+							if (totalSeconds < 86400) {
+								// Weniger als 24 Stunden = Reine Uhrzeit (z.B. Timer-Einstellung)
+								const h = Math.floor(totalSeconds / 3600)
+									.toString()
+									.padStart(2, "0");
+								const m = Math.floor((totalSeconds % 3600) / 60)
+									.toString()
+									.padStart(2, "0");
+								value = `${h}:${m}`;
+							} else {
+								// Große Zahl = Echter Unix-Timestamp (z.B. Systemzeit)
+								value = new Date(totalSeconds * 1000).toLocaleString("de-DE");
+							}
 							targetType = "string";
 							targetUnit = undefined;
 						}
@@ -447,36 +459,38 @@ class Lwd50a extends utils.Adapter {
 
 			let valueToWrite: any = state.val;
 
-			// --- NEU: DATETIME SCHREIBEN (Text zu Unix Sekunden) ---
+			// --- DATETIME SCHREIBEN (Text zu Uhrzeit-Sekunden oder Unix-Timestamp) ---
 			if (definition.role === "value.datetime") {
 				const valStr = String(state.val).trim();
-				const match = valStr.match(
+
+				const timeMatch = valStr.match(/^(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?$/);
+				const dateMatch = valStr.match(
 					/^(\d{1,2})\.(\d{1,2})\.(\d{4})(?:,\s*|\s+)(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?/,
 				);
 
-				if (match) {
-					const day = parseInt(match[1], 10);
-					const month = parseInt(match[2], 10) - 1; // JS Monate starten bei 0
-					const year = parseInt(match[3], 10);
-					const hour = parseInt(match[4], 10);
-					const minute = parseInt(match[5], 10);
-					const second = match[6] ? parseInt(match[6], 10) : 0;
-
+				if (timeMatch) {
+					// Uhrzeit in Sekunden seit Mitternacht umwandeln (z.B. für Timer)
+					const hour = parseInt(timeMatch[1], 10);
+					const minute = parseInt(timeMatch[2], 10);
+					const second = timeMatch[3] ? parseInt(timeMatch[3], 10) : 0;
+					valueToWrite = hour * 3600 + minute * 60 + second;
+				} else if (dateMatch) {
+					// Vollständiges Datum in Unix-Timestamp konvertieren
+					const day = parseInt(dateMatch[1], 10);
+					const month = parseInt(dateMatch[2], 10) - 1;
+					const year = parseInt(dateMatch[3], 10);
+					const hour = parseInt(dateMatch[4], 10);
+					const minute = parseInt(dateMatch[5], 10);
+					const second = dateMatch[6] ? parseInt(dateMatch[6], 10) : 0;
 					const date = new Date(year, month, day, hour, minute, second);
 					valueToWrite = Math.floor(date.getTime() / 1000);
 				} else if (/^\d+$/.test(valStr)) {
-					// Fallback, falls jemand direkt Unix-Sekunden als Zahl/String eingibt
 					valueToWrite = parseInt(valStr, 10);
 				} else {
-					const parsed = Date.parse(valStr);
-					if (!isNaN(parsed)) {
-						valueToWrite = Math.floor(parsed / 1000);
-					} else {
-						this.log.error(
-							`Ungültiges Datumsformat für ${id}: ${state.val}. Erwartet wird z.B. TT.MM.JJJJ, HH:MM:SS`,
-						);
-						return; // Abbruch bei völlig falscher Eingabe
-					}
+					this.log.error(
+						`Ungültiges Format für ${id}: ${state.val}. Erwartet wird "HH:MM" oder "TT.MM.JJJJ, HH:MM"`,
+					);
+					return;
 				}
 			} else if (definition.factor && typeof state.val === "number") {
 				valueToWrite = state.val * definition.factor;
@@ -484,7 +498,7 @@ class Lwd50a extends utils.Adapter {
 
 			const luxWriteId = definition.luxWriteId;
 
-			// Evaluierung ob Raw-Write anhand der neuen Definition
+			// Evaluierung ob Raw-Write anhand der Definition
 			const isRawWrite =
 				definition.dataSource === "raw_parameter" ||
 				definition.dataSource === "raw_value" ||

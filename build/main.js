@@ -273,8 +273,14 @@ class Lwd50a extends utils.Adapter {
             }
           } else if (definition.role === "value.datetime") {
             const totalSeconds = typeof value === "number" ? value : parseInt(value, 10);
-            if (!isNaN(totalSeconds) && totalSeconds > 0) {
-              value = new Date(totalSeconds * 1e3).toLocaleString("de-DE");
+            if (!isNaN(totalSeconds) && totalSeconds >= 0) {
+              if (totalSeconds < 86400) {
+                const h = Math.floor(totalSeconds / 3600).toString().padStart(2, "0");
+                const m = Math.floor(totalSeconds % 3600 / 60).toString().padStart(2, "0");
+                value = `${h}:${m}`;
+              } else {
+                value = new Date(totalSeconds * 1e3).toLocaleString("de-DE");
+              }
               targetType = "string";
               targetUnit = void 0;
             }
@@ -385,30 +391,31 @@ class Lwd50a extends utils.Adapter {
       let valueToWrite = state.val;
       if (definition.role === "value.datetime") {
         const valStr = String(state.val).trim();
-        const match = valStr.match(
+        const timeMatch = valStr.match(/^(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?$/);
+        const dateMatch = valStr.match(
           /^(\d{1,2})\.(\d{1,2})\.(\d{4})(?:,\s*|\s+)(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?/
         );
-        if (match) {
-          const day = parseInt(match[1], 10);
-          const month = parseInt(match[2], 10) - 1;
-          const year = parseInt(match[3], 10);
-          const hour = parseInt(match[4], 10);
-          const minute = parseInt(match[5], 10);
-          const second = match[6] ? parseInt(match[6], 10) : 0;
+        if (timeMatch) {
+          const hour = parseInt(timeMatch[1], 10);
+          const minute = parseInt(timeMatch[2], 10);
+          const second = timeMatch[3] ? parseInt(timeMatch[3], 10) : 0;
+          valueToWrite = hour * 3600 + minute * 60 + second;
+        } else if (dateMatch) {
+          const day = parseInt(dateMatch[1], 10);
+          const month = parseInt(dateMatch[2], 10) - 1;
+          const year = parseInt(dateMatch[3], 10);
+          const hour = parseInt(dateMatch[4], 10);
+          const minute = parseInt(dateMatch[5], 10);
+          const second = dateMatch[6] ? parseInt(dateMatch[6], 10) : 0;
           const date = new Date(year, month, day, hour, minute, second);
           valueToWrite = Math.floor(date.getTime() / 1e3);
         } else if (/^\d+$/.test(valStr)) {
           valueToWrite = parseInt(valStr, 10);
         } else {
-          const parsed = Date.parse(valStr);
-          if (!isNaN(parsed)) {
-            valueToWrite = Math.floor(parsed / 1e3);
-          } else {
-            this.log.error(
-              `Ung\xFCltiges Datumsformat f\xFCr ${id}: ${state.val}. Erwartet wird z.B. TT.MM.JJJJ, HH:MM:SS`
-            );
-            return;
-          }
+          this.log.error(
+            `Ung\xFCltiges Format f\xFCr ${id}: ${state.val}. Erwartet wird "HH:MM" oder "TT.MM.JJJJ, HH:MM"`
+          );
+          return;
         }
       } else if (definition.factor && typeof state.val === "number") {
         valueToWrite = state.val * definition.factor;
