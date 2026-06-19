@@ -701,160 +701,11 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: "parameter",
 	},
 
-	heatingOperationTimerTable52SatSun: {
-		folder: "Informationen.11_Tabellen.Heizen",
-		name: "Heizbetrieb Timer Tabelle Sa-So (5+2)",
-		role: "string",
-		type: "json",
-		dataSource: "parameter",
-	},
-
-	heatingOperationTimerTableDayFriday: {
-		folder: "Informationen.11_Tabellen.Heizen",
-		name: "Heizbetrieb Timer Tabelle Fr (Day Friday)",
-		role: "string",
-		type: "json",
-		dataSource: "parameter",
-	},
-
-	heatingOperationTimerTableDayMonday: {
-		folder: "Informationen.11_Tabellen.Heizen",
-		name: "Heizbetrieb Timer Tabelle Mo (Day Monday)",
-		role: "string",
-		type: "json",
-		dataSource: "parameter",
-	},
-
-	heatingOperationTimerTableDaySaturday: {
-		folder: "Informationen.11_Tabellen.Heizen",
-		name: "Heizbetrieb Timer Tabelle Sa (Day Saturday)",
-		role: "string",
-		type: "json",
-		dataSource: "parameter",
-	},
-
-	heatingOperationTimerTableDaySunday: {
-		folder: "Informationen.11_Tabellen.Heizen",
-		name: "Heizbetrieb Timer Tabelle So (Day Sunday)",
-		role: "string",
-		type: "json",
-		dataSource: "parameter",
-	},
-
-	heatingOperationTimerTableDayThursday: {
-		folder: "Informationen.11_Tabellen.Heizen",
-		name: "Heizbetrieb Timer Tabelle Do (Day Thursday)",
-		role: "string",
-		type: "json",
-		dataSource: "parameter",
-	},
-
-	heatingOperationTimerTableDayTuesday: {
-		folder: "Informationen.11_Tabellen.Heizen",
-		name: "Heizbetrieb Timer Tabelle Di (Day Tuesday)",
-		role: "string",
-		type: "json",
-		dataSource: "parameter",
-	},
-
-	heatingOperationTimerTableDayWednesday: {
-		folder: "Informationen.11_Tabellen.Heizen",
-		name: "Heizbetrieb Timer Tabelle Mi (Day Wednesday)",
-		role: "string",
-		type: "json",
-		dataSource: "parameter",
-	},
-
-	heatingOperationTimerTableWeek: {
-		folder: "Informationen.11_Tabellen.Heizen",
-		name: "Heizbetrieb Timer Tabelle Wo (Day Week)",
-		role: "string",
-		type: "json",
-		dataSource: "parameter",
-	},
-
-	hotWaterCircPumpTimerTable52MonFri: {
-		folder: "Informationen.11_Tabellen.Warmwasser",
-		name: "Warmwasserbetrieb Timer Tabelle Mo-Fr (5+2)",
-		role: "string",
-		type: "json",
-		dataSource: "parameter",
-	},
-
-	hotWaterCircPumpTimerTable52SatSun: {
-		folder: "Informationen.11_Tabellen.Warmwasser",
-		name: "Warmwasserbetrieb Timer Tabelle Sa-So (5+2)",
-		role: "string",
-		type: "json",
-		dataSource: "parameter",
-	},
-
-	hotWaterCircPumpTimerTableDayFriday: {
-		folder: "Informationen.11_Tabellen.Warmwasser",
-		name: "Warmwasserbetrieb Timer Tabelle Fr (Day Friday)",
-		role: "string",
-		type: "json",
-		dataSource: "parameter",
-	},
-
-	hotWaterCircPumpTimerTableDayMonday: {
-		folder: "Informationen.11_Tabellen.Warmwasser",
-		name: "Warmwasserbetrieb Timer Tabelle Mo (Day Monday)",
-		role: "string",
-		type: "json",
-		dataSource: "parameter",
-	},
-
-	hotWaterCircPumpTimerTableDaySaturday: {
-		folder: "Informationen.11_Tabellen.Warmwasser",
-		name: "Warmwasserbetrieb Timer Tabelle Sa (Day Saturday)",
-		role: "string",
-		type: "json",
-		dataSource: "parameter",
-	},
-
-	hotWaterCircPumpTimerTableDaySunday: {
-		folder: "Informationen.11_Tabellen.Warmwasser",
-		name: "Warmwasserbetrieb Timer Tabelle So (Day Sunday)",
-		role: "string",
-		type: "json",
-		dataSource: "parameter",
-	},
-
-	hotWaterCircPumpTimerTableDayThursday: {
-		folder: "Informationen.11_Tabellen.Warmwasser",
-		name: "Warmwasserbetrieb Timer Tabelle Do (Day Thursday)",
-		role: "string",
-		type: "json",
-		dataSource: "parameter",
-	},
-
-	hotWaterCircPumpTimerTableDayTuesday: {
-		folder: "Informationen.11_Tabellen.Warmwasser",
-		name: "Warmwasserbetrieb Timer Tabelle Di (Day Tuesday)",
-		role: "string",
-		type: "json",
-		dataSource: "parameter",
-	},
-
-	hotWaterCircPumpTimerTableDayWednesday: {
-		folder: "Informationen.11_Tabellen.Warmwasser",
-		name: "Warmwasserbetrieb Timer Tabelle Mi (Day Wednesday)",
-		role: "string",
-		type: "json",
-		dataSource: "parameter",
-	},
-
-	hotWaterCircPumpTimerTableWeek: {
-		folder: "Informationen.11_Tabellen.Warmwasser",
-		name: "Warmwasserbetrieb Timer Tabelle Wo (Day Week)",
-		role: "string",
-		type: "json",
-		dataSource: "parameter",
-	},
-
-	//Timer Tabellen Mo-So (1-3) - Hier gibt es nur 3 Start- und Endzeiten,
-	MoSo_Start1: {
+	// =========================================================
+	// HEIZEN TIMER: WOCHE (MO-SO)
+	// Basis: 223
+	// =========================================================
+	HZ_MoSo_Start1: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Mo-So",
 		name: "Heizen Timer Tabelle Start 1 Woche (Mo-So)",
 		role: "value.datetime",
@@ -863,8 +714,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "223",
 		write: true,
 	},
-
-	MoSo_End1: {
+	HZ_MoSo_End1: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Mo-So",
 		name: "Heizen Timer Tabelle Ende 1 Woche (Mo-So)",
 		role: "value.datetime",
@@ -873,8 +723,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "224",
 		write: true,
 	},
-
-	MoSo_Start2: {
+	HZ_MoSo_Start2: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Mo-So",
 		name: "Heizen Timer Tabelle Start 2 Woche (Mo-So)",
 		role: "value.datetime",
@@ -883,8 +732,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "225",
 		write: true,
 	},
-
-	MoSo_End2: {
+	HZ_MoSo_End2: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Mo-So",
 		name: "Heizen Timer Tabelle Ende 2 Woche (Mo-So)",
 		role: "value.datetime",
@@ -893,7 +741,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "226",
 		write: true,
 	},
-	MoSo_Start3: {
+	HZ_MoSo_Start3: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Mo-So",
 		name: "Heizen Timer Tabelle Start 3 Woche (Mo-So)",
 		role: "value.datetime",
@@ -902,8 +750,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "227",
 		write: true,
 	},
-
-	MoSo_End3: {
+	HZ_MoSo_End3: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Mo-So",
 		name: "Heizen Timer Tabelle Ende 3 Woche (Mo-So)",
 		role: "value.datetime",
@@ -914,11 +761,175 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 	},
 
 	// =========================================================
-	// HEIZEN TIMER: EINZELTAGE (MONTAG BIS SONNTAG)
+	// HEIZEN TIMER: 5+2 (MO-FR & SA-SO)
 	// =========================================================
+	HZ_MoFr_Start1: {
+		folder: "Informationen.11_Tabellen.Heizen.Parameter.52_MoFr_SaSo",
+		name: "Heizen Timer Tabelle Start 1 (Mo-Fr)",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "229",
+		write: true,
+	},
+	HZ_MoFr_Ende1: {
+		folder: "Informationen.11_Tabellen.Heizen.Parameter.52_MoFr_SaSo",
+		name: "Heizen Timer Tabelle Ende 1 (Mo-Fr)",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "230",
+		write: true,
+	},
+	HZ_MoFr_Start2: {
+		folder: "Informationen.11_Tabellen.Heizen.Parameter.52_MoFr_SaSo",
+		name: "Heizen Timer Tabelle Start 2 (Mo-Fr)",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "231",
+		write: true,
+	},
+	HZ_MoFr_Ende2: {
+		folder: "Informationen.11_Tabellen.Heizen.Parameter.52_MoFr_SaSo",
+		name: "Heizen Timer Tabelle Ende 2 (Mo-Fr)",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "232",
+		write: true,
+	},
+	HZ_MoFr_Start3: {
+		folder: "Informationen.11_Tabellen.Heizen.Parameter.52_MoFr_SaSo",
+		name: "Heizen Timer Tabelle Start 3 (Mo-Fr)",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "233",
+		write: true,
+	},
+	HZ_MoFr_Ende3: {
+		folder: "Informationen.11_Tabellen.Heizen.Parameter.52_MoFr_SaSo",
+		name: "Heizen Timer Tabelle Ende 3 (Mo-Fr)",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "234",
+		write: true,
+	},
+	HZ_SaSo_Start1: {
+		folder: "Informationen.11_Tabellen.Heizen.Parameter.52_MoFr_SaSo",
+		name: "Heizen Timer Tabelle Start 1 (Sa-So)",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "235",
+		write: true,
+	},
+	HZ_SaSo_Ende1: {
+		folder: "Informationen.11_Tabellen.Heizen.Parameter.52_MoFr_SaSo",
+		name: "Heizen Timer Tabelle Ende 1 (Sa-So)",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "236",
+		write: true,
+	},
+	HZ_SaSo_Start2: {
+		folder: "Informationen.11_Tabellen.Heizen.Parameter.52_MoFr_SaSo",
+		name: "Heizen Timer Tabelle Start 2 (Sa-So)",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "237",
+		write: true,
+	},
+	HZ_SaSo_Ende2: {
+		folder: "Informationen.11_Tabellen.Heizen.Parameter.52_MoFr_SaSo",
+		name: "Heizen Timer Tabelle Ende 2 (Sa-So)",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "238",
+		write: true,
+	},
+	HZ_SaSo_Start3: {
+		folder: "Informationen.11_Tabellen.Heizen.Parameter.52_MoFr_SaSo",
+		name: "Heizen Timer Tabelle Start 3 (Sa-So)",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "239",
+		write: true,
+	},
+	HZ_SaSo_Ende3: {
+		folder: "Informationen.11_Tabellen.Heizen.Parameter.52_MoFr_SaSo",
+		name: "Heizen Timer Tabelle Ende 3 (Sa-So)",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "240",
+		write: true,
+	},
 
-	// --- MONTAG (Basis 247) ---
-	Montag_Start1: {
+	// =========================================================
+	// HEIZEN TIMER: EINZELTAGE
+	// =========================================================
+	HZ_Sonntag_Start1: {
+		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Sonntag",
+		name: "Heizen Timer Tabelle Start 1 Sonntag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "241",
+		write: true,
+	},
+	HZ_Sonntag_Ende1: {
+		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Sonntag",
+		name: "Heizen Timer Tabelle Ende 1 Sonntag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "242",
+		write: true,
+	},
+	HZ_Sonntag_Start2: {
+		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Sonntag",
+		name: "Heizen Timer Tabelle Start 2 Sonntag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "243",
+		write: true,
+	},
+	HZ_Sonntag_Ende2: {
+		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Sonntag",
+		name: "Heizen Timer Tabelle Ende 2 Sonntag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "244",
+		write: true,
+	},
+	HZ_Sonntag_Start3: {
+		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Sonntag",
+		name: "Heizen Timer Tabelle Start 3 Sonntag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "245",
+		write: true,
+	},
+	HZ_Sonntag_Ende3: {
+		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Sonntag",
+		name: "Heizen Timer Tabelle Ende 3 Sonntag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "246",
+		write: true,
+	},
+	HZ_Montag_Start1: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Montag",
 		name: "Heizen Timer Tabelle Start 1 Montag",
 		role: "value.datetime",
@@ -927,7 +938,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "247",
 		write: true,
 	},
-	Montag_Ende1: {
+	HZ_Montag_Ende1: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Montag",
 		name: "Heizen Timer Tabelle Ende 1 Montag",
 		role: "value.datetime",
@@ -936,7 +947,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "248",
 		write: true,
 	},
-	Montag_Start2: {
+	HZ_Montag_Start2: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Montag",
 		name: "Heizen Timer Tabelle Start 2 Montag",
 		role: "value.datetime",
@@ -945,7 +956,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "249",
 		write: true,
 	},
-	Montag_Ende2: {
+	HZ_Montag_Ende2: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Montag",
 		name: "Heizen Timer Tabelle Ende 2 Montag",
 		role: "value.datetime",
@@ -954,7 +965,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "250",
 		write: true,
 	},
-	Montag_Start3: {
+	HZ_Montag_Start3: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Montag",
 		name: "Heizen Timer Tabelle Start 3 Montag",
 		role: "value.datetime",
@@ -963,7 +974,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "251",
 		write: true,
 	},
-	Montag_Ende3: {
+	HZ_Montag_Ende3: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Montag",
 		name: "Heizen Timer Tabelle Ende 3 Montag",
 		role: "value.datetime",
@@ -972,9 +983,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "252",
 		write: true,
 	},
-
-	// --- DIENSTAG (Basis 253) ---
-	Dienstag_Start1: {
+	HZ_Dienstag_Start1: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Dienstag",
 		name: "Heizen Timer Tabelle Start 1 Dienstag",
 		role: "value.datetime",
@@ -983,7 +992,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "253",
 		write: true,
 	},
-	Dienstag_Ende1: {
+	HZ_Dienstag_Ende1: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Dienstag",
 		name: "Heizen Timer Tabelle Ende 1 Dienstag",
 		role: "value.datetime",
@@ -992,7 +1001,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "254",
 		write: true,
 	},
-	Dienstag_Start2: {
+	HZ_Dienstag_Start2: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Dienstag",
 		name: "Heizen Timer Tabelle Start 2 Dienstag",
 		role: "value.datetime",
@@ -1001,7 +1010,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "255",
 		write: true,
 	},
-	Dienstag_Ende2: {
+	HZ_Dienstag_Ende2: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Dienstag",
 		name: "Heizen Timer Tabelle Ende 2 Dienstag",
 		role: "value.datetime",
@@ -1010,7 +1019,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "256",
 		write: true,
 	},
-	Dienstag_Start3: {
+	HZ_Dienstag_Start3: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Dienstag",
 		name: "Heizen Timer Tabelle Start 3 Dienstag",
 		role: "value.datetime",
@@ -1019,7 +1028,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "257",
 		write: true,
 	},
-	Dienstag_Ende3: {
+	HZ_Dienstag_Ende3: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Dienstag",
 		name: "Heizen Timer Tabelle Ende 3 Dienstag",
 		role: "value.datetime",
@@ -1028,9 +1037,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "258",
 		write: true,
 	},
-
-	// --- MITTWOCH (Basis 259) ---
-	Mittwoch_Start1: {
+	HZ_Mittwoch_Start1: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Mittwoch",
 		name: "Heizen Timer Tabelle Start 1 Mittwoch",
 		role: "value.datetime",
@@ -1039,7 +1046,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "259",
 		write: true,
 	},
-	Mittwoch_Ende1: {
+	HZ_Mittwoch_Ende1: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Mittwoch",
 		name: "Heizen Timer Tabelle Ende 1 Mittwoch",
 		role: "value.datetime",
@@ -1048,7 +1055,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "260",
 		write: true,
 	},
-	Mittwoch_Start2: {
+	HZ_Mittwoch_Start2: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Mittwoch",
 		name: "Heizen Timer Tabelle Start 2 Mittwoch",
 		role: "value.datetime",
@@ -1057,7 +1064,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "261",
 		write: true,
 	},
-	Mittwoch_Ende2: {
+	HZ_Mittwoch_Ende2: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Mittwoch",
 		name: "Heizen Timer Tabelle Ende 2 Mittwoch",
 		role: "value.datetime",
@@ -1066,7 +1073,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "262",
 		write: true,
 	},
-	Mittwoch_Start3: {
+	HZ_Mittwoch_Start3: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Mittwoch",
 		name: "Heizen Timer Tabelle Start 3 Mittwoch",
 		role: "value.datetime",
@@ -1075,7 +1082,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "263",
 		write: true,
 	},
-	Mittwoch_Ende3: {
+	HZ_Mittwoch_Ende3: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Mittwoch",
 		name: "Heizen Timer Tabelle Ende 3 Mittwoch",
 		role: "value.datetime",
@@ -1084,9 +1091,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "264",
 		write: true,
 	},
-
-	// --- DONNERSTAG (Basis 265) ---
-	Donnerstag_Start1: {
+	HZ_Donnerstag_Start1: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Donnerstag",
 		name: "Heizen Timer Tabelle Start 1 Donnerstag",
 		role: "value.datetime",
@@ -1095,7 +1100,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "265",
 		write: true,
 	},
-	Donnerstag_Ende1: {
+	HZ_Donnerstag_Ende1: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Donnerstag",
 		name: "Heizen Timer Tabelle Ende 1 Donnerstag",
 		role: "value.datetime",
@@ -1104,7 +1109,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "266",
 		write: true,
 	},
-	Donnerstag_Start2: {
+	HZ_Donnerstag_Start2: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Donnerstag",
 		name: "Heizen Timer Tabelle Start 2 Donnerstag",
 		role: "value.datetime",
@@ -1113,7 +1118,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "267",
 		write: true,
 	},
-	Donnerstag_Ende2: {
+	HZ_Donnerstag_Ende2: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Donnerstag",
 		name: "Heizen Timer Tabelle Ende 2 Donnerstag",
 		role: "value.datetime",
@@ -1122,7 +1127,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "268",
 		write: true,
 	},
-	Donnerstag_Start3: {
+	HZ_Donnerstag_Start3: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Donnerstag",
 		name: "Heizen Timer Tabelle Start 3 Donnerstag",
 		role: "value.datetime",
@@ -1131,7 +1136,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "269",
 		write: true,
 	},
-	Donnerstag_Ende3: {
+	HZ_Donnerstag_Ende3: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Donnerstag",
 		name: "Heizen Timer Tabelle Ende 3 Donnerstag",
 		role: "value.datetime",
@@ -1140,9 +1145,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "270",
 		write: true,
 	},
-
-	// --- FREITAG (Basis 271) ---
-	Freitag_Start1: {
+	HZ_Freitag_Start1: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Freitag",
 		name: "Heizen Timer Tabelle Start 1 Freitag",
 		role: "value.datetime",
@@ -1151,7 +1154,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "271",
 		write: true,
 	},
-	Freitag_Ende1: {
+	HZ_Freitag_Ende1: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Freitag",
 		name: "Heizen Timer Tabelle Ende 1 Freitag",
 		role: "value.datetime",
@@ -1160,7 +1163,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "272",
 		write: true,
 	},
-	Freitag_Start2: {
+	HZ_Freitag_Start2: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Freitag",
 		name: "Heizen Timer Tabelle Start 2 Freitag",
 		role: "value.datetime",
@@ -1169,7 +1172,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "273",
 		write: true,
 	},
-	Freitag_Ende2: {
+	HZ_Freitag_Ende2: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Freitag",
 		name: "Heizen Timer Tabelle Ende 2 Freitag",
 		role: "value.datetime",
@@ -1178,7 +1181,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "274",
 		write: true,
 	},
-	Freitag_Start3: {
+	HZ_Freitag_Start3: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Freitag",
 		name: "Heizen Timer Tabelle Start 3 Freitag",
 		role: "value.datetime",
@@ -1187,7 +1190,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "275",
 		write: true,
 	},
-	Freitag_Ende3: {
+	HZ_Freitag_Ende3: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Freitag",
 		name: "Heizen Timer Tabelle Ende 3 Freitag",
 		role: "value.datetime",
@@ -1196,9 +1199,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "276",
 		write: true,
 	},
-
-	// --- SAMSTAG (Basis 277) ---
-	Samstag_Start1: {
+	HZ_Samstag_Start1: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Samstag",
 		name: "Heizen Timer Tabelle Start 1 Samstag",
 		role: "value.datetime",
@@ -1207,7 +1208,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "277",
 		write: true,
 	},
-	Samstag_Ende1: {
+	HZ_Samstag_Ende1: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Samstag",
 		name: "Heizen Timer Tabelle Ende 1 Samstag",
 		role: "value.datetime",
@@ -1216,7 +1217,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "278",
 		write: true,
 	},
-	Samstag_Start2: {
+	HZ_Samstag_Start2: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Samstag",
 		name: "Heizen Timer Tabelle Start 2 Samstag",
 		role: "value.datetime",
@@ -1225,7 +1226,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "279",
 		write: true,
 	},
-	Samstag_Ende2: {
+	HZ_Samstag_Ende2: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Samstag",
 		name: "Heizen Timer Tabelle Ende 2 Samstag",
 		role: "value.datetime",
@@ -1234,7 +1235,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "280",
 		write: true,
 	},
-	Samstag_Start3: {
+	HZ_Samstag_Start3: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Samstag",
 		name: "Heizen Timer Tabelle Start 3 Samstag",
 		role: "value.datetime",
@@ -1243,7 +1244,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "281",
 		write: true,
 	},
-	Samstag_Ende3: {
+	HZ_Samstag_Ende3: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Samstag",
 		name: "Heizen Timer Tabelle Ende 3 Samstag",
 		role: "value.datetime",
@@ -1253,174 +1254,555 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		write: true,
 	},
 
-	// --- SONNTAG (Basis 283) ---
-	Sonntag_Start1: {
-		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Sonntag",
-		name: "Heizen Timer Tabelle Start 1 Sonntag",
-		role: "value.datetime",
-		type: "string",
-		dataSource: "raw_parameter",
-		luxWriteId: "283",
-		write: true,
-	},
-	Sonntag_Ende1: {
-		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Sonntag",
-		name: "Heizen Timer Tabelle Ende 1 Sonntag",
-		role: "value.datetime",
-		type: "string",
-		dataSource: "raw_parameter",
-		luxWriteId: "284",
-		write: true,
-	},
-	Sonntag_Start2: {
-		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Sonntag",
-		name: "Heizen Timer Tabelle Start 2 Sonntag",
-		role: "value.datetime",
-		type: "string",
-		dataSource: "raw_parameter",
-		luxWriteId: "285",
-		write: true,
-	},
-	Sonntag_Ende2: {
-		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Sonntag",
-		name: "Heizen Timer Tabelle Ende 2 Sonntag",
-		role: "value.datetime",
-		type: "string",
-		dataSource: "raw_parameter",
-		luxWriteId: "286",
-		write: true,
-	},
-	Sonntag_Start3: {
-		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Sonntag",
-		name: "Heizen Timer Tabelle Start 3 Sonntag",
-		role: "value.datetime",
-		type: "string",
-		dataSource: "raw_parameter",
-		luxWriteId: "287",
-		write: true,
-	},
-	Sonntag_Ende3: {
-		folder: "Informationen.11_Tabellen.Heizen.Parameter.Days.Sonntag",
-		name: "Heizen Timer Tabelle Ende 3 Sonntag",
-		role: "value.datetime",
-		type: "string",
-		dataSource: "raw_parameter",
-		luxWriteId: "288",
-		write: true,
-	},
 	// =========================================================
-	// HEIZEN TIMER: 5+2 (MO-FR & SA-SO)
+	// WARMWASSER TIMER: WOCHE (MO-SO)
 	// =========================================================
-
-	// --- MO-FR (Basis 229) ---
-	MoFr_Start1: {
-		folder: "Informationen.11_Tabellen.Heizen.Parameter.52_MoFr_SaSo",
-		name: "Heizen Timer Tabelle Start 1 (Mo-Fr)",
+	WW_MoSo_Start1: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Mo-So",
+		name: "Warmwasser Timer Tabelle Start 1 Woche (Mo-So)",
 		role: "value.datetime",
 		type: "string",
 		dataSource: "raw_parameter",
-		luxWriteId: "229",
+		luxWriteId: "507",
 		write: true,
 	},
-	MoFr_Ende1: {
-		folder: "Informationen.11_Tabellen.Heizen.Parameter.52_MoFr_SaSo",
-		name: "Heizen Timer Tabelle Ende 1 (Mo-Fr)",
+	WW_MoSo_End1: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Mo-So",
+		name: "Warmwasser Timer Tabelle Ende 1 Woche (Mo-So)",
 		role: "value.datetime",
 		type: "string",
 		dataSource: "raw_parameter",
-		luxWriteId: "230",
+		luxWriteId: "508",
 		write: true,
 	},
-	MoFr_Start2: {
-		folder: "Informationen.11_Tabellen.Heizen.Parameter.52_MoFr_SaSo",
-		name: "Heizen Timer Tabelle Start 2 (Mo-Fr)",
+	WW_MoSo_Start2: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Mo-So",
+		name: "Warmwasser Timer Tabelle Start 2 Woche (Mo-So)",
 		role: "value.datetime",
 		type: "string",
 		dataSource: "raw_parameter",
-		luxWriteId: "231",
+		luxWriteId: "509",
 		write: true,
 	},
-	MoFr_Ende2: {
-		folder: "Informationen.11_Tabellen.Heizen.Parameter.52_MoFr_SaSo",
-		name: "Heizen Timer Tabelle Ende 2 (Mo-Fr)",
+	WW_MoSo_End2: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Mo-So",
+		name: "Warmwasser Timer Tabelle Ende 2 Woche (Mo-So)",
 		role: "value.datetime",
 		type: "string",
 		dataSource: "raw_parameter",
-		luxWriteId: "232",
+		luxWriteId: "510",
 		write: true,
 	},
-	MoFr_Start3: {
-		folder: "Informationen.11_Tabellen.Heizen.Parameter.52_MoFr_SaSo",
-		name: "Heizen Timer Tabelle Start 3 (Mo-Fr)",
+	WW_MoSo_Start3: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Mo-So",
+		name: "Warmwasser Timer Tabelle Start 3 Woche (Mo-So)",
 		role: "value.datetime",
 		type: "string",
 		dataSource: "raw_parameter",
-		luxWriteId: "233",
+		luxWriteId: "511",
 		write: true,
 	},
-	MoFr_Ende3: {
-		folder: "Informationen.11_Tabellen.Heizen.Parameter.52_MoFr_SaSo",
-		name: "Heizen Timer Tabelle Ende 3 (Mo-Fr)",
+	WW_MoSo_End3: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Mo-So",
+		name: "Warmwasser Timer Tabelle Ende 3 Woche (Mo-So)",
 		role: "value.datetime",
 		type: "string",
 		dataSource: "raw_parameter",
-		luxWriteId: "234",
+		luxWriteId: "512",
 		write: true,
 	},
 
-	// --- SA-SO (Basis 235) ---
-	SaSo_Start1: {
-		folder: "Informationen.11_Tabellen.Heizen.Parameter.52_MoFr_SaSo",
-		name: "Heizen Timer Tabelle Start 1 (Sa-So)",
+	// =========================================================
+	// WARMWASSER TIMER: 5+2 (MO-FR & SA-SO)
+	// =========================================================
+	WW_MoFr_Start1: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.52_MoFr_SaSo",
+		name: "Warmwasser Timer Tabelle Start 1 (Mo-Fr)",
 		role: "value.datetime",
 		type: "string",
 		dataSource: "raw_parameter",
-		luxWriteId: "235",
+		luxWriteId: "517",
 		write: true,
 	},
-	SaSo_Ende1: {
-		folder: "Informationen.11_Tabellen.Heizen.Parameter.52_MoFr_SaSo",
-		name: "Heizen Timer Tabelle Ende 1 (Sa-So)",
+	WW_MoFr_Ende1: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.52_MoFr_SaSo",
+		name: "Warmwasser Timer Tabelle Ende 1 (Mo-Fr)",
 		role: "value.datetime",
 		type: "string",
 		dataSource: "raw_parameter",
-		luxWriteId: "236",
+		luxWriteId: "518",
 		write: true,
 	},
-	SaSo_Start2: {
-		folder: "Informationen.11_Tabellen.Heizen.Parameter.52_MoFr_SaSo",
-		name: "Heizen Timer Tabelle Start 2 (Sa-So)",
+	WW_MoFr_Start2: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.52_MoFr_SaSo",
+		name: "Warmwasser Timer Tabelle Start 2 (Mo-Fr)",
 		role: "value.datetime",
 		type: "string",
 		dataSource: "raw_parameter",
-		luxWriteId: "237",
+		luxWriteId: "519",
 		write: true,
 	},
-	SaSo_Ende2: {
-		folder: "Informationen.11_Tabellen.Heizen.Parameter.52_MoFr_SaSo",
-		name: "Heizen Timer Tabelle Ende 2 (Sa-So)",
+	WW_MoFr_Ende2: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.52_MoFr_SaSo",
+		name: "Warmwasser Timer Tabelle Ende 2 (Mo-Fr)",
 		role: "value.datetime",
 		type: "string",
 		dataSource: "raw_parameter",
-		luxWriteId: "238",
+		luxWriteId: "520",
 		write: true,
 	},
-	SaSo_Start3: {
-		folder: "Informationen.11_Tabellen.Heizen.Parameter.52_MoFr_SaSo",
-		name: "Heizen Timer Tabelle Start 3 (Sa-So)",
+	WW_MoFr_Start3: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.52_MoFr_SaSo",
+		name: "Warmwasser Timer Tabelle Start 3 (Mo-Fr)",
 		role: "value.datetime",
 		type: "string",
 		dataSource: "raw_parameter",
-		luxWriteId: "239",
+		luxWriteId: "521",
 		write: true,
 	},
-	SaSo_Ende3: {
-		folder: "Informationen.11_Tabellen.Heizen.Parameter.52_MoFr_SaSo",
-		name: "Heizen Timer Tabelle Ende 3 (Sa-So)",
+	WW_MoFr_Ende3: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.52_MoFr_SaSo",
+		name: "Warmwasser Timer Tabelle Ende 3 (Mo-Fr)",
 		role: "value.datetime",
 		type: "string",
 		dataSource: "raw_parameter",
-		luxWriteId: "240",
+		luxWriteId: "522",
+		write: true,
+	},
+	WW_SaSo_Start1: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.52_MoFr_SaSo",
+		name: "Warmwasser Timer Tabelle Start 1 (Sa-So)",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "527",
+		write: true,
+	},
+	WW_SaSo_Ende1: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.52_MoFr_SaSo",
+		name: "Warmwasser Timer Tabelle Ende 1 (Sa-So)",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "528",
+		write: true,
+	},
+	WW_SaSo_Start2: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.52_MoFr_SaSo",
+		name: "Warmwasser Timer Tabelle Start 2 (Sa-So)",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "529",
+		write: true,
+	},
+	WW_SaSo_Ende2: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.52_MoFr_SaSo",
+		name: "Warmwasser Timer Tabelle Ende 2 (Sa-So)",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "530",
+		write: true,
+	},
+	WW_SaSo_Start3: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.52_MoFr_SaSo",
+		name: "Warmwasser Timer Tabelle Start 3 (Sa-So)",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "531",
+		write: true,
+	},
+	WW_SaSo_Ende3: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.52_MoFr_SaSo",
+		name: "Warmwasser Timer Tabelle Ende 3 (Sa-So)",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "532",
+		write: true,
+	},
+
+	// =========================================================
+	// WARMWASSER TIMER: EINZELTAGE
+	// =========================================================
+	WW_Sonntag_Start1: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Sonntag",
+		name: "Warmwasser Timer Tabelle Start 1 Sonntag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "537",
+		write: true,
+	},
+	WW_Sonntag_Ende1: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Sonntag",
+		name: "Warmwasser Timer Tabelle Ende 1 Sonntag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "538",
+		write: true,
+	},
+	WW_Sonntag_Start2: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Sonntag",
+		name: "Warmwasser Timer Tabelle Start 2 Sonntag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "539",
+		write: true,
+	},
+	WW_Sonntag_Ende2: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Sonntag",
+		name: "Warmwasser Timer Tabelle Ende 2 Sonntag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "540",
+		write: true,
+	},
+	WW_Sonntag_Start3: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Sonntag",
+		name: "Warmwasser Timer Tabelle Start 3 Sonntag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "541",
+		write: true,
+	},
+	WW_Sonntag_Ende3: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Sonntag",
+		name: "Warmwasser Timer Tabelle Ende 3 Sonntag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "542",
+		write: true,
+	},
+	WW_Montag_Start1: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Montag",
+		name: "Warmwasser Timer Tabelle Start 1 Montag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "547",
+		write: true,
+	},
+	WW_Montag_Ende1: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Montag",
+		name: "Warmwasser Timer Tabelle Ende 1 Montag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "548",
+		write: true,
+	},
+	WW_Montag_Start2: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Montag",
+		name: "Warmwasser Timer Tabelle Start 2 Montag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "549",
+		write: true,
+	},
+	WW_Montag_Ende2: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Montag",
+		name: "Warmwasser Timer Tabelle Ende 2 Montag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "550",
+		write: true,
+	},
+	WW_Montag_Start3: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Montag",
+		name: "Warmwasser Timer Tabelle Start 3 Montag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "551",
+		write: true,
+	},
+	WW_Montag_Ende3: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Montag",
+		name: "Warmwasser Timer Tabelle Ende 3 Montag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "552",
+		write: true,
+	},
+	WW_Dienstag_Start1: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Dienstag",
+		name: "Warmwasser Timer Tabelle Start 1 Dienstag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "557",
+		write: true,
+	},
+	WW_Dienstag_Ende1: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Dienstag",
+		name: "Warmwasser Timer Tabelle Ende 1 Dienstag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "558",
+		write: true,
+	},
+	WW_Dienstag_Start2: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Dienstag",
+		name: "Warmwasser Timer Tabelle Start 2 Dienstag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "559",
+		write: true,
+	},
+	WW_Dienstag_Ende2: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Dienstag",
+		name: "Warmwasser Timer Tabelle Ende 2 Dienstag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "560",
+		write: true,
+	},
+	WW_Dienstag_Start3: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Dienstag",
+		name: "Warmwasser Timer Tabelle Start 3 Dienstag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "561",
+		write: true,
+	},
+	WW_Dienstag_Ende3: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Dienstag",
+		name: "Warmwasser Timer Tabelle Ende 3 Dienstag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "562",
+		write: true,
+	},
+	WW_Mittwoch_Start1: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Mittwoch",
+		name: "Warmwasser Timer Tabelle Start 1 Mittwoch",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "567",
+		write: true,
+	},
+	WW_Mittwoch_Ende1: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Mittwoch",
+		name: "Warmwasser Timer Tabelle Ende 1 Mittwoch",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "568",
+		write: true,
+	},
+	WW_Mittwoch_Start2: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Mittwoch",
+		name: "Warmwasser Timer Tabelle Start 2 Mittwoch",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "569",
+		write: true,
+	},
+	WW_Mittwoch_Ende2: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Mittwoch",
+		name: "Warmwasser Timer Tabelle Ende 2 Mittwoch",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "570",
+		write: true,
+	},
+	WW_Mittwoch_Start3: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Mittwoch",
+		name: "Warmwasser Timer Tabelle Start 3 Mittwoch",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "571",
+		write: true,
+	},
+	WW_Mittwoch_Ende3: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Mittwoch",
+		name: "Warmwasser Timer Tabelle Ende 3 Mittwoch",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "572",
+		write: true,
+	},
+	WW_Donnerstag_Start1: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Donnerstag",
+		name: "Warmwasser Timer Tabelle Start 1 Donnerstag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "577",
+		write: true,
+	},
+	WW_Donnerstag_Ende1: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Donnerstag",
+		name: "Warmwasser Timer Tabelle Ende 1 Donnerstag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "578",
+		write: true,
+	},
+	WW_Donnerstag_Start2: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Donnerstag",
+		name: "Warmwasser Timer Tabelle Start 2 Donnerstag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "579",
+		write: true,
+	},
+	WW_Donnerstag_Ende2: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Donnerstag",
+		name: "Warmwasser Timer Tabelle Ende 2 Donnerstag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "580",
+		write: true,
+	},
+	WW_Donnerstag_Start3: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Donnerstag",
+		name: "Warmwasser Timer Tabelle Start 3 Donnerstag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "581",
+		write: true,
+	},
+	WW_Donnerstag_Ende3: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Donnerstag",
+		name: "Warmwasser Timer Tabelle Ende 3 Donnerstag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "582",
+		write: true,
+	},
+	WW_Freitag_Start1: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Freitag",
+		name: "Warmwasser Timer Tabelle Start 1 Freitag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "587",
+		write: true,
+	},
+	WW_Freitag_Ende1: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Freitag",
+		name: "Warmwasser Timer Tabelle Ende 1 Freitag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "588",
+		write: true,
+	},
+	WW_Freitag_Start2: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Freitag",
+		name: "Warmwasser Timer Tabelle Start 2 Freitag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "589",
+		write: true,
+	},
+	WW_Freitag_Ende2: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Freitag",
+		name: "Warmwasser Timer Tabelle Ende 2 Freitag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "590",
+		write: true,
+	},
+	WW_Freitag_Start3: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Freitag",
+		name: "Warmwasser Timer Tabelle Start 3 Freitag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "591",
+		write: true,
+	},
+	WW_Freitag_Ende3: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Freitag",
+		name: "Warmwasser Timer Tabelle Ende 3 Freitag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "592",
+		write: true,
+	},
+	WW_Samstag_Start1: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Samstag",
+		name: "Warmwasser Timer Tabelle Start 1 Samstag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "597",
+		write: true,
+	},
+	WW_Samstag_Ende1: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Samstag",
+		name: "Warmwasser Timer Tabelle Ende 1 Samstag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "598",
+		write: true,
+	},
+	WW_Samstag_Start2: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Samstag",
+		name: "Warmwasser Timer Tabelle Start 2 Samstag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "599",
+		write: true,
+	},
+	WW_Samstag_Ende2: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Samstag",
+		name: "Warmwasser Timer Tabelle Ende 2 Samstag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "600",
+		write: true,
+	},
+	WW_Samstag_Start3: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Samstag",
+		name: "Warmwasser Timer Tabelle Start 3 Samstag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "601",
+		write: true,
+	},
+	WW_Samstag_Ende3: {
+		folder: "Informationen.11_Tabellen.Warmwasser.Parameter.Days.Samstag",
+		name: "Warmwasser Timer Tabelle Ende 3 Samstag",
+		role: "value.datetime",
+		type: "string",
+		dataSource: "raw_parameter",
+		luxWriteId: "602",
 		write: true,
 	},
 	// 12_Systeminfo
