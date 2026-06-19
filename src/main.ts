@@ -295,22 +295,27 @@ class Lwd50a extends utils.Adapter {
 							value = value === true || value === 1;
 						}
 					} else if (definition.type === "json" && typeof value === "object") {
-						// ==========================================
-						// NEU: OBJEKTE FÜR JSON-DATENPUNKTE UMWANDELN
-						// ==========================================
 						value = JSON.stringify(value);
 					}
-					// ==========================================
 
 					let targetType: ioBroker.CommonType = definition.type === "json" ? "string" : definition.type;
 					let targetRole = definition.role;
 					let targetUnit = definition.unit;
+
 					if (definition.unit === "s") {
 						const totalSeconds = typeof value === "number" ? value : parseInt(value, 10);
 						if (!isNaN(totalSeconds)) {
 							value = this.formatSecondsToHMS(totalSeconds);
 							targetType = "string";
 							targetRole = "text";
+							targetUnit = undefined;
+						}
+					} else if (definition.role === "value.datetime") {
+						// --- NEU: DATETIME AUSLESEN (Unix Sekunden zu Text) ---
+						const totalSeconds = typeof value === "number" ? value : parseInt(value, 10);
+						if (!isNaN(totalSeconds) && totalSeconds > 0) {
+							value = new Date(totalSeconds * 1000).toLocaleString("de-DE");
+							targetType = "string";
 							targetUnit = undefined;
 						}
 					}
@@ -440,8 +445,40 @@ class Lwd50a extends utils.Adapter {
 				}
 			}
 
-			let valueToWrite = state.val as number;
-			if (definition.factor && typeof state.val === "number") {
+			let valueToWrite: any = state.val;
+
+			// --- NEU: DATETIME SCHREIBEN (Text zu Unix Sekunden) ---
+			if (definition.role === "value.datetime") {
+				const valStr = String(state.val).trim();
+				const match = valStr.match(
+					/^(\d{1,2})\.(\d{1,2})\.(\d{4})(?:,\s*|\s+)(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?/,
+				);
+
+				if (match) {
+					const day = parseInt(match[1], 10);
+					const month = parseInt(match[2], 10) - 1; // JS Monate starten bei 0
+					const year = parseInt(match[3], 10);
+					const hour = parseInt(match[4], 10);
+					const minute = parseInt(match[5], 10);
+					const second = match[6] ? parseInt(match[6], 10) : 0;
+
+					const date = new Date(year, month, day, hour, minute, second);
+					valueToWrite = Math.floor(date.getTime() / 1000);
+				} else if (/^\d+$/.test(valStr)) {
+					// Fallback, falls jemand direkt Unix-Sekunden als Zahl/String eingibt
+					valueToWrite = parseInt(valStr, 10);
+				} else {
+					const parsed = Date.parse(valStr);
+					if (!isNaN(parsed)) {
+						valueToWrite = Math.floor(parsed / 1000);
+					} else {
+						this.log.error(
+							`Ungültiges Datumsformat für ${id}: ${state.val}. Erwartet wird z.B. TT.MM.JJJJ, HH:MM:SS`,
+						);
+						return; // Abbruch bei völlig falscher Eingabe
+					}
+				}
+			} else if (definition.factor && typeof state.val === "number") {
 				valueToWrite = state.val * definition.factor;
 			}
 

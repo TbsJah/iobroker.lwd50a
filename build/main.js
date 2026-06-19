@@ -271,6 +271,13 @@ class Lwd50a extends utils.Adapter {
               targetRole = "text";
               targetUnit = void 0;
             }
+          } else if (definition.role === "value.datetime") {
+            const totalSeconds = typeof value === "number" ? value : parseInt(value, 10);
+            if (!isNaN(totalSeconds) && totalSeconds > 0) {
+              value = new Date(totalSeconds * 1e3).toLocaleString("de-DE");
+              targetType = "string";
+              targetUnit = void 0;
+            }
           }
           const folderId = definition.folder;
           const stateId = `${folderId}.${key}`;
@@ -376,7 +383,34 @@ class Lwd50a extends utils.Adapter {
         }
       }
       let valueToWrite = state.val;
-      if (definition.factor && typeof state.val === "number") {
+      if (definition.role === "value.datetime") {
+        const valStr = String(state.val).trim();
+        const match = valStr.match(
+          /^(\d{1,2})\.(\d{1,2})\.(\d{4})(?:,\s*|\s+)(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?/
+        );
+        if (match) {
+          const day = parseInt(match[1], 10);
+          const month = parseInt(match[2], 10) - 1;
+          const year = parseInt(match[3], 10);
+          const hour = parseInt(match[4], 10);
+          const minute = parseInt(match[5], 10);
+          const second = match[6] ? parseInt(match[6], 10) : 0;
+          const date = new Date(year, month, day, hour, minute, second);
+          valueToWrite = Math.floor(date.getTime() / 1e3);
+        } else if (/^\d+$/.test(valStr)) {
+          valueToWrite = parseInt(valStr, 10);
+        } else {
+          const parsed = Date.parse(valStr);
+          if (!isNaN(parsed)) {
+            valueToWrite = Math.floor(parsed / 1e3);
+          } else {
+            this.log.error(
+              `Ung\xFCltiges Datumsformat f\xFCr ${id}: ${state.val}. Erwartet wird z.B. TT.MM.JJJJ, HH:MM:SS`
+            );
+            return;
+          }
+        }
+      } else if (definition.factor && typeof state.val === "number") {
         valueToWrite = state.val * definition.factor;
       }
       const luxWriteId = definition.luxWriteId;

@@ -856,7 +856,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 	223: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Mo-So",
 		name: "Heizen Timer Tabelle Start 1 Woche (Mo-So)",
-		role: "text",
+		role: "value.datetime",
 		type: "string",
 		dataSource: "raw_parameter",
 		luxWriteId: "223",
@@ -866,7 +866,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 	224: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Mo-So",
 		name: "Heizen Timer Tabelle Ende 1 Woche (Mo-So)",
-		role: "text",
+		role: "value.datetime",
 		type: "string",
 		dataSource: "raw_parameter",
 		luxWriteId: "224",
@@ -876,7 +876,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 	225: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Mo-So",
 		name: "Heizen Timer Tabelle Start 1 Woche (Mo-So)",
-		role: "text",
+		role: "value.datetime",
 		type: "string",
 		dataSource: "raw_parameter",
 		luxWriteId: "225",
@@ -886,7 +886,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 	226: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Mo-So",
 		name: "Heizen Timer Tabelle Ende 1 Woche (Mo-So)",
-		role: "text",
+		role: "value.datetime",
 		type: "string",
 		dataSource: "raw_parameter",
 		luxWriteId: "226",
@@ -895,7 +895,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 	227: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Mo-So",
 		name: "Heizen Timer Tabelle Start 1 Woche (Mo-So)",
-		role: "text",
+		role: "value.datetime",
 		type: "string",
 		dataSource: "raw_parameter",
 		luxWriteId: "227",
@@ -905,7 +905,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 	228: {
 		folder: "Informationen.11_Tabellen.Heizen.Parameter.Mo-So",
 		name: "Heizen Timer Tabelle Ende 1 Woche (Mo-So)",
-		role: "text",
+		role: "value.datetime",
 		type: "string",
 		dataSource: "raw_parameter",
 		luxWriteId: "228",
