@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "lwd50a",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "news": {
+      "0.3.0": {
+        "en": "Erweiterung",
+        "de": "Erweiterung",
+        "ru": "Расширение",
+        "pt": "Expansão",
+        "nl": "Erweiterung",
+        "fr": "Erweiterung",
+        "it": "Erweiterung",
+        "es": "Erweiterung",
+        "pl": "Rozwój",
+        "uk": "Додавання",
+        "zh-cn": "Erweiterung"
+      },
       "0.2.0": {
         "en": "Zip aktivierbar",
         "de": "Das ist nicht möglich",
@@ -80,19 +93,6 @@
         "pl": "Erweiterung Przewodniczący",
         "uk": "Ервінгер",
         "zh-cn": "埃尔韦特龙"
-      },
-      "0.1.0": {
-        "en": "Internal development updates",
-        "de": "Aktualisierungen der internen Entwicklung",
-        "ru": "Обновления внутреннего развития",
-        "pt": "Actualizações de desenvolvimento interno",
-        "nl": "Interne ontwikkelingsupdates",
-        "fr": "Mises à jour internes sur le développement",
-        "it": "Aggiornamenti di sviluppo interno",
-        "es": "Actualizaciones de desarrollo interno",
-        "pl": "Aktualizacje dotyczące rozwoju wewnętrznego",
-        "uk": "Оновлення внутрішнього розвитку",
-        "zh-cn": "内部发展最新情况"
       }
     },
     "main": "build/main.js",

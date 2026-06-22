@@ -147,6 +147,10 @@ For later updates:
 
 ### **WORK IN PROGRESS**
 
+- Abschluss
+
+### 0.3.0 (2026-06-22)
+
 - Erweiterung
 
 ### 0.2.0 (2026-05-29)
