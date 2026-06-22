@@ -46,6 +46,11 @@
 					"type": "number",
 					"label": "Dauer ZIP aktiv bei WW (Sekunden)",
 					"default": 300
+				},
+				"regelung_aktiv": {
+					"type": "checkbox",
+					"label": "Regelung aktiv (sonst nur Beobachtung)",
+					"default": true
 				}
 			}
 		},

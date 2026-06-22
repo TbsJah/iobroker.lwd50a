@@ -230,3 +230,33 @@ export async function updateOutageHistory(adapter: any, rawValues: number[]): Pr
 		"Unbekannter Abschaltgrund",
 	);
 }
+
+/**
+ * Berechnet die aktuelle Spreizung (Vorlauf minus Rücklauf)
+ *
+ * @param adapter	Die Instanz des ioBroker-Adapters (this)
+ */
+export async function calculateTemperatureSpread(adapter: any): Promise<void> {
+	try {
+		// --- ACHTUNG: Passe die Pfade hier an deine exakten Mapping-Keys an! ---
+		const vorlaufState = await adapter.getStateAsync("Informationen.01_Temperaturen.temperature_supply");
+		const ruecklaufState = await adapter.getStateAsync("Informationen.01_Temperaturen.temperature_return");
+
+		if (vorlaufState && ruecklaufState && vorlaufState.val !== null && ruecklaufState.val !== null) {
+			const vorlauf = Number(vorlaufState.val);
+			const ruecklauf = Number(ruecklaufState.val);
+
+			// Vorlauf minus Rücklauf, gerundet auf 2 Nachkommastellen
+			const spreizung = parseFloat((vorlauf - ruecklauf).toFixed(2));
+
+			// Wert in den virtuellen Datenpunkt schreiben
+			await adapter.setStateChangedAsync(
+				"Informationen.01_Temperaturen.spreizung_vorlauf_ruecklauf",
+				spreizung,
+				true,
+			);
+		}
+	} catch (err: any) {
+		adapter.log.error(`Fehler bei der Berechnung der Temperatur-Spreizung: ${err.message}`);
+	}
+}
