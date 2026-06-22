@@ -28,6 +28,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 var virtualStates_exports = {};
 __export(virtualStates_exports, {
+  calculateTemperatureSpread: () => calculateTemperatureSpread,
   calculateTotalEnergy: () => calculateTotalEnergy,
   calculateTotalThermalEnergy: () => calculateTotalThermalEnergy,
   initializeVirtualStates: () => initializeVirtualStates,
@@ -171,8 +172,27 @@ async function updateOutageHistory(adapter, rawValues) {
     "Unbekannter Abschaltgrund"
   );
 }
+async function calculateTemperatureSpread(adapter) {
+  try {
+    const vorlaufState = await adapter.getStateAsync("Informationen.01_Temperaturen.temperature_supply");
+    const ruecklaufState = await adapter.getStateAsync("Informationen.01_Temperaturen.temperature_return");
+    if (vorlaufState && ruecklaufState && vorlaufState.val !== null && ruecklaufState.val !== null) {
+      const vorlauf = Number(vorlaufState.val);
+      const ruecklauf = Number(ruecklaufState.val);
+      const spreizung = parseFloat((vorlauf - ruecklauf).toFixed(2));
+      await adapter.setStateChangedAsync(
+        "Informationen.01_Temperaturen.spreizung_vorlauf_ruecklauf",
+        spreizung,
+        true
+      );
+    }
+  } catch (err) {
+    adapter.log.error(`Fehler bei der Berechnung der Temperatur-Spreizung: ${err.message}`);
+  }
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
+  calculateTemperatureSpread,
   calculateTotalEnergy,
   calculateTotalThermalEnergy,
   initializeVirtualStates,

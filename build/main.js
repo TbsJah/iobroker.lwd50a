@@ -23,13 +23,14 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 ));
 var utils = __toESM(require("@iobroker/adapter-core"));
 var luxtronik = __toESM(require("luxtronik2"));
-var net = __toESM(require("net"));
+var import_rawFunctions = require("./rawFunctions");
 var import_stateMapping = require("./stateMapping");
 var import_virtualStates = require("./virtualStates");
 class Lwd50a extends utils.Adapter {
   pollingInterval;
   pump;
   createdStates = /* @__PURE__ */ new Set();
+  lastBzVal = "";
   constructor(options = {}) {
     super({
       ...options,
@@ -46,80 +47,235 @@ class Lwd50a extends utils.Adapter {
     this.pump = new luxtronik.createConnection(ip, port);
     await (0, import_virtualStates.initializeVirtualStates)(this);
     await this.updateData();
-    void this.dumpAllRawToLog();
     let intervalSeconds = this.config.interval || 30;
     if (intervalSeconds < 10) {
       intervalSeconds = 10;
       this.log.warn("Eingestelltes Intervall war zu kurz. Wurde zum Schutz auf 10 Sekunden korrigiert.");
     }
-    this.log.info(`Starte Polling-Intervall. Lese Daten alle ${intervalSeconds} Sekunden aus.`);
+    this.log.info(`Starte Polling-Intervall. Lese Daten und optimiere alle ${intervalSeconds} Sekunden.`);
     this.pollingInterval = setInterval(() => {
       void this.updateData();
     }, intervalSeconds * 1e3);
   }
-  async dumpAllRawToLog() {
+  // =========================================================
+  // SKRIPT-OPTIMIERUNG: HILFSFUNKTIONEN & SCHEDULE
+  // =========================================================
+  /**
+   * Setzt einen eigenen State nur, wenn der Wert abweicht oder noch nicht existiert.
+   * Verhindert unnötige Schreibbefehle (Traffic) an die Wärmepumpe.
+   *
+   * @param id ID des zu setzenden Datenpunkts
+   * @param val Neuer Wert für den Datenpunkt
+   * @param ack Ack-Flag für den State
+   */
+  async setOwnStateIfDifferent(id, val, ack = false) {
     try {
-      const dumpList = async (command, title) => {
-        this.log.info("=======================================================");
-        this.log.info(`START COMPACT RAW DUMP: LISTE ${command} (${title})`);
-        this.log.info("=======================================================");
-        const data = await this.readAllRaw(command);
-        for (let i = 0; i < data.length; i++) {
-          this.log.info(`[RAW ${command}] Index ${i.toString().padStart(3, " ")} = ${data[i]}`);
-        }
-        this.log.info(`--- ENDE LISTE ${command} (Insgesamt ${data.length} Indizes geloggt) ---`);
-        this.log.info("=======================================================");
-      };
-      await dumpList(3003, "PARAMETER");
-      await dumpList(3004, "MESSWERTE");
+      if (val === void 0) {
+        return;
+      }
+      const state = await this.getStateAsync(id);
+      if (!state || state.val !== val) {
+        await this.setState(id, { val, ack });
+      }
     } catch (err) {
-      this.log.error(`Fehler beim Ausf\xFChren des Raw-Dumps: ${err.message}`);
+      this.log.error(`Fehler in setOwnStateIfDifferent f\xFCr ${id}: ${err.message}`);
     }
   }
-  readAllRaw(command) {
-    return new Promise((resolve, reject) => {
-      const client = new net.Socket();
-      const host = this.config.host;
-      const port = 8888;
-      let responseData = Buffer.alloc(0);
-      client.connect(port, host, () => {
-        const buffer = Buffer.alloc(8);
-        buffer.writeInt32BE(command, 0);
-        buffer.writeInt32BE(0, 4);
-        client.write(buffer);
-      });
-      client.on("data", (chunk) => {
-        responseData = Buffer.concat([responseData, chunk]);
-        const is3004 = command === 3004;
-        const headerSize = is3004 ? 12 : 8;
-        const lengthOffset = is3004 ? 8 : 4;
-        if (responseData.length >= headerSize) {
-          const responseCommand = responseData.readInt32BE(0);
-          if (responseCommand === command) {
-            const totalItems = responseData.readInt32BE(lengthOffset);
-            const totalRequiredLength = headerSize + totalItems * 4;
-            if (responseData.length >= totalRequiredLength) {
-              const allValues = [];
-              for (let i = 0; i < totalItems; i++) {
-                const valueOffset = headerSize + i * 4;
-                allValues.push(responseData.readInt32BE(valueOffset));
-              }
-              client.destroy();
-              resolve(allValues);
-            }
+  /**
+   * Prüft, ob der letzte Wechsel des Anlagenstatus länger als 10 Minuten her ist.
+   */
+  async istAnlageAelterAls10Min() {
+    var _a;
+    try {
+      const state = await this.getStateAsync("Informationen.08_Betriebszustand.WP_BZ_akt");
+      const lastChange = (_a = state == null ? void 0 : state.lc) != null ? _a : 0;
+      return (Date.now() - lastChange) / 6e4 >= 10;
+    } catch {
+      return false;
+    }
+  }
+  /**
+   * Führt die Überwachung und dynamische Anpassung der Heizkurve/HUP aus.
+   * Wird automatisch am Ende von updateData() aufgerufen.
+   */
+  async runOptimizationSchedule() {
+    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u;
+    try {
+      const regelungAktiv = await this.getStateAsync("Aktionen.Regelung_Aktiv");
+      if ((regelungAktiv == null ? void 0 : regelungAktiv.val) === false) {
+        return;
+      }
+      const bzState = await this.getStateAsync("Informationen.08_Betriebszustand.WP_BZ_akt");
+      const bzVal = bzState && bzState.val ? String(bzState.val).trim() : "";
+      const istHeizen = bzVal === "Heizen";
+      const istWarmwasser = bzVal === "Warmwasser";
+      const istLeerlauf = bzVal === "Leerlauf";
+      const istAbtauen = bzVal === "Abtauen";
+      if (!istHeizen && !istWarmwasser && !istLeerlauf && !istAbtauen) {
+        return;
+      }
+      if (bzVal !== this.lastBzVal) {
+        this.log.info(
+          `Betriebsmodus gewechselt von '${this.lastBzVal}' zu '${bzVal}'. Setze Vorgabewerte aus Instanz-Konfiguration...`
+        );
+        const configWithDynamicKeys = this.config;
+        if (istLeerlauf) {
+          await this.setOwnStateIfDifferent(
+            "Einstellungen.02_Heizung.heating_curve_end_point",
+            configWithDynamicKeys.endpunkt,
+            false
+          );
+          await this.setOwnStateIfDifferent(
+            "Einstellungen.02_Heizung.heating_curve_parallel_offset",
+            configWithDynamicKeys.fusspunkt,
+            false
+          );
+          await this.setOwnStateIfDifferent(
+            "Einstellungen.04_Pumpe.heating_system_circ_pump_voltage_minimal",
+            configWithDynamicKeys.sync_heating_system_circ_pump_voltage_minimal,
+            false
+          );
+          await this.setOwnStateIfDifferent(
+            "Einstellungen.04_Pumpe.heating_system_circ_pump_voltage_nominal",
+            configWithDynamicKeys.sync_heating_system_circ_pump_voltage_nominal,
+            false
+          );
+          await this.setOwnStateIfDifferent(
+            "Einstellungen.03_Warmwasser.warmwater_temperature",
+            configWithDynamicKeys.sync_warmwater_target_temperature,
+            false
+          );
+          await this.setOwnStateIfDifferent(
+            "Einstellungen.03_Warmwasser.hotWaterTemperatureHysteresis",
+            configWithDynamicKeys.sync_hotwater_temperature_hysteresis,
+            false
+          );
+          await this.setOwnStateIfDifferent(
+            "Einstellungen.02_Heizung.returnTemperatureHysteresis",
+            configWithDynamicKeys.sync_return_temperature_hysteresis,
+            false
+          );
+          await this.setOwnStateIfDifferent(
+            "Einstellungen.05_ZIP.zip_aktiv",
+            configWithDynamicKeys.zip_aktiv,
+            false
+          );
+          await this.setOwnStateIfDifferent("Einstellungen.02_Heizung.Heizen_nach_Wasser", false, true);
+        } else if (istHeizen) {
+          await this.setOwnStateIfDifferent(
+            "Einstellungen.05_ZIP.zip_aktiv",
+            configWithDynamicKeys.zip_aktiv,
+            false
+          );
+          await this.setOwnStateIfDifferent(
+            "Einstellungen.04_Pumpe.heating_system_circ_pump_voltage_minimal",
+            configWithDynamicKeys.sync_heating_system_circ_pump_voltage_minimal,
+            false
+          );
+          await this.setOwnStateIfDifferent(
+            "Einstellungen.04_Pumpe.heating_system_circ_pump_voltage_nominal",
+            configWithDynamicKeys.sync_heating_system_circ_pump_voltage_nominal,
+            false
+          );
+          await this.setOwnStateIfDifferent("Einstellungen.02_Heizung.Heizen_nach_Wasser", true, true);
+        } else if (istWarmwasser) {
+          await this.setOwnStateIfDifferent(
+            "Einstellungen.03_Warmwasser.hotWaterTemperatureHysteresis",
+            configWithDynamicKeys.hysterese_ww,
+            false
+          );
+          await this.setOwnStateIfDifferent(
+            "Einstellungen.05_ZIP.zip_aktiv",
+            configWithDynamicKeys.zip_aktiv_ww,
+            false
+          );
+          await this.setOwnStateIfDifferent(
+            "Einstellungen.04_Pumpe.heating_system_circ_pump_voltage_nominal",
+            10,
+            false
+          );
+          await this.setOwnStateIfDifferent("Einstellungen.05_ZIP.Activate_Zip", true, false);
+        } else if (istAbtauen) {
+          await this.setOwnStateIfDifferent(
+            "Einstellungen.04_Pumpe.heating_system_circ_pump_voltage_nominal",
+            10,
+            false
+          );
+        }
+        this.lastBzVal = bzVal;
+      }
+      const wwSoll = (_b = (_a = await this.getStateAsync("Informationen.01_Temperaturen.Wamwassertemperatur_Soll")) == null ? void 0 : _a.val) != null ? _b : 0;
+      const wwIst = (_d = (_c = await this.getStateAsync("Informationen.01_Temperaturen.Warmwassertemperatur")) == null ? void 0 : _c.val) != null ? _d : 0;
+      const ruecklauf = (_f = (_e = await this.getStateAsync("Informationen.01_Temperaturen.R\xFCcklauf")) == null ? void 0 : _e.val) != null ? _f : 0;
+      const spreizung = (_h = (_g = await this.getStateAsync("Informationen.01_Temperaturen.spreizung_vorlauf_ruecklauf")) == null ? void 0 : _g.val) != null ? _h : 0;
+      const heatingStateStr = String(
+        ((_i = await this.getStateAsync("Informationen.08_Betriebszustand.opStateHeatingString")) == null ? void 0 : _i.val) || ""
+      ).trim();
+      const vd1 = ((_j = await this.getStateAsync("Informationen.03_Ausgaenge.VD1out")) == null ? void 0 : _j.val) === true;
+      const wwHysterese = (_l = (_k = await this.getStateAsync("Einstellungen.03_Warmwasser.hotWaterTemperatureHysteresis")) == null ? void 0 : _k.val) != null ? _l : 0;
+      const ruecklaufSoll = (_n = (_m = await this.getStateAsync("Informationen.01_Temperaturen.temperature_target_return")) == null ? void 0 : _m.val) != null ? _n : 0;
+      const hupAktiv = (_p = (_o = await this.getStateAsync("Informationen.03_Ausgaenge.HUPout")) == null ? void 0 : _o.val) != null ? _p : 0;
+      const heizenHysterese = (_r = (_q = await this.getStateAsync("Einstellungen.02_Heizung.returnTemperatureHysteresis")) == null ? void 0 : _q.val) != null ? _r : 0;
+      const betriebsart = (_t = (_s = await this.getStateAsync("Informationen.08_Betriebszustand.WP_BZ_akt")) == null ? void 0 : _s.val) != null ? _t : 0;
+      const nachWasserState = await this.getStateAsync("Einstellungen.02_Heizung.Heizen_nach_Wasser");
+      const nachWasser = nachWasserState == null ? void 0 : nachWasserState.val;
+      const aelterAls10 = await this.istAnlageAelterAls10Min();
+      if (istHeizen) {
+        if (aelterAls10 && vd1) {
+          const fusspunkt = (_u = await this.getStateAsync("Einstellungen.02_Heizung.heating_curve_parallel_offset")) == null ? void 0 : _u.val;
+          if (fusspunkt === 35) {
+            const configWithDynamicKeys = this.config;
+            await this.setOwnStateIfDifferent(
+              "Einstellungen.02_Heizung.heating_curve_parallel_offset",
+              configWithDynamicKeys.fusspunkt,
+              false
+            );
           }
         }
-      });
-      client.on("error", (err) => {
-        client.destroy();
-        reject(err);
-      });
-      client.setTimeout(8e3);
-      client.on("timeout", () => {
-        client.destroy();
-        reject(new Error(`Timeout beim Auslesen der kompletten Liste ${command}.`));
-      });
-    });
+        if (spreizung < 6.5 && hupAktiv > 5.5) {
+          await this.setOwnStateIfDifferent("Informationen.03_Ausgaenge.HUPout", hupAktiv - 0.25, false);
+        } else if (spreizung > 7.5) {
+          await this.setOwnStateIfDifferent("Informationen.03_Ausgaenge.HUPout", hupAktiv + 0.25, false);
+        }
+        if (ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1) {
+          if (aelterAls10) {
+            await this.setOwnStateIfDifferent("Einstellungen.02_Heizung.Heizen_nach_Wasser", false, true);
+          }
+        } else {
+          if (!nachWasser) {
+            await this.setOwnStateIfDifferent("Einstellungen.02_Heizung.Heizen_nach_Wasser", true, true);
+          }
+        }
+        if (wwSoll - wwIst > 2 && ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1) {
+          this.log.debug("Starte WW Erzeugung nach Heizung");
+          await this.setOwnStateIfDifferent(
+            "Einstellungen.03_Warmwasser.hotWaterTemperatureHysteresis",
+            2,
+            false
+          );
+        }
+      }
+      if (istWarmwasser) {
+        if (nachWasser) {
+          await this.setOwnStateIfDifferent(
+            "Einstellungen.02_Heizung.heating_curve_parallel_offset",
+            35,
+            false
+          );
+        }
+      }
+      if (istLeerlauf) {
+        if (wwSoll - wwIst >= wwHysterese - 1.5 && ruecklauf <= ruecklaufSoll && betriebsart !== 4 && heatingStateStr !== "Heizgrenze") {
+          await this.setOwnStateIfDifferent(
+            "Einstellungen.02_Heizung.heating_curve_parallel_offset",
+            35,
+            false
+          );
+        }
+      }
+    } catch (err) {
+      this.log.error(`Fehler im runOptimizationSchedule-Ablauf: ${err.message}`);
+    }
   }
   formatSecondsToHMS(totalSeconds) {
     if (totalSeconds < 0 || isNaN(totalSeconds)) {
@@ -165,11 +321,11 @@ class Lwd50a extends utils.Adapter {
     }
     try {
       const [rawParams, rawValues, coolchipData] = await Promise.all([
-        this.readAllRaw(3003).catch((err) => {
+        (0, import_rawFunctions.readAllRaw)(this, 3003).catch((err) => {
           this.log.debug(`Raw-Parameter (3003) nicht verf\xFCgbar: ${err.message}`);
           return [];
         }),
-        this.readAllRaw(3004).catch((err) => {
+        (0, import_rawFunctions.readAllRaw)(this, 3004).catch((err) => {
           this.log.debug(`Raw-Messwerte (3004) nicht verf\xFCgbar: ${err.message}`);
           return [];
         }),
@@ -288,12 +444,12 @@ class Lwd50a extends utils.Adapter {
           const folderId = definition.folder;
           const stateId = `${folderId}.${key}`;
           if (!this.createdStates.has(stateId)) {
-            await this.setObjectNotExistsAsync(folderId, {
+            await this.setObjectNotExists(folderId, {
               type: "channel",
               common: { name: folderId.split(".").pop() || folderId },
               native: {}
             });
-            await this.setObjectNotExistsAsync(stateId, {
+            await this.setObjectNotExists(stateId, {
               type: "state",
               common: {
                 name: definition.name,
@@ -309,17 +465,18 @@ class Lwd50a extends utils.Adapter {
               native: {}
             });
             if (definition.write) {
-              await this.subscribeStatesAsync(stateId);
+              this.subscribeStates(stateId);
             }
             this.createdStates.add(stateId);
           }
-          await this.setStateChangedAsync(stateId, value, true);
+          await this.setStateChangedAsync(stateId, { val: value, ack: true });
         }
       }
       await (0, import_virtualStates.calculateTotalThermalEnergy)(this);
       await (0, import_virtualStates.calculateTotalEnergy)(this);
       await (0, import_virtualStates.updateErrorHistory)(this, rawValues);
       await (0, import_virtualStates.updateOutageHistory)(this, rawValues);
+      await this.runOptimizationSchedule();
     } catch (catchErr) {
       this.log.error(`Fehler im updateData-Ablauf: ${catchErr.message}`);
     }
@@ -360,8 +517,16 @@ class Lwd50a extends utils.Adapter {
       return;
     }
     try {
+      if (mappingKey === "Dump_Raw_To_Log") {
+        if (state.val === true) {
+          this.log.info("Manueller Raw-Dump \xFCber Datenpunkt getriggert...");
+          await (0, import_rawFunctions.dumpAllRawToLog)(this);
+          await this.setState(id, { val: false, ack: true });
+        }
+        return;
+      }
       if (mappingKey === "Activate_Zip") {
-        const zipOutState = await this.getStateAsync("Informationen.Ausgaenge.ZIPout");
+        const zipOutState = await this.getStateAsync("Informationen.03_Ausgaenge.ZIPout");
         const isCurrentlyRunning = zipOutState ? zipOutState.val === 1 || zipOutState.val === true : false;
         const targetVal = isCurrentlyRunning ? 0 : 1;
         const actionText = targetVal === 1 ? "Aktiviere" : "Deaktiviere";
@@ -370,7 +535,7 @@ class Lwd50a extends utils.Adapter {
         await new Promise((resolve) => setTimeout(resolve, 1e3));
         await this.writePumpAsync("hotWaterCircPumpDeaerate", targetVal);
         this.log.info(`Makro erfolgreich: ZIP Entl\xFCftungsprogramm wurde auf ${targetVal} gesetzt.`);
-        await this.setStateAsync(id, { val: targetVal, ack: true });
+        await this.setState(id, { val: targetVal, ack: true });
         await this.updateData();
         return;
       }
@@ -435,7 +600,7 @@ class Lwd50a extends utils.Adapter {
         await this.writePumpAsync(luxWriteId, valueToWrite, false);
       }
       this.log.info(`Wert ${state.val} erfolgreich via [${luxWriteId}] an W\xE4rmepumpe \xFCbertragen.`);
-      await this.setStateAsync(id, state.val, true);
+      await this.setState(id, { val: state.val, ack: true });
       await new Promise((resolve) => setTimeout(resolve, 500));
       await this.updateData();
     } catch (err) {

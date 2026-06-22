@@ -147,6 +147,10 @@ For later updates:
 
 ### **WORK IN PROGRESS**
 
+- Test
+
+### 0.4.0 (2026-06-22)
+
 - Steuerung hinzugefügt
 
 ### 0.3.0 (2026-06-22)

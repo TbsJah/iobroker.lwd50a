@@ -42,6 +42,16 @@ const STATE_MAPPING = {
     unit: "\xB0C",
     dataSource: "value"
   },
+  // Virtuelle Berechnungen
+  spreizung_vorlauf_ruecklauf: {
+    folder: "Informationen.01_Temperaturen",
+    // Passe den Ordner an den Ort an, wo deine Temperaturen liegen
+    name: "Spreizung Vorlauf - R\xFCcklauf",
+    role: "value.temperature",
+    type: "number",
+    unit: "K",
+    isVirtual: true
+  },
   temperature_target_return: {
     folder: "Informationen.01_Temperaturen",
     name: "R\xFCckl.-Soll-Temperatur",
@@ -301,7 +311,8 @@ const STATE_MAPPING = {
     role: "value",
     type: "number",
     unit: "V",
-    dataSource: "value"
+    dataSource: "value",
+    factor: 100
   },
   analogOut2: {
     folder: "Informationen.03_Ausgaenge",
@@ -309,7 +320,8 @@ const STATE_MAPPING = {
     role: "value",
     type: "number",
     unit: "V",
-    dataSource: "value"
+    dataSource: "value",
+    factor: 100
   },
   defrostValve: {
     folder: "Informationen.03_Ausgaenge",
@@ -543,12 +555,11 @@ const STATE_MAPPING = {
     type: "string",
     dataSource: "value"
   },
-  opStateHotWater: {
+  opStateHotWaterString: {
     folder: "Informationen.08_Betriebszustand",
     name: "Betriebszustand Warmwasser",
-    role: "value",
-    type: "number",
-    states: { 0: "Temp. OK", 1: "Aufheizen", 2: "Aus", 3: "Sperrzeit" },
+    role: "text",
+    type: "string",
     dataSource: "value"
   },
   bivalentLevel: {
@@ -957,6 +968,14 @@ const STATE_MAPPING = {
     states: { 0: "Aus", 1: "Ein" },
     dataSource: "raw_parameter"
   },
+  Heizen_nach_Wasser: {
+    folder: "Einstellungen.Heizen",
+    name: "Heizen nach Wasser",
+    role: "switch",
+    type: "boolean",
+    isVirtual: true,
+    write: true
+  },
   // Warmwasser
   warmwater_temperature: {
     folder: "Einstellungen.03_Warmwasser",
@@ -983,7 +1002,7 @@ const STATE_MAPPING = {
     dataSource: "parameter"
   },
   heating_system_circ_pump_voltage_nominal: {
-    folder: "Einstellungen.04_Pumpe",
+    folder: "Einstellungen.04_HUP",
     name: "Heizungsumw\xE4lzpumpe Nennspannung",
     role: "value.voltage",
     type: "number",
@@ -995,7 +1014,7 @@ const STATE_MAPPING = {
     dataSource: "parameter"
   },
   heating_system_circ_pump_voltage_minimal: {
-    folder: "Einstellungen.04_Pumpe",
+    folder: "Einstellungen.04_HUP",
     name: "Heizungsumw\xE4lzpumpe Minimalspannung",
     role: "value.voltage",
     type: "number",
@@ -1017,7 +1036,7 @@ const STATE_MAPPING = {
     dataSource: "parameter"
   },
   hotWaterCircPumpDeaerate: {
-    folder: "Einstellungen.05_ZIP",
+    folder: "Einstellungen.05_ZIP ",
     name: "Zirkulationspumpe entl\xFCften",
     role: "value",
     type: "number",
@@ -1054,6 +1073,15 @@ const STATE_MAPPING = {
     unit: "min",
     factor: 1,
     dataSource: "parameter"
+  },
+  zip_aktiv: {
+    folder: "Einstellungen.05_ZIP",
+    name: "ZIP Dauer (Normal)",
+    role: "value",
+    type: "number",
+    unit: "s",
+    isVirtual: true,
+    write: true
   },
   //Systemeinstellungen
   Pumpenoptimierung: {
@@ -2561,6 +2589,24 @@ const STATE_MAPPING = {
     type: "string",
     dataSource: "raw_parameter",
     luxWriteId: "606",
+    write: true
+  },
+  //Action
+  Dump_Raw_To_Log: {
+    folder: "Aktionen",
+    // Oder ein anderer Ordner deiner Wahl, z.B. "Einstellungen.Adapter"
+    name: "Raw Data in Log schreiben",
+    role: "button",
+    type: "boolean",
+    isVirtual: true,
+    write: true
+  },
+  Regelung_Aktiv: {
+    folder: "Aktionen",
+    name: "Automatische Anlagenregelung ein-/ausschalten",
+    role: "switch",
+    type: "boolean",
+    isVirtual: true,
     write: true
   }
 };
