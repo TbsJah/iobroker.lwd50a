@@ -147,7 +147,7 @@ For later updates:
 
 ### **WORK IN PROGRESS**
 
-- Abschluss
+- Steuerung hinzugefügt
 
 ### 0.3.0 (2026-06-22)
 
