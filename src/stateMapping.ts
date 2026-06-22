@@ -1076,7 +1076,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: "parameter",
 	},
 	hotWaterCircPumpDeaerate: {
-		folder: "Einstellungen.05_ZIP ",
+		folder: "Einstellungen.05_ZIP",
 		name: "Zirkulationspumpe entlüften",
 		role: "value",
 		type: "number",
