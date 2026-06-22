@@ -620,6 +620,12 @@ class Lwd50a extends utils.Adapter {
 		}
 
 		try {
+			if (mappingKey === "Regelung_Aktiv") {
+				this.log.info(`Interner Schalter betätigt: Regelung ist nun ${state.val ? "AKTIV" : "PAUSIERT"}`);
+				await this.setState(id, { val: state.val, ack: true });
+				return;
+			}
+
 			if (mappingKey === "Dump_Raw_To_Log") {
 				if (state.val === true) {
 					this.log.info("Manueller Raw-Dump über Datenpunkt getriggert...");
