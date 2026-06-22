@@ -589,6 +589,13 @@ const STATE_MAPPING = {
     type: "string",
     dataSource: "value"
   },
+  Heizen_nach_Wasser: {
+    folder: "Informationen.08_Betriebszustand",
+    name: "Heizen nach Wasser aktiv",
+    role: "switch",
+    type: "boolean",
+    isVirtual: true
+  },
   // Wärmemenge
   thermalenergy_heating: {
     folder: "Informationen.09_W\xE4rmemenge",
@@ -967,14 +974,6 @@ const STATE_MAPPING = {
     luxWriteId: "699",
     states: { 0: "Aus", 1: "Ein" },
     dataSource: "raw_parameter"
-  },
-  Heizen_nach_Wasser: {
-    folder: "Einstellungen.Heizen",
-    name: "Heizen nach Wasser",
-    role: "switch",
-    type: "boolean",
-    isVirtual: true,
-    write: true
   },
   // Warmwasser
   warmwater_temperature: {

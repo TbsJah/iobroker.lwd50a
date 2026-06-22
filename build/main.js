@@ -55,11 +55,11 @@ class Lwd50a extends utils.Adapter {
       }
     };
     const dynConfig = this.config;
-    await initDefault("Einstellungen.Regelung_Aktiv", true);
+    await initDefault("Aktionen.Regelung_Aktiv", true);
     await initDefault("Einstellungen.05_ZIP.zip_aktiv", (_a = dynConfig.zip_aktiv) != null ? _a : 120);
     await initDefault("Einstellungen.05_ZIP.Activate_Zip", false);
     await initDefault("Aktionen.Dump_Raw_To_Log", false);
-    await initDefault("Einstellungen.02_Heizung.Heizen_nach_Wasser", false);
+    await initDefault("Informationen.08_Betriebszustand.Heizen_nach_Wasser", false);
     await this.updateData();
     let intervalSeconds = this.config.interval || 30;
     if (intervalSeconds < 10) {
