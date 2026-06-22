@@ -41,7 +41,7 @@ class Lwd50a extends utils.Adapter {
 		// Alle virtuellen Datenpunkte aus dem Mapping vorab generieren
 		await initializeVirtualStates(this);
 
-		const initDefault = async (id: string, defValue: any) => {
+		const initDefault = async (id: string, defValue: any): Promise<void> => {
 			const state = await this.getStateAsync(id);
 			// Wir schreiben den Wert nur, wenn der Punkt noch absolut leer (null) ist!
 			if (!state || state.val === null) {
