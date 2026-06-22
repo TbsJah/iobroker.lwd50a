@@ -41,6 +41,24 @@ class Lwd50a extends utils.Adapter {
 		// Alle virtuellen Datenpunkte aus dem Mapping vorab generieren
 		await initializeVirtualStates(this);
 
+		const initDefault = async (id: string, defValue: any) => {
+			const state = await this.getStateAsync(id);
+			// Wir schreiben den Wert nur, wenn der Punkt noch absolut leer (null) ist!
+			if (!state || state.val === null) {
+				await this.setState(id, { val: defValue, ack: true });
+				this.log.info(`Initiale Erstellung: Setze Default-Wert [${defValue}] für ${id}`);
+			}
+		};
+
+		const dynConfig = this.config as Record<string, any>;
+
+		// Hier können wir nun alle unsere virtuellen Punkte sicher initialisieren:
+		await initDefault("Einstellungen.Regelung_Aktiv", true); // Automatik beim ersten Start auf AN
+		await initDefault("Einstellungen.05_ZIP.zip_aktiv", dynConfig.zip_aktiv ?? 120); // Nimmt Config-Wert oder 120
+		await initDefault("Einstellungen.05_ZIP.Activate_Zip", false); // Manueller Trigger-Button (aus)
+		await initDefault("Aktionen.Dump_Raw_To_Log", false); // Dump-Button (aus)
+		await initDefault("Einstellungen.02_Heizung.Heizen_nach_Wasser", false); // Interne Logik-Weiche
+
 		// Erste Abfrage sofort starten
 		await this.updateData();
 

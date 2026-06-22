@@ -41,11 +41,25 @@ class Lwd50a extends utils.Adapter {
     this.on("unload", this.onUnload.bind(this));
   }
   async onReady() {
+    var _a;
     const ip = this.config.host;
     const port = this.config.port || 8889;
     this.log.info(`Verbinde mit W\xE4rmepumpe auf ${ip}:${port}...`);
     this.pump = new luxtronik.createConnection(ip, port);
     await (0, import_virtualStates.initializeVirtualStates)(this);
+    const initDefault = async (id, defValue) => {
+      const state = await this.getStateAsync(id);
+      if (!state || state.val === null) {
+        await this.setState(id, { val: defValue, ack: true });
+        this.log.info(`Initiale Erstellung: Setze Default-Wert [${defValue}] f\xFCr ${id}`);
+      }
+    };
+    const dynConfig = this.config;
+    await initDefault("Einstellungen.Regelung_Aktiv", true);
+    await initDefault("Einstellungen.05_ZIP.zip_aktiv", (_a = dynConfig.zip_aktiv) != null ? _a : 120);
+    await initDefault("Einstellungen.05_ZIP.Activate_Zip", false);
+    await initDefault("Aktionen.Dump_Raw_To_Log", false);
+    await initDefault("Einstellungen.02_Heizung.Heizen_nach_Wasser", false);
     await this.updateData();
     let intervalSeconds = this.config.interval || 30;
     if (intervalSeconds < 10) {
