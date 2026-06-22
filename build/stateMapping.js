@@ -1017,7 +1017,7 @@ const STATE_MAPPING = {
     dataSource: "parameter"
   },
   hotWaterCircPumpDeaerate: {
-    folder: "Einstellungen.05_Spezial",
+    folder: "Einstellungen.05_ZIP",
     name: "Zirkulationspumpe entl\xFCften",
     role: "value",
     type: "number",
