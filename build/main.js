@@ -476,6 +476,7 @@ class Lwd50a extends utils.Adapter {
       await (0, import_virtualStates.calculateTotalEnergy)(this);
       await (0, import_virtualStates.updateErrorHistory)(this, rawValues);
       await (0, import_virtualStates.updateOutageHistory)(this, rawValues);
+      await (0, import_virtualStates.calculateTemperatureSpread)(this);
       await this.runOptimizationSchedule();
     } catch (catchErr) {
       this.log.error(`Fehler im updateData-Ablauf: ${catchErr.message}`);

@@ -7,6 +7,7 @@ import * as luxtronik from "luxtronik2";
 import { dumpAllRawToLog, readAllRaw } from "./rawFunctions";
 import { STATE_MAPPING } from "./stateMapping";
 import {
+	calculateTemperatureSpread,
 	calculateTotalEnergy,
 	calculateTotalThermalEnergy,
 	initializeVirtualStates,
@@ -567,6 +568,7 @@ class Lwd50a extends utils.Adapter {
 			await calculateTotalEnergy(this);
 			await updateErrorHistory(this, rawValues);
 			await updateOutageHistory(this, rawValues);
+			await calculateTemperatureSpread(this);
 
 			// Synchroner Aufruf der Optimierungs- und Modus-Wechsel-Logik
 			await this.runOptimizationSchedule();
