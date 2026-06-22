@@ -49,7 +49,7 @@ class Lwd50a extends utils.Adapter {
     await (0, import_virtualStates.initializeVirtualStates)(this);
     const initDefault = async (id, defValue) => {
       const state = await this.getStateAsync(id);
-      if (!state || state.val === null) {
+      if (!state || state.val === null || state.val === void 0) {
         await this.setState(id, { val: defValue, ack: true });
         this.log.info(`Initiale Erstellung: Setze Default-Wert [${defValue}] f\xFCr ${id}`);
       }

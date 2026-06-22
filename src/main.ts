@@ -43,8 +43,8 @@ class Lwd50a extends utils.Adapter {
 
 		const initDefault = async (id: string, defValue: any): Promise<void> => {
 			const state = await this.getStateAsync(id);
-			// Wir schreiben den Wert nur, wenn der Punkt noch absolut leer (null) ist!
-			if (!state || state.val === null) {
+			// Erweitert: Läuft, wenn der State gar nicht existiert, null oder undefined ist
+			if (!state || state.val === null || state.val === undefined) {
 				await this.setState(id, { val: defValue, ack: true });
 				this.log.info(`Initiale Erstellung: Setze Default-Wert [${defValue}] für ${id}`);
 			}
