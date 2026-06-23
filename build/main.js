@@ -113,18 +113,25 @@ class Lwd50a extends utils.Adapter {
         return;
       }
       const bzState = await this.getStateAsync("Informationen.08_Betriebszustand.WP_BZ_akt");
-      const bzVal = bzState && bzState.val ? String(bzState.val).trim() : "";
-      const istHeizen = bzVal === "Heizen";
-      const istWarmwasser = bzVal === "Warmwasser";
-      const istLeerlauf = bzVal === "Leerlauf";
-      const istAbtauen = bzVal === "Abtauen";
+      const bzVal = bzState && bzState.val !== null ? String(bzState.val).trim() : "";
+      const istHeizen = bzVal === "0";
+      const istWarmwasser = bzVal === "1";
+      const istAbtauen = bzVal === "4";
+      const istLeerlauf = bzVal === "5";
       if (!istHeizen && !istWarmwasser && !istLeerlauf && !istAbtauen) {
+        if (this.isDebugLogActive) {
+          this.log.debug(
+            `Betriebsmodus gewechselt von '${this.lastBzVal}' zu '${bzVal}'. Keine Optimierung f\xFCr diesen Modus vorgesehen. \xDCberspringe Anpassungen.`
+          );
+        }
         return;
       }
       if (bzVal !== this.lastBzVal) {
-        this.log.debug(
-          `Betriebsmodus gewechselt von '${this.lastBzVal}' zu '${bzVal}'. Setze Vorgabewerte aus Instanz-Konfiguration...`
-        );
+        if (this.isDebugLogActive) {
+          this.log.debug(
+            `Betriebsmodus gewechselt von '${this.lastBzVal}' zu '${bzVal}'. Setze Vorgabewerte aus Instanz-Konfiguration...`
+          );
+        }
         const configWithDynamicKeys = this.config;
         if (istLeerlauf) {
           await this.setOwnStateIfDifferent(
@@ -254,7 +261,9 @@ class Lwd50a extends utils.Adapter {
           }
         }
         if (wwSoll - wwIst > 2 && ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1) {
-          this.log.debug("Starte WW Erzeugung nach Heizung");
+          if (this.isDebugLogActive) {
+            this.log.debug("Starte WW Erzeugung nach Heizung");
+          }
           await this.setOwnStateIfDifferent(
             "Einstellungen.03_Warmwasser.hotWaterTemperatureHysteresis",
             2,
@@ -494,7 +503,9 @@ class Lwd50a extends utils.Adapter {
       if (this.pollingInterval) {
         clearInterval(this.pollingInterval);
         this.pollingInterval = void 0;
-        this.log.info("Polling-Intervall erfolgreich gestoppt.");
+        if (this.isDebugLogActive) {
+          this.log.info("Polling-Intervall erfolgreich gestoppt.");
+        }
       }
       if (this.pump && typeof this.pump.disconnect === "function") {
         this.pump.disconnect();
@@ -503,7 +514,9 @@ class Lwd50a extends utils.Adapter {
         clearTimeout(this.zipTimer);
         this.zipTimer = void 0;
       }
-      this.log.info("Adapter wurde sauber beendet.");
+      if (this.isDebugLogActive) {
+        this.log.info("Adapter wurde sauber beendet.");
+      }
       callback();
     } catch (err) {
       this.log.error(`Fehler beim Beenden des Adapters: ${err.message}`);
@@ -513,7 +526,9 @@ class Lwd50a extends utils.Adapter {
   async onStateChange(id, state) {
     if (!state || state.ack) {
       if (!state) {
-        this.log.info(`State ${id} wurde gel\xF6scht.`);
+        if (this.isDebugLogActive) {
+          this.log.info(`State ${id} wurde gel\xF6scht.`);
+        }
       }
       return;
     }
@@ -533,23 +548,31 @@ class Lwd50a extends utils.Adapter {
     try {
       if (mappingKey === "Schreibe_Debug_Log") {
         this.isDebugLogActive = state.val === true;
-        this.log.info(`Erweitertes Logging ist nun ${this.isDebugLogActive ? "AKTIV" : "DEAKTIVIERT"}`);
+        if (this.isDebugLogActive) {
+          this.log.info(`Erweitertes Logging ist nun ${this.isDebugLogActive ? "AKTIV" : "DEAKTIVIERT"}`);
+        }
         await this.setState(id, { val: state.val, ack: true });
         return;
       }
       if (mappingKey === "Regelung_Aktiv") {
-        this.log.info(`Interner Schalter bet\xE4tigt: Regelung ist nun ${state.val ? "AKTIV" : "PAUSIERT"}`);
+        if (this.isDebugLogActive) {
+          this.log.info(`Interner Schalter bet\xE4tigt: Regelung ist nun ${state.val ? "AKTIV" : "PAUSIERT"}`);
+        }
         await this.setState(id, { val: state.val, ack: true });
         return;
       }
       if (mappingKey === "zip_aktiv") {
-        this.log.info(`Zip Dauer auf ${state.val} ge\xE4ndert`);
+        if (this.isDebugLogActive) {
+          this.log.info(`Zip Dauer auf ${state.val} ge\xE4ndert`);
+        }
         await this.setState(id, { val: state.val, ack: true });
         return;
       }
       if (mappingKey === "Dump_Raw_To_Log") {
         if (state.val === true) {
-          this.log.info("Manueller Raw-Dump \xFCber Datenpunkt getriggert...");
+          if (this.isDebugLogActive) {
+            this.log.info("Manueller Raw-Dump \xFCber Datenpunkt getriggert...");
+          }
           await (0, import_rawFunctions.dumpAllRawToLog)(this);
           await this.setState(id, { val: false, ack: true });
         }
@@ -577,9 +600,11 @@ class Lwd50a extends utils.Adapter {
               this.zipTimer = void 0;
             }
           } else {
-            this.log.info(
-              `Makro gestartet: ZIP Entl\xFCftung wird f\xFCr ${durationSeconds} Sekunden aktiviert...`
-            );
+            if (this.isDebugLogActive) {
+              this.log.info(
+                `Makro gestartet: ZIP Entl\xFCftung wird f\xFCr ${durationSeconds} Sekunden aktiviert...`
+              );
+            }
             await this.writePumpAsync("runDeaerate", 1);
             await new Promise((resolve) => setTimeout(resolve, 1e3));
             await this.writePumpAsync("hotWaterCircPumpDeaerate", 1);
@@ -587,7 +612,9 @@ class Lwd50a extends utils.Adapter {
           await this.setState(id, { val: true, ack: true });
           await this.updateData();
           this.zipTimer = setTimeout(async () => {
-            this.log.info("ZIP Entl\xFCftung: Zeit abgelaufen. Deaktiviere Pumpe...");
+            if (this.isDebugLogActive) {
+              this.log.info("ZIP Entl\xFCftung: Zeit abgelaufen. Deaktiviere Pumpe...");
+            }
             try {
               await this.writePumpAsync("runDeaerate", 0);
               await new Promise((resolve) => setTimeout(resolve, 1e3));
@@ -600,7 +627,9 @@ class Lwd50a extends utils.Adapter {
             this.zipTimer = void 0;
           }, durationSeconds * 1e3);
         } else {
-          this.log.info("Makro manuell abgebrochen: Deaktiviere ZIP Entl\xFCftung sofort...");
+          if (this.isDebugLogActive) {
+            this.log.info("Makro manuell abgebrochen: Deaktiviere ZIP Entl\xFCftung sofort...");
+          }
           if (this.zipTimer) {
             clearTimeout(this.zipTimer);
             this.zipTimer = void 0;
@@ -667,13 +696,19 @@ class Lwd50a extends utils.Adapter {
       }
       if (isRawWrite) {
         const paramId = parseInt(luxWriteId, 10);
-        this.log.info(`Sende RAW-NUMBER an Luxtronik: ID ${paramId} = ${valueToWrite}`);
+        if (this.isDebugLogActive) {
+          this.log.info(`Sende RAW-NUMBER an Luxtronik: ID ${paramId} = ${valueToWrite}`);
+        }
         await this.writePumpAsync(paramId, valueToWrite, true);
       } else {
-        this.log.info(`Sende STANDARD-STRING an Luxtronik: Name "${luxWriteId}" = ${valueToWrite}`);
+        if (this.isDebugLogActive) {
+          this.log.info(`Sende STANDARD-STRING an Luxtronik: Name "${luxWriteId}" = ${valueToWrite}`);
+        }
         await this.writePumpAsync(luxWriteId, valueToWrite, false);
       }
-      this.log.info(`Wert ${state.val} erfolgreich via [${luxWriteId}] an W\xE4rmepumpe \xFCbertragen.`);
+      if (this.isDebugLogActive) {
+        this.log.info(`Wert ${state.val} erfolgreich via [${luxWriteId}] an W\xE4rmepumpe \xFCbertragen.`);
+      }
       await this.setState(id, { val: state.val, ack: true });
       await new Promise((resolve) => setTimeout(resolve, 500));
       await this.updateData();

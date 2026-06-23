@@ -126,14 +126,21 @@ class Lwd50a extends utils.Adapter {
 
 			// 1. STATUS ABFRAGEN (Weiche)
 			const bzState = await this.getStateAsync("Informationen.08_Betriebszustand.WP_BZ_akt");
-			const bzVal = bzState && bzState.val ? String(bzState.val).trim() : "";
+			// Den reinen Zahlenwert als String sichern (z.B. "0", "1", "5")
+			const bzVal = bzState && bzState.val !== null ? String(bzState.val).trim() : "";
 
-			const istHeizen = bzVal === "Heizen";
-			const istWarmwasser = bzVal === "Warmwasser";
-			const istLeerlauf = bzVal === "Leerlauf";
-			const istAbtauen = bzVal === "Abtauen";
+			// Mit den echten Luxtronik-Statuscodes vergleichen
+			const istHeizen = bzVal === "0";
+			const istWarmwasser = bzVal === "1";
+			const istAbtauen = bzVal === "4";
+			const istLeerlauf = bzVal === "5";
 
 			if (!istHeizen && !istWarmwasser && !istLeerlauf && !istAbtauen) {
+				if (this.isDebugLogActive) {
+					this.log.debug(
+						`Betriebsmodus gewechselt von '${this.lastBzVal}' zu '${bzVal}'. Keine Optimierung für diesen Modus vorgesehen. Überspringe Anpassungen.`,
+					);
+				}
 				return;
 			}
 
@@ -141,9 +148,11 @@ class Lwd50a extends utils.Adapter {
 			// VORGABEWERTE BEI BETRIEBSMODUS-WECHSEL SEAMLESS SETZEN
 			// =========================================================
 			if (bzVal !== this.lastBzVal) {
-				this.log.debug(
-					`Betriebsmodus gewechselt von '${this.lastBzVal}' zu '${bzVal}'. Setze Vorgabewerte aus Instanz-Konfiguration...`,
-				);
+				if (this.isDebugLogActive) {
+					this.log.debug(
+						`Betriebsmodus gewechselt von '${this.lastBzVal}' zu '${bzVal}'. Setze Vorgabewerte aus Instanz-Konfiguration...`,
+					);
+				}
 
 				const configWithDynamicKeys = this.config as Record<string, any>;
 
@@ -314,7 +323,9 @@ class Lwd50a extends utils.Adapter {
 
 				// Wasser Hysterese Boost
 				if (wwSoll - wwIst > 2 && ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1) {
-					this.log.debug("Starte WW Erzeugung nach Heizung");
+					if (this.isDebugLogActive) {
+						this.log.debug("Starte WW Erzeugung nach Heizung");
+					}
 					await this.setOwnStateIfDifferent(
 						"Einstellungen.03_Warmwasser.hotWaterTemperatureHysteresis",
 						2,
@@ -592,7 +603,9 @@ class Lwd50a extends utils.Adapter {
 			if (this.pollingInterval) {
 				clearInterval(this.pollingInterval);
 				this.pollingInterval = undefined;
-				this.log.info("Polling-Intervall erfolgreich gestoppt.");
+				if (this.isDebugLogActive) {
+					this.log.info("Polling-Intervall erfolgreich gestoppt.");
+				}
 			}
 
 			if (this.pump && typeof this.pump.disconnect === "function") {
@@ -604,7 +617,9 @@ class Lwd50a extends utils.Adapter {
 				this.zipTimer = undefined;
 			}
 
-			this.log.info("Adapter wurde sauber beendet.");
+			if (this.isDebugLogActive) {
+				this.log.info("Adapter wurde sauber beendet.");
+			}
 			callback();
 		} catch (err: any) {
 			this.log.error(`Fehler beim Beenden des Adapters: ${err.message}`);
@@ -615,7 +630,9 @@ class Lwd50a extends utils.Adapter {
 	private async onStateChange(id: string, state: ioBroker.State | null | undefined): Promise<void> {
 		if (!state || state.ack) {
 			if (!state) {
-				this.log.info(`State ${id} wurde gelöscht.`);
+				if (this.isDebugLogActive) {
+					this.log.info(`State ${id} wurde gelöscht.`);
+				}
 			}
 			return;
 		}
@@ -640,26 +657,34 @@ class Lwd50a extends utils.Adapter {
 			if (mappingKey === "Schreibe_Debug_Log") {
 				// Globale Variable sofort updaten!
 				this.isDebugLogActive = state.val === true;
-				this.log.info(`Erweitertes Logging ist nun ${this.isDebugLogActive ? "AKTIV" : "DEAKTIVIERT"}`);
+				if (this.isDebugLogActive) {
+					this.log.info(`Erweitertes Logging ist nun ${this.isDebugLogActive ? "AKTIV" : "DEAKTIVIERT"}`);
+				}
 				await this.setState(id, { val: state.val, ack: true });
 				return;
 			}
 
 			if (mappingKey === "Regelung_Aktiv") {
-				this.log.info(`Interner Schalter betätigt: Regelung ist nun ${state.val ? "AKTIV" : "PAUSIERT"}`);
+				if (this.isDebugLogActive) {
+					this.log.info(`Interner Schalter betätigt: Regelung ist nun ${state.val ? "AKTIV" : "PAUSIERT"}`);
+				}
 				await this.setState(id, { val: state.val, ack: true });
 				return;
 			}
 
 			if (mappingKey === "zip_aktiv") {
-				this.log.info(`Zip Dauer auf ${state.val} geändert`);
+				if (this.isDebugLogActive) {
+					this.log.info(`Zip Dauer auf ${state.val} geändert`);
+				}
 				await this.setState(id, { val: state.val, ack: true });
 				return;
 			}
 
 			if (mappingKey === "Dump_Raw_To_Log") {
 				if (state.val === true) {
-					this.log.info("Manueller Raw-Dump über Datenpunkt getriggert...");
+					if (this.isDebugLogActive) {
+						this.log.info("Manueller Raw-Dump über Datenpunkt getriggert...");
+					}
 					await dumpAllRawToLog(this);
 					await this.setState(id, { val: false, ack: true });
 				}
@@ -697,9 +722,11 @@ class Lwd50a extends utils.Adapter {
 						}
 					} else {
 						// Pumpe steht -> Normal starten und Hardware-Befehle senden
-						this.log.info(
-							`Makro gestartet: ZIP Entlüftung wird für ${durationSeconds} Sekunden aktiviert...`,
-						);
+						if (this.isDebugLogActive) {
+							this.log.info(
+								`Makro gestartet: ZIP Entlüftung wird für ${durationSeconds} Sekunden aktiviert...`,
+							);
+						}
 
 						await this.writePumpAsync("runDeaerate", 1);
 						await new Promise(resolve => setTimeout(resolve, 1000));
@@ -712,7 +739,9 @@ class Lwd50a extends utils.Adapter {
 
 					// 3. Den Timer für die automatische Abschaltung (neu) starten
 					this.zipTimer = setTimeout(async () => {
-						this.log.info("ZIP Entlüftung: Zeit abgelaufen. Deaktiviere Pumpe...");
+						if (this.isDebugLogActive) {
+							this.log.info("ZIP Entlüftung: Zeit abgelaufen. Deaktiviere Pumpe...");
+						}
 						try {
 							await this.writePumpAsync("runDeaerate", 0);
 							await new Promise(resolve => setTimeout(resolve, 1000));
@@ -727,7 +756,9 @@ class Lwd50a extends utils.Adapter {
 					}, durationSeconds * 1000);
 				} else {
 					// Manueller Abbruch durch den User (Schalter in der VIS auf "false" gesetzt)
-					this.log.info("Makro manuell abgebrochen: Deaktiviere ZIP Entlüftung sofort...");
+					if (this.isDebugLogActive) {
+						this.log.info("Makro manuell abgebrochen: Deaktiviere ZIP Entlüftung sofort...");
+					}
 
 					if (this.zipTimer) {
 						clearTimeout(this.zipTimer);
@@ -811,14 +842,20 @@ class Lwd50a extends utils.Adapter {
 
 			if (isRawWrite) {
 				const paramId = parseInt(luxWriteId, 10);
-				this.log.info(`Sende RAW-NUMBER an Luxtronik: ID ${paramId} = ${valueToWrite}`);
+				if (this.isDebugLogActive) {
+					this.log.info(`Sende RAW-NUMBER an Luxtronik: ID ${paramId} = ${valueToWrite}`);
+				}
 				await this.writePumpAsync(paramId, valueToWrite, true);
 			} else {
-				this.log.info(`Sende STANDARD-STRING an Luxtronik: Name "${luxWriteId}" = ${valueToWrite}`);
+				if (this.isDebugLogActive) {
+					this.log.info(`Sende STANDARD-STRING an Luxtronik: Name "${luxWriteId}" = ${valueToWrite}`);
+				}
 				await this.writePumpAsync(luxWriteId, valueToWrite, false);
 			}
 
-			this.log.info(`Wert ${state.val} erfolgreich via [${luxWriteId}] an Wärmepumpe übertragen.`);
+			if (this.isDebugLogActive) {
+				this.log.info(`Wert ${state.val} erfolgreich via [${luxWriteId}] an Wärmepumpe übertragen.`);
+			}
 
 			await this.setState(id, { val: state.val, ack: true });
 			await new Promise(resolve => setTimeout(resolve, 500));
