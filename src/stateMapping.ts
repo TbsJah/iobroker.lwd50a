@@ -29,7 +29,7 @@ export interface StateDefinition {
 	factor?: number;
 	/** Optionales Mapping für numerische Werte zu Texten */
 	states?: Record<number, string>;
-	/** NEU: Bestimmt explizit die exakte Datenquelle an der Luxtronik */
+	/** Bestimmt explizit die exakte Datenquelle an der Luxtronik */
 	dataSource?: "raw_value" | "raw_parameter" | "value" | "parameter" | "additional";
 }
 
@@ -47,7 +47,9 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value.temperature",
 		type: "number",
 		unit: "°C",
-		dataSource: "value",
+		luxWriteId: "10",
+		factor: 10,
+		dataSource: "raw_value",
 	},
 	temperature_return: {
 		folder: "Informationen.01_Temperaturen",
@@ -55,11 +57,12 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value.temperature",
 		type: "number",
 		unit: "°C",
-		dataSource: "value",
+		luxWriteId: "11",
+		factor: 10,
+		dataSource: "raw_value",
 	},
-	// Virtuelle Berechnungen
 	spreizung_vorlauf_ruecklauf: {
-		folder: "Informationen.01_Temperaturen", // Passe den Ordner an den Ort an, wo deine Temperaturen liegen
+		folder: "Informationen.01_Temperaturen",
 		name: "Spreizung Vorlauf - Rücklauf",
 		role: "value.temperature",
 		type: "number",
@@ -72,7 +75,9 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value.temperature",
 		type: "number",
 		unit: "°C",
-		dataSource: "value",
+		luxWriteId: "12",
+		factor: 10,
+		dataSource: "raw_value",
 	},
 	temperature_hot_gas: {
 		folder: "Informationen.01_Temperaturen",
@@ -80,7 +85,9 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value.temperature",
 		type: "number",
 		unit: "°C",
-		dataSource: "value",
+		luxWriteId: "14",
+		factor: 10,
+		dataSource: "raw_value",
 	},
 	temperature_outside: {
 		folder: "Informationen.01_Temperaturen",
@@ -88,7 +95,9 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value.temperature",
 		type: "number",
 		unit: "°C",
-		dataSource: "value",
+		luxWriteId: "15",
+		factor: 10,
+		dataSource: "raw_value",
 	},
 	Mitteltemperatur: {
 		folder: "Informationen.01_Temperaturen",
@@ -107,7 +116,9 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value.temperature",
 		type: "number",
 		unit: "°C",
-		dataSource: "value",
+		luxWriteId: "17",
+		factor: 10,
+		dataSource: "raw_value",
 	},
 	Wamwassertemperatur_Ist: {
 		folder: "Informationen.01_Temperaturen",
@@ -137,7 +148,9 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value.temperature",
 		type: "number",
 		unit: "°C",
-		dataSource: "value",
+		luxWriteId: "19",
+		factor: 10,
+		dataSource: "raw_value",
 	},
 	temperature_overheating_target: {
 		folder: "Informationen.01_Temperaturen",
@@ -145,7 +158,9 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value.temperature",
 		type: "number",
 		unit: "K",
-		dataSource: "value",
+		luxWriteId: "179",
+		factor: 10,
+		dataSource: "raw_value",
 	},
 	temperature_compressor1_heating: {
 		folder: "Informationen.01_Temperaturen",
@@ -153,15 +168,19 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value.temperature",
 		type: "number",
 		unit: "°C",
-		dataSource: "value",
+		luxWriteId: "177",
+		factor: 10,
+		dataSource: "raw_value",
 	},
 	temperature_overheating: {
 		folder: "Informationen.01_Temperaturen",
 		name: "Überhitzung Ist",
 		role: "value.temperature",
 		type: "number",
-		unit: "°C",
-		dataSource: "value",
+		unit: "K",
+		luxWriteId: "178",
+		factor: 10,
+		dataSource: "raw_value",
 	},
 	temperature_intake_compressor1: {
 		folder: "Informationen.01_Temperaturen",
@@ -169,7 +188,9 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value.temperature",
 		type: "number",
 		unit: "°C",
-		dataSource: "value",
+		luxWriteId: "176",
+		factor: 10,
+		dataSource: "raw_value",
 	},
 	temperature_intake_evaporation: {
 		folder: "Informationen.01_Temperaturen",
@@ -177,7 +198,9 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value.temperature",
 		type: "number",
 		unit: "°C",
-		dataSource: "value",
+		luxWriteId: "175",
+		factor: 10,
+		dataSource: "raw_value",
 	},
 
 	// Eingänge
@@ -187,7 +210,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: { 0: "Aus", 1: "Ein" },
-		dataSource: "value",
+		luxWriteId: "29",
+		dataSource: "raw_value",
 	},
 	EVUin: {
 		folder: "Informationen.02_Eingaenge",
@@ -195,7 +219,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: { 0: "Aus", 1: "Ein" },
-		dataSource: "value",
+		luxWriteId: "31",
+		dataSource: "raw_value",
 	},
 	HDin: {
 		folder: "Informationen.02_Eingaenge",
@@ -203,7 +228,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: { 0: "Aus", 1: "Ein" },
-		dataSource: "value",
+		luxWriteId: "32",
+		dataSource: "raw_value",
 	},
 	MOTin: {
 		folder: "Informationen.02_Eingaenge",
@@ -211,7 +237,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: { 0: "Aus", 1: "Ein" },
-		dataSource: "value",
+		luxWriteId: "33",
+		dataSource: "raw_value",
 	},
 	NDin: {
 		folder: "Informationen.02_Eingaenge",
@@ -219,7 +246,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: { 0: "Aus", 1: "Ein" },
-		dataSource: "value",
+		luxWriteId: "34",
+		dataSource: "raw_value",
 	},
 	AnalogIn: {
 		folder: "Informationen.02_Eingaenge",
@@ -227,7 +255,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		unit: "V",
-		dataSource: "value",
+		luxWriteId: "147",
+		dataSource: "raw_value",
 	},
 	NDin_pressure: {
 		folder: "Informationen.02_Eingaenge",
@@ -235,8 +264,9 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value.pressure",
 		type: "number",
 		unit: "bar",
-		factor: 1,
-		dataSource: "value",
+		luxWriteId: "181",
+		factor: 100,
+		dataSource: "raw_value",
 	},
 	HDin_pressure: {
 		folder: "Informationen.02_Eingaenge",
@@ -244,8 +274,9 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value.pressure",
 		type: "number",
 		unit: "bar",
-		factor: 1,
-		dataSource: "value",
+		luxWriteId: "180",
+		factor: 100,
+		dataSource: "raw_value",
 	},
 	BWTin: {
 		folder: "Informationen.02_Eingaenge",
@@ -253,7 +284,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: { 0: "Aus", 1: "Ein" },
-		dataSource: "value",
+		luxWriteId: "30",
+		dataSource: "raw_value",
 	},
 
 	// Ausgänge
@@ -263,7 +295,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: { 0: "Aus", 1: "Ein" },
-		dataSource: "value",
+		luxWriteId: "37",
+		dataSource: "raw_value",
 	},
 	BUPout: {
 		folder: "Informationen.03_Ausgaenge",
@@ -271,7 +304,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: { 0: "Aus", 1: "Ein" },
-		dataSource: "value",
+		luxWriteId: "38",
+		dataSource: "raw_value",
 	},
 	HUPout: {
 		folder: "Informationen.03_Ausgaenge",
@@ -279,7 +313,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: { 0: "Aus", 1: "Ein" },
-		dataSource: "value",
+		luxWriteId: "39",
+		dataSource: "raw_value",
 	},
 	VENout: {
 		folder: "Informationen.03_Ausgaenge",
@@ -287,7 +322,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: { 0: "Aus", 1: "Ein" },
-		dataSource: "value",
+		luxWriteId: "42",
+		dataSource: "raw_value",
 	},
 	VD1out: {
 		folder: "Informationen.03_Ausgaenge",
@@ -295,7 +331,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: { 0: "Aus", 1: "Ein" },
-		dataSource: "value",
+		luxWriteId: "44",
+		dataSource: "raw_value",
 	},
 	ZIPout: {
 		folder: "Informationen.03_Ausgaenge",
@@ -303,7 +340,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: { 0: "Aus", 1: "Ein" },
-		dataSource: "value",
+		luxWriteId: "46",
+		dataSource: "raw_value",
 	},
 	ZUPout: {
 		folder: "Informationen.03_Ausgaenge",
@@ -311,7 +349,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: { 0: "Aus", 1: "Ein" },
-		dataSource: "value",
+		luxWriteId: "47",
+		dataSource: "raw_value",
 	},
 	ZW1out: {
 		folder: "Informationen.03_Ausgaenge",
@@ -319,7 +358,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: { 0: "Aus", 1: "Ein" },
-		dataSource: "value",
+		luxWriteId: "48",
+		dataSource: "raw_value",
 	},
 	analogOut1: {
 		folder: "Informationen.03_Ausgaenge",
@@ -327,7 +367,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		unit: "V",
-		dataSource: "value",
+		luxWriteId: "156",
+		dataSource: "raw_value",
 		factor: 100,
 	},
 	analogOut2: {
@@ -336,7 +377,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		unit: "V",
-		dataSource: "value",
+		luxWriteId: "157",
+		dataSource: "raw_value",
 		factor: 100,
 	},
 	defrostValve: {
@@ -345,7 +387,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: { 0: "Aus", 1: "Ein" },
-		dataSource: "value",
+		luxWriteId: "37",
+		dataSource: "raw_value",
 	},
 	hotWaterBoilerValve: {
 		folder: "Informationen.03_Ausgaenge",
@@ -353,14 +396,16 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: { 0: "Aus", 1: "Ein" },
-		dataSource: "value",
+		luxWriteId: "38",
+		dataSource: "raw_value",
 	},
 	heatingSystemCircPump: {
 		folder: "Informationen.03_Ausgaenge",
 		name: "Heizungssystem Zirkulationspumpe Laufindikator",
 		role: "indicator",
 		type: "boolean",
-		dataSource: "value",
+		luxWriteId: "39",
+		dataSource: "raw_value",
 	},
 	heatSourceMotor: {
 		folder: "Informationen.03_Ausgaenge",
@@ -368,7 +413,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: { 0: "Aus", 1: "Ein" },
-		dataSource: "value",
+		luxWriteId: "43",
+		dataSource: "raw_value",
 	},
 	compressor1: {
 		folder: "Informationen.03_Ausgaenge",
@@ -376,7 +422,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: { 0: "Aus", 1: "Ein" },
-		dataSource: "value",
+		luxWriteId: "44",
+		dataSource: "raw_value",
 	},
 	hotWaterCircPumpExtern: {
 		folder: "Informationen.03_Ausgaenge",
@@ -384,7 +431,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: { 0: "Aus", 1: "Ein" },
-		dataSource: "value",
+		luxWriteId: "46",
+		dataSource: "raw_value",
 	},
 
 	// Zeiten
@@ -394,7 +442,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		unit: "s",
-		dataSource: "value",
+		luxWriteId: "67",
+		dataSource: "raw_value",
 	},
 	Time_ZWE1_akt: {
 		folder: "Informationen.04_Timer",
@@ -402,7 +451,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		unit: "s",
-		dataSource: "value",
+		luxWriteId: "68",
+		dataSource: "raw_value",
 	},
 	Timer_EinschVerz: {
 		folder: "Informationen.04_Timer",
@@ -410,7 +460,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		unit: "s",
-		dataSource: "value",
+		luxWriteId: "70",
+		dataSource: "raw_value",
 	},
 	Time_SSPAUS_akt: {
 		folder: "Informationen.04_Timer",
@@ -418,7 +469,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		unit: "s",
-		dataSource: "value",
+		luxWriteId: "71",
+		dataSource: "raw_value",
 	},
 	Time_SSPEIN_akt: {
 		folder: "Informationen.04_Timer",
@@ -426,7 +478,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		unit: "s",
-		dataSource: "value",
+		luxWriteId: "72",
+		dataSource: "raw_value",
 	},
 	Time_VDStd_akt: {
 		folder: "Informationen.04_Timer",
@@ -434,7 +487,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		unit: "s",
-		dataSource: "value",
+		luxWriteId: "73",
+		dataSource: "raw_value",
 	},
 	Time_HRM_akt: {
 		folder: "Informationen.04_Timer",
@@ -442,7 +496,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		unit: "s",
-		dataSource: "value",
+		luxWriteId: "74",
+		dataSource: "raw_value",
 	},
 	Time_HRW_akt: {
 		folder: "Informationen.04_Timer",
@@ -450,7 +505,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		unit: "s",
-		dataSource: "value",
+		luxWriteId: "75",
+		dataSource: "raw_value",
 	},
 	Time_Heissgas: {
 		folder: "Informationen.04_Timer",
@@ -458,7 +514,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		unit: "s",
-		dataSource: "value",
+		luxWriteId: "158",
+		dataSource: "raw_value",
 	},
 	ahp_Zeit: {
 		folder: "Informationen.04_Timer",
@@ -466,7 +523,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		unit: "s",
-		dataSource: "value",
+		luxWriteId: "123",
+		dataSource: "raw_value",
 	},
 
 	// Betriebsstunden
@@ -476,14 +534,17 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		unit: "h",
-		dataSource: "value",
+		luxWriteId: "56",
+		factor: 3600,
+		dataSource: "raw_value",
 	},
 	starts_compressor1: {
 		folder: "Informationen.05_Betriebsstunden",
 		name: "Schaltspiele Kompressor 1",
 		role: "value",
 		type: "number",
-		dataSource: "value",
+		luxWriteId: "57",
+		dataSource: "raw_value",
 	},
 	hours_2nd_heat_source1: {
 		folder: "Informationen.05_Betriebsstunden",
@@ -491,7 +552,9 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		unit: "h",
-		dataSource: "value",
+		luxWriteId: "60",
+		factor: 3600,
+		dataSource: "raw_value",
 	},
 	hours_heatpump: {
 		folder: "Informationen.05_Betriebsstunden",
@@ -499,7 +562,9 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		unit: "h",
-		dataSource: "value",
+		luxWriteId: "63",
+		factor: 3600,
+		dataSource: "raw_value",
 	},
 	hours_heating: {
 		folder: "Informationen.05_Betriebsstunden",
@@ -507,7 +572,9 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		unit: "h",
-		dataSource: "value",
+		luxWriteId: "64",
+		factor: 3600,
+		dataSource: "raw_value",
 	},
 	hours_warmwater: {
 		folder: "Informationen.05_Betriebsstunden",
@@ -515,7 +582,9 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		unit: "h",
-		dataSource: "value",
+		luxWriteId: "65",
+		factor: 3600,
+		dataSource: "raw_value",
 	},
 
 	// Fehlerspeicher
@@ -552,14 +621,15 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 			6: "Externe Energiequelle",
 			7: "Kühlung",
 		},
-		dataSource: "value",
+		luxWriteId: "80",
+		dataSource: "raw_value",
 	},
 	heatpump_extendet_state_string: {
 		folder: "Informationen.08_Betriebszustand",
 		name: "Erweiterter Status Text",
 		role: "text",
 		type: "string",
-		dataSource: "value",
+		dataSource: "value", // Bleibt auf "value", da Textgenerierung in Lib!
 	},
 	opStateHeating: {
 		folder: "Informationen.08_Betriebszustand",
@@ -567,7 +637,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		states: { 0: "Abgesenkt", 1: "Normal", 2: "Heizgrenze", 3: "Aus", 4: "Frostschutz" },
-		dataSource: "value",
+		luxWriteId: "125",
+		dataSource: "raw_value",
 	},
 	opStateHeatingString: {
 		folder: "Informationen.08_Betriebszustand",
@@ -593,7 +664,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 			2: "Zwei Verdichter dürfen laufen",
 			3: "Zusätzlicher Wärmeerzeuger darf mitlaufen",
 		},
-		dataSource: "value",
+		luxWriteId: "79",
+		dataSource: "raw_value",
 	},
 	heatpump_duration: {
 		folder: "Informationen.08_Betriebszustand",
@@ -601,7 +673,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value",
 		type: "number",
 		unit: "s",
-		dataSource: "value",
+		luxWriteId: "120",
+		dataSource: "raw_value",
 	},
 	heatpump_state_string: {
 		folder: "Informationen.08_Betriebszustand",
@@ -625,7 +698,9 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value.power.consumption",
 		type: "number",
 		unit: "kWh",
-		dataSource: "value",
+		luxWriteId: "151",
+		factor: 10,
+		dataSource: "raw_value",
 	},
 	thermalenergy_warmwater: {
 		folder: "Informationen.09_Wärmemenge",
@@ -633,7 +708,9 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value.power.consumption",
 		type: "number",
 		unit: "kWh",
-		dataSource: "value",
+		luxWriteId: "152",
+		factor: 10,
+		dataSource: "raw_value",
 	},
 	thermalenergy_ZWE1: {
 		folder: "Informationen.09_Wärmemenge",
@@ -642,7 +719,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		luxWriteId: "1059",
 		unit: "kWh",
-		dataSource: "raw_parameter", // <--- HIER DER WECHSEL ZU 3003!
+		dataSource: "raw_parameter",
 		factor: 100,
 	},
 	thermalenergy_total: {
@@ -651,7 +728,9 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value.power.consumption",
 		type: "number",
 		unit: "kWh",
-		dataSource: "value",
+		luxWriteId: "154",
+		factor: 10,
+		dataSource: "raw_value",
 	},
 
 	// Energie
@@ -662,7 +741,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: "1136",
 		type: "number",
 		unit: "kWh",
-		dataSource: "raw_parameter", // <--- HIER DER WECHSEL ZU 3003!
+		dataSource: "raw_parameter",
 		factor: 100,
 	},
 	energy_warmwater: {
@@ -672,7 +751,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		luxWriteId: "1137",
 		unit: "kWh",
-		dataSource: "raw_parameter", // <--- HIER DER WECHSEL ZU 3003!
+		dataSource: "raw_parameter",
 		factor: 100,
 	},
 	energy_ZWE1: {
@@ -682,7 +761,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		luxWriteId: "1059",
 		unit: "kWh",
-		dataSource: "raw_parameter", // <--- HIER DER WECHSEL ZU 3003!
+		dataSource: "raw_parameter",
 		factor: 100,
 	},
 	energy_total: {
@@ -691,11 +770,10 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value.power.consumption",
 		type: "number",
 		unit: "kWh",
-		isVirtual: true, // <--- KORREKTUR: Fehlte! Wird vom Adapter selbst addiert.
+		isVirtual: true,
 	},
 
 	// 11_Tabellen
-
 	heatingOperationTimerTable52MonFri: {
 		folder: "Informationen.11_Tabellen.Heizen",
 		name: "Heizbetrieb Timer Tabelle Mo-Fr (5+2)",
@@ -703,7 +781,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "json",
 		dataSource: "parameter",
 	},
-
 	heatingOperationTimerTable52SatSun: {
 		folder: "Informationen.11_Tabellen.Heizen",
 		name: "Heizbetrieb Timer Tabelle Sa-So (5+2)",
@@ -711,7 +788,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "json",
 		dataSource: "parameter",
 	},
-
 	heatingOperationTimerTableDayFriday: {
 		folder: "Informationen.11_Tabellen.Heizen",
 		name: "Heizbetrieb Timer Tabelle Fr (Day Friday)",
@@ -719,7 +795,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "json",
 		dataSource: "parameter",
 	},
-
 	heatingOperationTimerTableDayMonday: {
 		folder: "Informationen.11_Tabellen.Heizen",
 		name: "Heizbetrieb Timer Tabelle Mo (Day Monday)",
@@ -727,7 +802,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "json",
 		dataSource: "parameter",
 	},
-
 	heatingOperationTimerTableDaySaturday: {
 		folder: "Informationen.11_Tabellen.Heizen",
 		name: "Heizbetrieb Timer Tabelle Sa (Day Saturday)",
@@ -735,7 +809,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "json",
 		dataSource: "parameter",
 	},
-
 	heatingOperationTimerTableDaySunday: {
 		folder: "Informationen.11_Tabellen.Heizen",
 		name: "Heizbetrieb Timer Tabelle So (Day Sunday)",
@@ -743,7 +816,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "json",
 		dataSource: "parameter",
 	},
-
 	heatingOperationTimerTableDayThursday: {
 		folder: "Informationen.11_Tabellen.Heizen",
 		name: "Heizbetrieb Timer Tabelle Do (Day Thursday)",
@@ -751,7 +823,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "json",
 		dataSource: "parameter",
 	},
-
 	heatingOperationTimerTableDayTuesday: {
 		folder: "Informationen.11_Tabellen.Heizen",
 		name: "Heizbetrieb Timer Tabelle Di (Day Tuesday)",
@@ -759,7 +830,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "json",
 		dataSource: "parameter",
 	},
-
 	heatingOperationTimerTableDayWednesday: {
 		folder: "Informationen.11_Tabellen.Heizen",
 		name: "Heizbetrieb Timer Tabelle Mi (Day Wednesday)",
@@ -767,7 +837,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "json",
 		dataSource: "parameter",
 	},
-
 	heatingOperationTimerTableWeek: {
 		folder: "Informationen.11_Tabellen.Heizen",
 		name: "Heizbetrieb Timer Tabelle Wo (Day Week)",
@@ -775,7 +844,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "json",
 		dataSource: "parameter",
 	},
-
 	hotWaterCircPumpTimerTable52MonFri: {
 		folder: "Informationen.11_Tabellen.Warmwasser",
 		name: "Warmwasserbetrieb Timer Tabelle Mo-Fr (5+2)",
@@ -783,7 +851,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "json",
 		dataSource: "parameter",
 	},
-
 	hotWaterCircPumpTimerTable52SatSun: {
 		folder: "Informationen.11_Tabellen.Warmwasser",
 		name: "Warmwasserbetrieb Timer Tabelle Sa-So (5+2)",
@@ -791,7 +858,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "json",
 		dataSource: "parameter",
 	},
-
 	hotWaterCircPumpTimerTableDayFriday: {
 		folder: "Informationen.11_Tabellen.Warmwasser",
 		name: "Warmwasserbetrieb Timer Tabelle Fr (Day Friday)",
@@ -799,7 +865,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "json",
 		dataSource: "parameter",
 	},
-
 	hotWaterCircPumpTimerTableDayMonday: {
 		folder: "Informationen.11_Tabellen.Warmwasser",
 		name: "Warmwasserbetrieb Timer Tabelle Mo (Day Monday)",
@@ -807,7 +872,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "json",
 		dataSource: "parameter",
 	},
-
 	hotWaterCircPumpTimerTableDaySaturday: {
 		folder: "Informationen.11_Tabellen.Warmwasser",
 		name: "Warmwasserbetrieb Timer Tabelle Sa (Day Saturday)",
@@ -815,7 +879,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "json",
 		dataSource: "parameter",
 	},
-
 	hotWaterCircPumpTimerTableDaySunday: {
 		folder: "Informationen.11_Tabellen.Warmwasser",
 		name: "Warmwasserbetrieb Timer Tabelle So (Day Sunday)",
@@ -823,7 +886,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "json",
 		dataSource: "parameter",
 	},
-
 	hotWaterCircPumpTimerTableDayThursday: {
 		folder: "Informationen.11_Tabellen.Warmwasser",
 		name: "Warmwasserbetrieb Timer Tabelle Do (Day Thursday)",
@@ -831,7 +893,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "json",
 		dataSource: "parameter",
 	},
-
 	hotWaterCircPumpTimerTableDayTuesday: {
 		folder: "Informationen.11_Tabellen.Warmwasser",
 		name: "Warmwasserbetrieb Timer Tabelle Di (Day Tuesday)",
@@ -839,7 +900,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "json",
 		dataSource: "parameter",
 	},
-
 	hotWaterCircPumpTimerTableDayWednesday: {
 		folder: "Informationen.11_Tabellen.Warmwasser",
 		name: "Warmwasserbetrieb Timer Tabelle Mi (Day Wednesday)",
@@ -847,7 +907,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "json",
 		dataSource: "parameter",
 	},
-
 	hotWaterCircPumpTimerTableWeek: {
 		folder: "Informationen.11_Tabellen.Warmwasser",
 		name: "Warmwasserbetrieb Timer Tabelle Wo (Day Week)",
@@ -904,7 +963,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "LIN-Bus vorhanden",
 		role: "indicator",
 		type: "boolean",
-		dataSource: "value",
+		luxWriteId: "174",
+		dataSource: "raw_value",
 	},
 	rawDeviceTimeCalc: {
 		folder: "Informationen.12_Systeminfo",
@@ -913,10 +973,11 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "string",
 		dataSource: "value",
 	},
+
 	// ==========================================
 	// EINSTELLUNGEN & PARAMETER (Beschreibbar)
 	// ==========================================
-	//Betriebsmodus
+	// Betriebsmodus
 	heating_operation_mode: {
 		folder: "Einstellungen.01_Betriebsmodus",
 		name: "Betriebsart Heizung",
@@ -924,7 +985,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		write: true,
 		states: { 0: "Automatik", 1: "Zweites WEZ", 2: "Party", 3: "Ferien", 4: "Aus" },
-		dataSource: "parameter",
+		luxWriteId: "3",
+		dataSource: "raw_parameter",
 	},
 	warmwater_operation_mode: {
 		folder: "Einstellungen.01_Betriebsmodus",
@@ -933,10 +995,11 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		write: true,
 		states: { 0: "Automatik", 1: "Zweites WEZ", 2: "Party", 3: "Ferien", 4: "Aus" },
-		dataSource: "parameter",
+		luxWriteId: "4",
+		dataSource: "raw_parameter",
 	},
 
-	//Heizung
+	// Heizung
 	heating_curve_end_point: {
 		folder: "Einstellungen.02_Heizung",
 		name: "Heizkurve Endpunkt (Rücklauf)",
@@ -946,7 +1009,9 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		write: true,
 		min: 20,
 		max: 45,
-		dataSource: "parameter",
+		luxWriteId: "11",
+		factor: 10,
+		dataSource: "raw_parameter",
 	},
 	heating_curve_parallel_offset: {
 		folder: "Einstellungen.02_Heizung",
@@ -957,7 +1022,9 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		write: true,
 		min: 20,
 		max: 45,
-		dataSource: "parameter",
+		luxWriteId: "12",
+		factor: 10,
+		dataSource: "raw_parameter",
 	},
 	deltaHeatingReduction: {
 		folder: "Einstellungen.02_Heizung",
@@ -969,7 +1036,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		factor: 10,
 		min: -10,
 		max: 10,
-		dataSource: "parameter",
+		luxWriteId: "13",
+		dataSource: "raw_parameter",
 	},
 	heating_temperature: {
 		folder: "Einstellungen.02_Heizung",
@@ -978,10 +1046,11 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "°C",
 		write: true,
-		luxWriteId: "heating_target_temperature",
+		luxWriteId: "1",
+		factor: 10,
 		min: -5,
 		max: 5,
-		dataSource: "parameter",
+		dataSource: "raw_parameter",
 	},
 	returnTemperatureHysteresis: {
 		folder: "Einstellungen.02_Heizung",
@@ -990,10 +1059,11 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "K",
 		write: true,
-		factor: 1,
+		factor: 10,
 		min: 1,
 		max: 5,
-		dataSource: "parameter",
+		luxWriteId: "88",
+		dataSource: "raw_parameter",
 	},
 	thresholdHeatingLimit: {
 		folder: "Einstellungen.02_Heizung",
@@ -1025,10 +1095,11 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "°C",
 		write: true,
-		luxWriteId: "temperature_hot_water_target",
+		luxWriteId: "2",
+		factor: 10,
 		min: 30,
 		max: 65,
-		dataSource: "parameter",
+		dataSource: "raw_parameter",
 	},
 	hotWaterTemperatureHysteresis: {
 		folder: "Einstellungen.03_Warmwasser",
@@ -1037,11 +1108,14 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "K",
 		write: true,
-		factor: 1,
+		factor: 10,
 		min: 1,
 		max: 15,
-		dataSource: "parameter",
+		luxWriteId: "74",
+		dataSource: "raw_parameter",
 	},
+
+	// Pumpe (HUP)
 	heating_system_circ_pump_voltage_nominal: {
 		folder: "Einstellungen.04_HUP",
 		name: "Heizungsumwälzpumpe Nennspannung",
@@ -1049,10 +1123,11 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "V",
 		write: true,
-		factor: 1,
+		factor: 100,
 		min: 3,
 		max: 10,
-		dataSource: "parameter",
+		luxWriteId: "867",
+		dataSource: "raw_parameter",
 	},
 	heating_system_circ_pump_voltage_minimal: {
 		folder: "Einstellungen.04_HUP",
@@ -1061,13 +1136,14 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		unit: "V",
 		write: true,
-		factor: 1,
+		factor: 100,
 		min: 3,
 		max: 10,
-		dataSource: "parameter",
+		luxWriteId: "868",
+		dataSource: "raw_parameter",
 	},
 
-	//Zip
+	// Zip
 	runDeaerate: {
 		folder: "Einstellungen.05_ZIP",
 		name: "Entlüftungsprogramm starten",
@@ -1075,7 +1151,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "boolean",
 		write: true,
 		states: { 0: "Aus", 1: "Ein" },
-		dataSource: "parameter",
+		luxWriteId: "158",
+		dataSource: "raw_parameter",
 	},
 	hotWaterCircPumpDeaerate: {
 		folder: "Einstellungen.05_ZIP",
@@ -1084,7 +1161,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "number",
 		states: { 0: "Aus", 1: "Ein" },
 		write: true,
-		dataSource: "parameter",
+		luxWriteId: "684",
+		dataSource: "raw_parameter",
 	},
 	Activate_Zip: {
 		folder: "Einstellungen.05_ZIP",
@@ -1104,7 +1182,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		write: true,
 		unit: "min",
 		factor: 1,
-		dataSource: "parameter",
+		luxWriteId: "697",
+		dataSource: "raw_parameter",
 	},
 	hotWaterCircPumpOffTime: {
 		folder: "Einstellungen.05_ZIP",
@@ -1114,7 +1193,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		write: true,
 		unit: "min",
 		factor: 1,
-		dataSource: "parameter",
+		luxWriteId: "698",
+		dataSource: "raw_parameter",
 	},
 	zip_aktiv: {
 		folder: "Einstellungen.05_ZIP",
@@ -1126,7 +1206,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		write: true,
 		def: 120,
 	},
-	//Systemeinstellungen
+
+	// Systemeinstellungen
 	Pumpenoptimierung: {
 		folder: "Einstellungen.06_System-Einstellung",
 		name: "Parameter 49 (ID_Einst_Popt_akt)",
@@ -1137,7 +1218,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: "raw_parameter",
 		states: { 0: "Aus", 1: "Ein" },
 	},
-
 	Pumpen_Nachlauf: {
 		folder: "Einstellungen.06_System-Einstellung",
 		name: "Parameter 864 (ID_Einst_Popt_Nachlauf_akt)",
@@ -1146,17 +1226,18 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		write: true,
 		luxWriteId: "864",
 		dataSource: "raw_parameter",
-		unit: "°C",
+		unit: "min", // Oft in Minuten angegeben
 		factor: 1,
 	},
 
-	//Timer Table
+	// Timer Tables Selection
 	heatingOperationTimerTableSelected: {
 		folder: "Einstellungen.07_Tabellen",
 		name: "Aktuell ausgewählte Tabelle Heizbetrieb Timer",
 		role: "value",
 		type: "number",
-		dataSource: "parameter",
+		luxWriteId: "222",
+		dataSource: "raw_parameter",
 		states: { 0: "Woche (Mo-So)", 1: "5+2 (Mo-Fr, Sa-So)", 2: "Tage (Mo, Di, ...)" },
 	},
 	hotWaterCircPumpTimerTableSelected: {
@@ -1164,7 +1245,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: "Aktuell ausgewählte Tabelle Warmwasserbetrieb Timer",
 		role: "value",
 		type: "number",
-		dataSource: "parameter",
+		luxWriteId: "506",
+		dataSource: "raw_parameter",
 		states: { 0: "Woche (Mo-So)", 1: "5+2 (Mo-Fr, Sa-So)", 2: "Tage (Mo, Di, ...)" },
 	},
 
@@ -2652,16 +2734,18 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		write: true,
 	},
 
-	//Action
+	// ==========================================
+	// AKTIONEN & VIRTUELL
+	// ==========================================
 	Dump_Raw_To_Log: {
-		folder: "Aktionen", // Oder ein anderer Ordner deiner Wahl, z.B. "Einstellungen.Adapter"
+		folder: "Aktionen",
 		name: "Raw Data in Log schreiben",
 		role: "button",
 		type: "boolean",
 		isVirtual: true,
 		write: true,
+		def: false,
 	},
-
 	Regelung_Aktiv: {
 		folder: "Aktionen",
 		name: "Automatische Anlagenregelung ein-/ausschalten",
@@ -2671,7 +2755,6 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		write: true,
 		def: true,
 	},
-
 	Schreibe_Debug_Log: {
 		folder: "Aktionen",
 		name: "Erweiterte Logging-Ausgaben ein-/ausschalten",
