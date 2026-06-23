@@ -1,6 +1,7 @@
 import type { AdapterInstance } from "@iobroker/adapter-core";
 import * as net from "net";
 
+let finished = false;
 /**
  * Liest die kompletten Rohdaten (3003 oder 3004) direkt über einen TCP-Socket aus der Wärmepumpe.
  *
@@ -29,34 +30,77 @@ export function readAllRaw(adapter: AdapterInstance, command: number): Promise<n
 			const headerSize = is3004 ? 12 : 8;
 			const lengthOffset = is3004 ? 8 : 4;
 
-			if (responseData.length >= headerSize) {
-				const responseCommand = responseData.readInt32BE(0);
-
-				if (responseCommand === command) {
-					const totalItems = responseData.readInt32BE(lengthOffset);
-					const totalRequiredLength = headerSize + totalItems * 4;
-
-					if (responseData.length >= totalRequiredLength) {
-						const allValues: number[] = [];
-						for (let i = 0; i < totalItems; i++) {
-							const valueOffset = headerSize + i * 4;
-							allValues.push(responseData.readInt32BE(valueOffset));
-						}
-						client.destroy();
-						resolve(allValues);
-					}
-				}
+			if (responseData.length < headerSize) {
+				return;
 			}
+
+			const responseCommand = responseData.readInt32BE(0);
+
+			// Sofortiger Abbruch bei ungültiger Antwort
+			if (responseCommand !== command) {
+				client.destroy();
+				if (finished) {
+					return;
+				}
+				finished = true;
+				reject(
+					new Error(`Unerwartete Antwort der Wärmepumpe. Erwartet: ${command}, erhalten: ${responseCommand}`),
+				);
+
+				return;
+			}
+
+			const totalItems = responseData.readInt32BE(lengthOffset);
+
+			// Plausibilitätsprüfung
+			if (totalItems < 0 || totalItems > 10000) {
+				client.destroy();
+				if (finished) {
+					return;
+				}
+				finished = true;
+				reject(new Error(`Ungültige Elementanzahl (${totalItems}) in Antwort ${command}`));
+
+				return;
+			}
+
+			const totalRequiredLength = headerSize + totalItems * 4;
+
+			if (responseData.length < totalRequiredLength) {
+				return;
+			}
+
+			const allValues: number[] = [];
+
+			for (let i = 0; i < totalItems; i++) {
+				const valueOffset = headerSize + i * 4;
+				allValues.push(responseData.readInt32BE(valueOffset));
+			}
+
+			client.destroy();
+			if (finished) {
+				return;
+			}
+			finished = true;
+			resolve(allValues);
 		});
 
 		client.on("error", (err: Error) => {
 			client.destroy();
+			if (finished) {
+				return;
+			}
+			finished = true;
 			reject(err);
 		});
 
 		client.setTimeout(8000);
 		client.on("timeout", () => {
 			client.destroy();
+			if (finished) {
+				return;
+			}
+			finished = true;
 			reject(new Error(`Timeout beim Auslesen der kompletten Liste ${command}.`));
 		});
 	});

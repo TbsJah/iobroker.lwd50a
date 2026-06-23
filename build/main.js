@@ -33,6 +33,7 @@ class Lwd50a extends utils.Adapter {
   lastBzVal = "";
   zipTimer;
   isDebugLogActive = false;
+  updateRunning = false;
   constructor(options = {}) {
     super({
       ...options,
@@ -159,13 +160,13 @@ class Lwd50a extends utils.Adapter {
    * Wird automatisch am Ende von updateData() aufgerufen.
    */
   async runOptimizationSchedule() {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j;
     try {
-      const regelungAktiv = await this.getStateAsync("Aktionen.Regelung_Aktiv");
+      const regelungAktiv = await this.getStateAsync((0, import_stateMapping.getDpPath)("Regelung_Aktiv"));
       if ((regelungAktiv == null ? void 0 : regelungAktiv.val) === false) {
         return;
       }
-      const bzState = await this.getStateAsync("Informationen.08_Betriebszustand.WP_BZ_akt");
+      const bzState = await this.getStateAsync((0, import_stateMapping.getDpPath)("WP_BZ_akt"));
       const bzVal = bzState && bzState.val !== null ? String(bzState.val).trim() : "";
       const istHeizen = bzVal === "0";
       const istWarmwasser = bzVal === "1";
@@ -173,9 +174,7 @@ class Lwd50a extends utils.Adapter {
       const istLeerlauf = bzVal === "5";
       if (!istHeizen && !istWarmwasser && !istLeerlauf && !istAbtauen) {
         if (this.isDebugLogActive) {
-          this.log.debug(
-            `Betriebsmodus gewechselt von '${this.lastBzVal}' zu '${bzVal}'. Keine Optimierung f\xFCr diesen Modus vorgesehen. \xDCberspringe Anpassungen.`
-          );
+          this.log.debug(`Modus '${bzVal}' wird nicht optimiert. \xDCberspringe.`);
         }
         return;
       }
@@ -231,25 +230,48 @@ class Lwd50a extends utils.Adapter {
         }
         this.lastBzVal = bzVal;
       }
-      const wwSoll = (_b = (_a = await this.getStateAsync("Informationen.01_Temperaturen.Wamwassertemperatur_Soll")) == null ? void 0 : _a.val) != null ? _b : 0;
-      const wwIst = (_d = (_c = await this.getStateAsync("Informationen.01_Temperaturen.Wamwassertemperatur_Ist")) == null ? void 0 : _c.val) != null ? _d : 0;
-      const ruecklauf = (_f = (_e = await this.getStateAsync("Informationen.01_Temperaturen.temperature_return")) == null ? void 0 : _e.val) != null ? _f : 0;
-      const spreizung = (_h = (_g = await this.getStateAsync("Informationen.01_Temperaturen.spreizung_vorlauf_ruecklauf")) == null ? void 0 : _g.val) != null ? _h : 0;
-      const heatingStateStr = String(
-        ((_i = await this.getStateAsync("Informationen.08_Betriebszustand.opStateHeatingString")) == null ? void 0 : _i.val) || ""
-      ).trim();
-      const vd1 = ((_j = await this.getStateAsync("Informationen.03_Ausgaenge.VD1out")) == null ? void 0 : _j.val) === true;
-      const wwHysterese = (_l = (_k = await this.getStateAsync("Einstellungen.03_Warmwasser.hotWaterTemperatureHysteresis")) == null ? void 0 : _k.val) != null ? _l : 0;
-      const ruecklaufSoll = (_n = (_m = await this.getStateAsync("Informationen.01_Temperaturen.temperature_target_return")) == null ? void 0 : _m.val) != null ? _n : 0;
-      const hupAktiv = (_p = (_o = await this.getStateAsync("Informationen.03_Ausgaenge.HUPout")) == null ? void 0 : _o.val) != null ? _p : 0;
-      const heizenHysterese = (_r = (_q = await this.getStateAsync("Einstellungen.02_Heizung.returnTemperatureHysteresis")) == null ? void 0 : _q.val) != null ? _r : 0;
-      const betriebsart = (_t = (_s = await this.getStateAsync("Informationen.08_Betriebszustand.WP_BZ_akt")) == null ? void 0 : _s.val) != null ? _t : 0;
-      const nachWasserState = await this.getStateAsync("Einstellungen.02_Heizung.Heizen_nach_Wasser");
+      const [
+        wwSollState,
+        wwIstState,
+        ruecklaufState,
+        spreizungState,
+        heatingStateStrState,
+        vd1State,
+        wwHystereseState,
+        ruecklaufSollState,
+        hupAktivState,
+        heizenHystereseState,
+        nachWasserState,
+        aelterAls10
+      ] = await Promise.all([
+        this.getStateAsync((0, import_stateMapping.getDpPath)("Wamwassertemperatur_Soll")),
+        this.getStateAsync((0, import_stateMapping.getDpPath)("Wamwassertemperatur_Ist")),
+        this.getStateAsync((0, import_stateMapping.getDpPath)("temperature_return")),
+        this.getStateAsync((0, import_stateMapping.getDpPath)("spreizung_vorlauf_ruecklauf")),
+        this.getStateAsync((0, import_stateMapping.getDpPath)("opStateHeatingString")),
+        this.getStateAsync((0, import_stateMapping.getDpPath)("VD1out")),
+        this.getStateAsync((0, import_stateMapping.getDpPath)("hotWaterTemperatureHysteresis")),
+        this.getStateAsync((0, import_stateMapping.getDpPath)("temperature_target_return")),
+        this.getStateAsync((0, import_stateMapping.getDpPath)("heating_system_circ_pump_voltage_nominal")),
+        this.getStateAsync((0, import_stateMapping.getDpPath)("returnTemperatureHysteresis")),
+        this.getStateAsync((0, import_stateMapping.getDpPath)("Heizen_nach_Wasser")),
+        this.istAnlageAelterAls10Min()
+      ]);
+      const wwSoll = (_a = wwSollState == null ? void 0 : wwSollState.val) != null ? _a : 0;
+      const wwIst = (_b = wwIstState == null ? void 0 : wwIstState.val) != null ? _b : 0;
+      const ruecklauf = (_c = ruecklaufState == null ? void 0 : ruecklaufState.val) != null ? _c : 0;
+      const spreizung = (_d = spreizungState == null ? void 0 : spreizungState.val) != null ? _d : 0;
+      const heatingStateStr = String((heatingStateStrState == null ? void 0 : heatingStateStrState.val) || "").trim();
+      const vd1 = (vd1State == null ? void 0 : vd1State.val) === 1;
+      const wwHysterese = (_e = wwHystereseState == null ? void 0 : wwHystereseState.val) != null ? _e : 0;
+      const ruecklaufSoll = (_f = ruecklaufSollState == null ? void 0 : ruecklaufSollState.val) != null ? _f : 0;
+      const hupAktiv = (_g = hupAktivState == null ? void 0 : hupAktivState.val) != null ? _g : 0;
+      const heizenHysterese = (_h = heizenHystereseState == null ? void 0 : heizenHystereseState.val) != null ? _h : 0;
       const nachWasser = nachWasserState == null ? void 0 : nachWasserState.val;
-      const aelterAls10 = await this.istAnlageAelterAls10Min();
+      const betriebsart = (_i = bzState == null ? void 0 : bzState.val) != null ? _i : 0;
       if (istHeizen) {
         if (aelterAls10 && vd1) {
-          const fusspunkt = (_u = await this.getStateAsync("Einstellungen.02_Heizung.heating_curve_parallel_offset")) == null ? void 0 : _u.val;
+          const fusspunkt = (_j = await this.getStateAsync("Einstellungen.02_Heizung.heating_curve_parallel_offset")) == null ? void 0 : _j.val;
           if (fusspunkt === 35) {
             const configWithDynamicKeys = this.config;
             await this.setOwnStateIfDifferent(
@@ -349,10 +371,15 @@ class Lwd50a extends utils.Adapter {
   }
   async updateData() {
     var _a, _b, _c, _d, _e, _f, _g, _h;
+    if (this.updateRunning) {
+      this.log.debug("Polling \xFCbersprungen");
+      return;
+    }
     if (!this.pump) {
       this.log.error("Abfrage abgebrochen: Keine aktive Verbindung zur W\xE4rmepumpe vorhanden.");
       return;
     }
+    this.updateRunning = true;
     try {
       const [rawParams, rawValues, coolchipData] = await Promise.all([
         (0, import_rawFunctions.readAllRaw)(this, 3003).catch((err) => {
@@ -514,6 +541,8 @@ class Lwd50a extends utils.Adapter {
       await this.runOptimizationSchedule();
     } catch (catchErr) {
       this.log.error(`Fehler im updateData-Ablauf: ${catchErr.message}`);
+    } finally {
+      this.updateRunning = false;
     }
   }
   onUnload(callback) {

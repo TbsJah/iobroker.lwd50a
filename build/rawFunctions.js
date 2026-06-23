@@ -33,6 +33,7 @@ __export(rawFunctions_exports, {
 });
 module.exports = __toCommonJS(rawFunctions_exports);
 var net = __toESM(require("net"));
+let finished = false;
 function readAllRaw(adapter, command) {
   return new Promise((resolve, reject) => {
     const client = new net.Socket();
@@ -50,30 +51,62 @@ function readAllRaw(adapter, command) {
       const is3004 = command === 3004;
       const headerSize = is3004 ? 12 : 8;
       const lengthOffset = is3004 ? 8 : 4;
-      if (responseData.length >= headerSize) {
-        const responseCommand = responseData.readInt32BE(0);
-        if (responseCommand === command) {
-          const totalItems = responseData.readInt32BE(lengthOffset);
-          const totalRequiredLength = headerSize + totalItems * 4;
-          if (responseData.length >= totalRequiredLength) {
-            const allValues = [];
-            for (let i = 0; i < totalItems; i++) {
-              const valueOffset = headerSize + i * 4;
-              allValues.push(responseData.readInt32BE(valueOffset));
-            }
-            client.destroy();
-            resolve(allValues);
-          }
-        }
+      if (responseData.length < headerSize) {
+        return;
       }
+      const responseCommand = responseData.readInt32BE(0);
+      if (responseCommand !== command) {
+        client.destroy();
+        if (finished) {
+          return;
+        }
+        finished = true;
+        reject(
+          new Error(`Unerwartete Antwort der W\xE4rmepumpe. Erwartet: ${command}, erhalten: ${responseCommand}`)
+        );
+        return;
+      }
+      const totalItems = responseData.readInt32BE(lengthOffset);
+      if (totalItems < 0 || totalItems > 1e4) {
+        client.destroy();
+        if (finished) {
+          return;
+        }
+        finished = true;
+        reject(new Error(`Ung\xFCltige Elementanzahl (${totalItems}) in Antwort ${command}`));
+        return;
+      }
+      const totalRequiredLength = headerSize + totalItems * 4;
+      if (responseData.length < totalRequiredLength) {
+        return;
+      }
+      const allValues = [];
+      for (let i = 0; i < totalItems; i++) {
+        const valueOffset = headerSize + i * 4;
+        allValues.push(responseData.readInt32BE(valueOffset));
+      }
+      client.destroy();
+      if (finished) {
+        return;
+      }
+      finished = true;
+      resolve(allValues);
     });
     client.on("error", (err) => {
       client.destroy();
+      if (finished) {
+        return;
+      }
+      finished = true;
       reject(err);
     });
     client.setTimeout(8e3);
     client.on("timeout", () => {
       client.destroy();
+      if (finished) {
+        return;
+      }
+      finished = true;
       reject(new Error(`Timeout beim Auslesen der kompletten Liste ${command}.`));
     });
   });

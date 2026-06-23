@@ -77,8 +77,10 @@ async function initializeVirtualStates(adapter) {
 }
 async function calculateSum(adapter, sourceId1, sourceId2, targetId, logName) {
   try {
-    const state1 = await adapter.getStateAsync(sourceId1);
-    const state2 = await adapter.getStateAsync(sourceId2);
+    const [state1, state2] = await Promise.all([
+      adapter.getStateAsync(sourceId1),
+      adapter.getStateAsync(sourceId2)
+    ]);
     const val1 = state1 && typeof state1.val === "number" ? state1.val : 0;
     const val2 = state2 && typeof state2.val === "number" ? state2.val : 0;
     await adapter.setStateChangedAsync(targetId, val1 + val2, true);
@@ -172,17 +174,13 @@ async function updateOutageHistory(adapter, rawValues) {
 }
 async function calculateTemperatureSpread(adapter) {
   try {
-    const vorlaufState = await adapter.getStateAsync("Informationen.01_Temperaturen.temperature_supply");
-    const ruecklaufState = await adapter.getStateAsync("Informationen.01_Temperaturen.temperature_return");
+    const [vorlaufState, ruecklaufState] = await Promise.all([
+      adapter.getStateAsync((0, import_stateMapping.getDpPath)("temperature_supply")),
+      adapter.getStateAsync((0, import_stateMapping.getDpPath)("temperature_return"))
+    ]);
     if (vorlaufState && ruecklaufState && vorlaufState.val !== null && ruecklaufState.val !== null) {
-      const vorlauf = Number(vorlaufState.val);
-      const ruecklauf = Number(ruecklaufState.val);
-      const spreizung = parseFloat((vorlauf - ruecklauf).toFixed(2));
-      await adapter.setStateChangedAsync(
-        "Informationen.01_Temperaturen.spreizung_vorlauf_ruecklauf",
-        spreizung,
-        true
-      );
+      const spreizung = parseFloat((Number(vorlaufState.val) - Number(ruecklaufState.val)).toFixed(2));
+      await adapter.setStateChangedAsync((0, import_stateMapping.getDpPath)("spreizung_vorlauf_ruecklauf"), spreizung, true);
     }
   } catch (err) {
     adapter.log.error(`Fehler bei der Berechnung der Temperatur-Spreizung: ${err.message}`);

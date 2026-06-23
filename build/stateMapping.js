@@ -18,7 +18,8 @@ var __copyProps = (to, from, except, desc) => {
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 var stateMapping_exports = {};
 __export(stateMapping_exports, {
-  STATE_MAPPING: () => STATE_MAPPING
+  STATE_MAPPING: () => STATE_MAPPING,
+  getDpPath: () => getDpPath
 });
 module.exports = __toCommonJS(stateMapping_exports);
 const STATE_MAPPING = {
@@ -2732,8 +2733,16 @@ for (const key of Object.keys(STATE_MAPPING)) {
     STATE_MAPPING[key].luxWriteId = key;
   }
 }
+function getDpPath(key) {
+  const def = STATE_MAPPING[key];
+  if (!def) {
+    throw new Error(`Kritischer Fehler: Datenpunkt-Schl\xFCssel '${key}' existiert nicht im Mapping!`);
+  }
+  return `${def.folder}.${key}`;
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  STATE_MAPPING
+  STATE_MAPPING,
+  getDpPath
 });
 //# sourceMappingURL=stateMapping.js.map

@@ -5,7 +5,7 @@
 import * as utils from "@iobroker/adapter-core";
 import * as luxtronik from "luxtronik2";
 import { dumpAllRawToLog, readAllRaw } from "./rawFunctions";
-import { STATE_MAPPING } from "./stateMapping";
+import { STATE_MAPPING, getDpPath } from "./stateMapping";
 import {
 	calculateTemperatureSpread,
 	calculateTotalEnergy,
@@ -22,6 +22,7 @@ class Lwd50a extends utils.Adapter {
 	private lastBzVal = "";
 	private zipTimer?: NodeJS.Timeout;
 	private isDebugLogActive = false;
+	private updateRunning = false;
 
 	public constructor(options: Partial<utils.AdapterOptions> = {}) {
 		super({
@@ -175,20 +176,16 @@ class Lwd50a extends utils.Adapter {
 			// =========================================================
 			// HAUPTSCHALTER FÜR DIE REGELUNG
 			// =========================================================
-			const regelungAktiv = await this.getStateAsync("Aktionen.Regelung_Aktiv");
+			const regelungAktiv = await this.getStateAsync(getDpPath("Regelung_Aktiv"));
 
-			// Wenn der Schalter explizit vom Nutzer ausgeschaltet wurde,
-			// brechen wir hier sofort ab und machen nichts!
 			if (regelungAktiv?.val === false) {
-				return;
+				return; // Schalter aus -> Abbruch
 			}
 
 			// 1. STATUS ABFRAGEN (Weiche)
-			const bzState = await this.getStateAsync("Informationen.08_Betriebszustand.WP_BZ_akt");
-			// Den reinen Zahlenwert als String sichern (z.B. "0", "1", "5")
+			const bzState = await this.getStateAsync(getDpPath("WP_BZ_akt"));
 			const bzVal = bzState && bzState.val !== null ? String(bzState.val).trim() : "";
 
-			// Mit den echten Luxtronik-Statuscodes vergleichen
 			const istHeizen = bzVal === "0";
 			const istWarmwasser = bzVal === "1";
 			const istAbtauen = bzVal === "4";
@@ -196,9 +193,7 @@ class Lwd50a extends utils.Adapter {
 
 			if (!istHeizen && !istWarmwasser && !istLeerlauf && !istAbtauen) {
 				if (this.isDebugLogActive) {
-					this.log.debug(
-						`Betriebsmodus gewechselt von '${this.lastBzVal}' zu '${bzVal}'. Keine Optimierung für diesen Modus vorgesehen. Überspringe Anpassungen.`,
-					);
+					this.log.debug(`Modus '${bzVal}' wird nicht optimiert. Überspringe.`);
 				}
 				return;
 			}
@@ -265,42 +260,49 @@ class Lwd50a extends utils.Adapter {
 			}
 
 			// =========================================================
-			// 2. ALLE WERTE ZENTRAL EINMALIG ABRUFEN (DRY-Prinzip)
+			// 2. ALLE WERTE ZENTRAL EINMALIG ABRUFEN (PARALLEL & VARIABLER PFAD)
 			// =========================================================
-			const wwSoll =
-				((await this.getStateAsync("Informationen.01_Temperaturen.Wamwassertemperatur_Soll"))?.val as number) ??
-				0;
-			const wwIst =
-				((await this.getStateAsync("Informationen.01_Temperaturen.Wamwassertemperatur_Ist"))?.val as number) ??
-				0;
-			const ruecklauf =
-				((await this.getStateAsync("Informationen.01_Temperaturen.temperature_return"))?.val as number) ?? 0;
+			const [
+				wwSollState,
+				wwIstState,
+				ruecklaufState,
+				spreizungState,
+				heatingStateStrState,
+				vd1State,
+				wwHystereseState,
+				ruecklaufSollState,
+				hupAktivState,
+				heizenHystereseState,
+				nachWasserState,
+				aelterAls10,
+			] = await Promise.all([
+				this.getStateAsync(getDpPath("Wamwassertemperatur_Soll")),
+				this.getStateAsync(getDpPath("Wamwassertemperatur_Ist")),
+				this.getStateAsync(getDpPath("temperature_return")),
+				this.getStateAsync(getDpPath("spreizung_vorlauf_ruecklauf")),
+				this.getStateAsync(getDpPath("opStateHeatingString")),
+				this.getStateAsync(getDpPath("VD1out")),
+				this.getStateAsync(getDpPath("hotWaterTemperatureHysteresis")),
+				this.getStateAsync(getDpPath("temperature_target_return")),
+				this.getStateAsync(getDpPath("heating_system_circ_pump_voltage_nominal")),
+				this.getStateAsync(getDpPath("returnTemperatureHysteresis")),
+				this.getStateAsync(getDpPath("Heizen_nach_Wasser")),
+				this.istAnlageAelterAls10Min(),
+			]);
 
-			const spreizung =
-				((await this.getStateAsync("Informationen.01_Temperaturen.spreizung_vorlauf_ruecklauf"))
-					?.val as number) ?? 0;
-			const heatingStateStr = String(
-				(await this.getStateAsync("Informationen.08_Betriebszustand.opStateHeatingString"))?.val || "",
-			).trim();
-			const vd1 = (await this.getStateAsync("Informationen.03_Ausgaenge.VD1out"))?.val === true;
-
-			const wwHysterese =
-				((await this.getStateAsync("Einstellungen.03_Warmwasser.hotWaterTemperatureHysteresis"))
-					?.val as number) ?? 0;
-			const ruecklaufSoll =
-				((await this.getStateAsync("Informationen.01_Temperaturen.temperature_target_return"))
-					?.val as number) ?? 0;
-			const hupAktiv = ((await this.getStateAsync("Informationen.03_Ausgaenge.HUPout"))?.val as number) ?? 0;
-			const heizenHysterese =
-				((await this.getStateAsync("Einstellungen.02_Heizung.returnTemperatureHysteresis"))?.val as number) ??
-				0;
-			const betriebsart =
-				((await this.getStateAsync("Informationen.08_Betriebszustand.WP_BZ_akt"))?.val as number) ?? 0;
-
-			const nachWasserState = await this.getStateAsync("Einstellungen.02_Heizung.Heizen_nach_Wasser");
+			// Extrahieren der Werte
+			const wwSoll = (wwSollState?.val as number) ?? 0;
+			const wwIst = (wwIstState?.val as number) ?? 0;
+			const ruecklauf = (ruecklaufState?.val as number) ?? 0;
+			const spreizung = (spreizungState?.val as number) ?? 0;
+			const heatingStateStr = String(heatingStateStrState?.val || "").trim();
+			const vd1 = vd1State?.val === 1;
+			const wwHysterese = (wwHystereseState?.val as number) ?? 0;
+			const ruecklaufSoll = (ruecklaufSollState?.val as number) ?? 0;
+			const hupAktiv = (hupAktivState?.val as number) ?? 0;
+			const heizenHysterese = (heizenHystereseState?.val as number) ?? 0;
 			const nachWasser = nachWasserState?.val;
-
-			const aelterAls10 = await this.istAnlageAelterAls10Min();
+			const betriebsart = (bzState?.val as number) ?? 0;
 
 			// =========================================================
 			// 3. REINE REGEL-LOGIK (FORTLAUFENDES POLLING IM BETRIEB)
@@ -428,11 +430,17 @@ class Lwd50a extends utils.Adapter {
 	}
 
 	private async updateData(): Promise<void> {
+		if (this.updateRunning) {
+			this.log.debug("Polling übersprungen");
+			return;
+		}
+
 		if (!this.pump) {
 			this.log.error("Abfrage abgebrochen: Keine aktive Verbindung zur Wärmepumpe vorhanden.");
 			return;
 		}
 
+		this.updateRunning = true;
 		try {
 			const [rawParams, rawValues, coolchipData] = await Promise.all([
 				readAllRaw(this, 3003).catch(err => {
@@ -619,6 +627,8 @@ class Lwd50a extends utils.Adapter {
 			await this.runOptimizationSchedule();
 		} catch (catchErr: any) {
 			this.log.error(`Fehler im updateData-Ablauf: ${catchErr.message}`);
+		} finally {
+			this.updateRunning = false;
 		}
 	}
 

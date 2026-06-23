@@ -2781,3 +2781,17 @@ for (const key of Object.keys(STATE_MAPPING)) {
 		STATE_MAPPING[key].luxWriteId = key;
 	}
 }
+
+/**
+ * Hilfsfunktion: Generiert den vollständigen ioBroker-Pfad für einen Datenpunkt-Schlüssel.
+ * Beispiel: getDpPath("WP_BZ_akt") liefert "Informationen.08_Betriebszustand.WP_BZ_akt"
+ *
+ * @param key Der Schlüssel des Datenpunkts aus STATE_MAPPING, z.B. "WP_BZ_akt".
+ */
+export function getDpPath(key: keyof typeof STATE_MAPPING): string {
+	const def = STATE_MAPPING[key];
+	if (!def) {
+		throw new Error(`Kritischer Fehler: Datenpunkt-Schlüssel '${key}' existiert nicht im Mapping!`);
+	}
+	return `${def.folder}.${key}`;
+}

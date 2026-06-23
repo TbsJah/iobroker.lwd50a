@@ -1,4 +1,4 @@
-import { STATE_MAPPING } from "./stateMapping";
+import { STATE_MAPPING, getDpPath } from "./stateMapping";
 
 // Moderner, linter-konformer ES6-Import (benötigt die luxtronik2.d.ts im src-Ordner)
 import * as luxtronikTypes from "luxtronik2/types";
@@ -72,8 +72,11 @@ async function calculateSum(
 	logName: string,
 ): Promise<void> {
 	try {
-		const state1 = await adapter.getStateAsync(sourceId1);
-		const state2 = await adapter.getStateAsync(sourceId2);
+		// Paralleler Abruf beider Summanden
+		const [state1, state2] = await Promise.all([
+			adapter.getStateAsync(sourceId1),
+			adapter.getStateAsync(sourceId2),
+		]);
 
 		const val1 = state1 && typeof state1.val === "number" ? state1.val : 0;
 		const val2 = state2 && typeof state2.val === "number" ? state2.val : 0;
@@ -232,23 +235,15 @@ export async function updateOutageHistory(adapter: any, rawValues: number[]): Pr
  */
 export async function calculateTemperatureSpread(adapter: any): Promise<void> {
 	try {
-		// --- ACHTUNG: Passe die Pfade hier an deine exakten Mapping-Keys an! ---
-		const vorlaufState = await adapter.getStateAsync("Informationen.01_Temperaturen.temperature_supply");
-		const ruecklaufState = await adapter.getStateAsync("Informationen.01_Temperaturen.temperature_return");
+		const [vorlaufState, ruecklaufState] = await Promise.all([
+			adapter.getStateAsync(getDpPath("temperature_supply")),
+			adapter.getStateAsync(getDpPath("temperature_return")),
+		]);
 
 		if (vorlaufState && ruecklaufState && vorlaufState.val !== null && ruecklaufState.val !== null) {
-			const vorlauf = Number(vorlaufState.val);
-			const ruecklauf = Number(ruecklaufState.val);
+			const spreizung = parseFloat((Number(vorlaufState.val) - Number(ruecklaufState.val)).toFixed(2));
 
-			// Vorlauf minus Rücklauf, gerundet auf 2 Nachkommastellen
-			const spreizung = parseFloat((vorlauf - ruecklauf).toFixed(2));
-
-			// Wert in den virtuellen Datenpunkt schreiben
-			await adapter.setStateChangedAsync(
-				"Informationen.01_Temperaturen.spreizung_vorlauf_ruecklauf",
-				spreizung,
-				true,
-			);
+			await adapter.setStateChangedAsync(getDpPath("spreizung_vorlauf_ruecklauf"), spreizung, true);
 		}
 	} catch (err: any) {
 		adapter.log.error(`Fehler bei der Berechnung der Temperatur-Spreizung: ${err.message}`);
