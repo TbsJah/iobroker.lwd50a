@@ -39,7 +39,7 @@ class Lwd50a extends utils.Adapter {
 		const port = this.config.port || 8889;
 
 		this.log.info(`Verbinde mit Wärmepumpe auf ${ip}:${port}...`);
-		this.pump = luxtronik.createConnection(ip, port);
+		this.pump = new luxtronik.createConnection(ip, port);
 
 		// Alle virtuellen Datenpunkte aus dem Mapping vorab generieren
 		await initializeVirtualStates(this);

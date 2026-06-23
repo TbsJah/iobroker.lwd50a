@@ -47,7 +47,7 @@ class Lwd50a extends utils.Adapter {
     const ip = this.config.host;
     const port = this.config.port || 8889;
     this.log.info(`Verbinde mit W\xE4rmepumpe auf ${ip}:${port}...`);
-    this.pump = luxtronik.createConnection(ip, port);
+    this.pump = new luxtronik.createConnection(ip, port);
     await (0, import_virtualStates.initializeVirtualStates)(this);
     const debugState = await this.getStateAsync((0, import_stateMapping.getDpPath)("Schreibe_Debug_Log"));
     this.isDebugLogActive = (debugState == null ? void 0 : debugState.val) === true;

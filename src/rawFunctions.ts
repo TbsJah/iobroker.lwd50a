@@ -1,7 +1,6 @@
 import type { AdapterInstance } from "@iobroker/adapter-core";
 import * as net from "net";
 
-let finished = false;
 /**
  * Liest die kompletten Rohdaten (3003 oder 3004) direkt über einen TCP-Socket aus der Wärmepumpe.
  *
@@ -10,6 +9,9 @@ let finished = false;
  */
 export function readAllRaw(adapter: AdapterInstance, command: number): Promise<number[]> {
 	return new Promise((resolve, reject) => {
+		// WICHTIG: Die Variable muss IN das Promise, damit sie bei jedem Aufruf neu auf 'false' steht!
+		let finished = false;
+
 		const client = new net.Socket();
 		const host = adapter.config.host;
 		const port = 8888;

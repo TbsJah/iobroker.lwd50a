@@ -33,9 +33,9 @@ __export(rawFunctions_exports, {
 });
 module.exports = __toCommonJS(rawFunctions_exports);
 var net = __toESM(require("net"));
-let finished = false;
 function readAllRaw(adapter, command) {
   return new Promise((resolve, reject) => {
+    let finished = false;
     const client = new net.Socket();
     const host = adapter.config.host;
     const port = 8888;
