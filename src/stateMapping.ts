@@ -2764,6 +2764,15 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		write: true,
 		def: false,
 	},
+	Setze_Vorgabewerte: {
+		folder: "Aktionen",
+		name: "Vorgabewerte (wie Leerlauf) manuell setzen",
+		role: "button",
+		type: "boolean",
+		isVirtual: true,
+		write: true,
+		def: false,
+	},
 };
 
 // Runtime Injection für fehlende IDs

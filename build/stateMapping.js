@@ -2716,6 +2716,15 @@ const STATE_MAPPING = {
     isVirtual: true,
     write: true,
     def: false
+  },
+  Setze_Vorgabewerte: {
+    folder: "Aktionen",
+    name: "Vorgabewerte (wie Leerlauf) manuell setzen",
+    role: "button",
+    type: "boolean",
+    isVirtual: true,
+    write: true,
+    def: false
   }
 };
 for (const key of Object.keys(STATE_MAPPING)) {

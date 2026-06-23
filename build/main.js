@@ -89,6 +89,53 @@ class Lwd50a extends utils.Adapter {
     }
   }
   /**
+   * Setzt alle Anlageparameter auf die Standardwerte (Leerlauf) aus der Instanzkonfiguration zurück.
+   */
+  async setIdleDefaults() {
+    try {
+      const configWithDynamicKeys = this.config;
+      await this.setOwnStateIfDifferent(
+        "Einstellungen.02_Heizung.heating_curve_end_point",
+        configWithDynamicKeys.endpunkt,
+        false
+      );
+      await this.setOwnStateIfDifferent(
+        "Einstellungen.02_Heizung.heating_curve_parallel_offset",
+        configWithDynamicKeys.fusspunkt,
+        false
+      );
+      await this.setOwnStateIfDifferent(
+        "Einstellungen.04_HUP.heating_system_circ_pump_voltage_minimal",
+        configWithDynamicKeys.sync_heating_system_circ_pump_voltage_minimal,
+        false
+      );
+      await this.setOwnStateIfDifferent(
+        "Einstellungen.04_HUP.heating_system_circ_pump_voltage_nominal",
+        configWithDynamicKeys.sync_heating_system_circ_pump_voltage_nominal,
+        false
+      );
+      await this.setOwnStateIfDifferent(
+        "Einstellungen.03_Warmwasser.warmwater_temperature",
+        configWithDynamicKeys.sync_warmwater_target_temperature,
+        false
+      );
+      await this.setOwnStateIfDifferent(
+        "Einstellungen.03_Warmwasser.hotWaterTemperatureHysteresis",
+        configWithDynamicKeys.sync_hotwater_temperature_hysteresis,
+        false
+      );
+      await this.setOwnStateIfDifferent(
+        "Einstellungen.02_Heizung.returnTemperatureHysteresis",
+        configWithDynamicKeys.sync_return_temperature_hysteresis,
+        false
+      );
+      await this.setOwnStateIfDifferent("Einstellungen.05_ZIP.zip_aktiv", configWithDynamicKeys.zip_aktiv, false);
+      await this.setOwnStateIfDifferent("Einstellungen.02_Heizung.Heizen_nach_Wasser", false, true);
+    } catch (err) {
+      this.log.error(`Fehler beim Setzen der Leerlauf-Vorgabewerte: ${err.message}`);
+    }
+  }
+  /**
    * Prüft, ob der letzte Wechsel des Anlagenstatus länger als 10 Minuten her ist.
    */
   async istAnlageAelterAls10Min() {
@@ -134,47 +181,7 @@ class Lwd50a extends utils.Adapter {
         }
         const configWithDynamicKeys = this.config;
         if (istLeerlauf) {
-          await this.setOwnStateIfDifferent(
-            "Einstellungen.02_Heizung.heating_curve_end_point",
-            configWithDynamicKeys.endpunkt,
-            false
-          );
-          await this.setOwnStateIfDifferent(
-            "Einstellungen.02_Heizung.heating_curve_parallel_offset",
-            configWithDynamicKeys.fusspunkt,
-            false
-          );
-          await this.setOwnStateIfDifferent(
-            "Einstellungen.04_Pumpe.heating_system_circ_pump_voltage_minimal",
-            configWithDynamicKeys.sync_heating_system_circ_pump_voltage_minimal,
-            false
-          );
-          await this.setOwnStateIfDifferent(
-            "Einstellungen.04_Pumpe.heating_system_circ_pump_voltage_nominal",
-            configWithDynamicKeys.sync_heating_system_circ_pump_voltage_nominal,
-            false
-          );
-          await this.setOwnStateIfDifferent(
-            "Einstellungen.03_Warmwasser.warmwater_temperature",
-            configWithDynamicKeys.sync_warmwater_target_temperature,
-            false
-          );
-          await this.setOwnStateIfDifferent(
-            "Einstellungen.03_Warmwasser.hotWaterTemperatureHysteresis",
-            configWithDynamicKeys.sync_hotwater_temperature_hysteresis,
-            false
-          );
-          await this.setOwnStateIfDifferent(
-            "Einstellungen.02_Heizung.returnTemperatureHysteresis",
-            configWithDynamicKeys.sync_return_temperature_hysteresis,
-            false
-          );
-          await this.setOwnStateIfDifferent(
-            "Einstellungen.05_ZIP.zip_aktiv",
-            configWithDynamicKeys.zip_aktiv,
-            false
-          );
-          await this.setOwnStateIfDifferent("Einstellungen.02_Heizung.Heizen_nach_Wasser", false, true);
+          await this.setIdleDefaults();
         } else if (istHeizen) {
           await this.setOwnStateIfDifferent(
             "Einstellungen.05_ZIP.zip_aktiv",
@@ -182,12 +189,12 @@ class Lwd50a extends utils.Adapter {
             false
           );
           await this.setOwnStateIfDifferent(
-            "Einstellungen.04_Pumpe.heating_system_circ_pump_voltage_minimal",
+            "Einstellungen.04_HUP.heating_system_circ_pump_voltage_minimal",
             configWithDynamicKeys.sync_heating_system_circ_pump_voltage_minimal,
             false
           );
           await this.setOwnStateIfDifferent(
-            "Einstellungen.04_Pumpe.heating_system_circ_pump_voltage_nominal",
+            "Einstellungen.04_HUP.heating_system_circ_pump_voltage_nominal",
             configWithDynamicKeys.sync_heating_system_circ_pump_voltage_nominal,
             false
           );
@@ -211,7 +218,7 @@ class Lwd50a extends utils.Adapter {
           await this.setOwnStateIfDifferent("Einstellungen.05_ZIP.Activate_Zip", true, false);
         } else if (istAbtauen) {
           await this.setOwnStateIfDifferent(
-            "Einstellungen.04_Pumpe.heating_system_circ_pump_voltage_nominal",
+            "Einstellungen.04_HUP.heating_system_circ_pump_voltage_nominal",
             10,
             false
           );
@@ -559,6 +566,15 @@ class Lwd50a extends utils.Adapter {
           this.log.info(`Interner Schalter bet\xE4tigt: Regelung ist nun ${state.val ? "AKTIV" : "PAUSIERT"}`);
         }
         await this.setState(id, { val: state.val, ack: true });
+        return;
+      }
+      if (mappingKey === "Setze_Vorgabewerte") {
+        if (state.val === true) {
+          this.log.info("Manueller Trigger: Setze alle Vorgabewerte auf Leerlauf-Standard zur\xFCck...");
+          await this.setIdleDefaults();
+          await this.setState(id, { val: false, ack: true });
+          this.log.info("Vorgabewerte erfolgreich gesetzt.");
+        }
         return;
       }
       if (mappingKey === "zip_aktiv") {
