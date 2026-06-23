@@ -1080,7 +1080,8 @@ const STATE_MAPPING = {
     type: "number",
     unit: "s",
     isVirtual: true,
-    write: true
+    write: true,
+    def: 120
   },
   //Systemeinstellungen
   Pumpenoptimierung: {
@@ -2606,7 +2607,8 @@ const STATE_MAPPING = {
     role: "switch",
     type: "boolean",
     isVirtual: true,
-    write: true
+    write: true,
+    def: true
   }
 };
 for (const key of Object.keys(STATE_MAPPING)) {

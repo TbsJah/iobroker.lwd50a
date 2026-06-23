@@ -10,50 +10,44 @@ import * as luxtronikTypes from "luxtronik2/types";
  * @param adapter Die Instanz des ioBroker-Adapters (this)
  */
 export async function initializeVirtualStates(adapter: any): Promise<void> {
-	try {
-		for (const [key, definition] of Object.entries(STATE_MAPPING)) {
-			if (definition.isVirtual) {
-				const folderId = definition.folder;
-				const fullId = `${folderId}.${key}`;
+	for (const [key, definition] of Object.entries(STATE_MAPPING)) {
+		if (definition.isVirtual) {
+			const folderId = definition.folder;
+			const stateId = `${folderId}.${key}`;
 
-				// 1. Zuerst den Channel (Ordner) anlegen
-				await adapter.setObjectNotExistsAsync(folderId, {
-					type: "channel",
-					common: { name: folderId.split(".").pop() || folderId },
-					native: {},
-				});
+			await adapter.setObjectNotExistsAsync(folderId, {
+				type: "channel",
+				common: { name: folderId.split(".").pop() || folderId },
+				native: {},
+			});
 
-				// 2. Danach den eigentlichen Datenpunkt (State) anlegen
-				const ioBrokerType = definition.type === "json" ? "string" : definition.type;
+			await adapter.setObjectNotExistsAsync(stateId, {
+				type: "state",
+				common: {
+					name: definition.name,
+					type: definition.type,
+					role: definition.role,
+					unit: definition.unit,
+					read: true,
+					write: definition.write || false,
+					def: definition.def, // <--- 1. ioBroker das Default mitteilen
+				},
+				native: {},
+			});
 
-				await adapter.setObjectNotExistsAsync(fullId, {
-					type: "state",
-					common: {
-						name: definition.name,
-						type: ioBrokerType,
-						role: definition.role,
-						unit: definition.unit,
-						read: true,
-						write: !!definition.write,
-						states: definition.states,
-					},
-					native: {},
-				});
-
-				// 3. Initialwert setzen, falls der Datenpunkt nagelneu ist
-				const currentState = await adapter.getStateAsync(fullId);
-				if (!currentState) {
-					const defaultVal = definition.type === "json" ? "[]" : definition.type === "number" ? 0 : false;
-					await adapter.setStateAsync(fullId, { val: defaultVal, ack: true });
-				}
-
-				if (definition.write) {
-					await adapter.subscribeStatesAsync(fullId);
+			// 2. NEU: Sofortiger Initial-Schreibbefehl
+			if (definition.def !== undefined) {
+				const checkState = await adapter.getStateAsync(stateId);
+				if (!checkState || checkState.val === null) {
+					adapter.log.info(`Initiale Erstellung: Setze Default-Wert [${definition.def}] für ${stateId}`);
+					await adapter.setStateAsync(stateId, { val: definition.def, ack: true });
 				}
 			}
+
+			if (definition.write) {
+				adapter.subscribeStates(stateId);
+			}
 		}
-	} catch (err: any) {
-		adapter.log.error(`Fehler bei der Initialisierung der virtuellen Datenpunkte: ${err.message}`);
 	}
 }
 

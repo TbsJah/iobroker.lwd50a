@@ -19,6 +19,8 @@ export interface StateDefinition {
 	luxWriteId?: string;
 	/** Kennzeichnung für rein virtuelle/berechnete Datenpunkte */
 	isVirtual?: boolean;
+	/** Optionaler Standardwert für den Datenpunkt */
+	def?: any;
 	/** Optionaler Minimalwert */
 	min?: number;
 	/** Optionaler Maximalwert */
@@ -1122,6 +1124,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		unit: "s",
 		isVirtual: true,
 		write: true,
+		def: 120,
 	},
 	//Systemeinstellungen
 	Pumpenoptimierung: {
@@ -2666,6 +2669,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: "boolean",
 		isVirtual: true,
 		write: true,
+		def: true,
 	},
 };
 
