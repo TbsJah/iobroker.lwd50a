@@ -144,8 +144,7 @@ For later updates:
    //- Test
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 0.6.0 (2026-06-23)
 
 - Fehlerbereinigung & Codeoptimierung
 
