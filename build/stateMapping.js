@@ -2609,6 +2609,15 @@ const STATE_MAPPING = {
     isVirtual: true,
     write: true,
     def: true
+  },
+  Schreibe_Debug_Log: {
+    folder: "Aktionen",
+    name: "Erweiterte Logging-Ausgaben ein-/ausschalten",
+    role: "switch",
+    type: "boolean",
+    isVirtual: true,
+    write: true,
+    def: false
   }
 };
 for (const key of Object.keys(STATE_MAPPING)) {

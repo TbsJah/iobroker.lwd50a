@@ -32,6 +32,7 @@ class Lwd50a extends utils.Adapter {
   createdStates = /* @__PURE__ */ new Set();
   lastBzVal = "";
   zipTimer;
+  isDebugLogActive = false;
   constructor(options = {}) {
     super({
       ...options,
@@ -47,6 +48,8 @@ class Lwd50a extends utils.Adapter {
     this.log.info(`Verbinde mit W\xE4rmepumpe auf ${ip}:${port}...`);
     this.pump = new luxtronik.createConnection(ip, port);
     await (0, import_virtualStates.initializeVirtualStates)(this);
+    const debugState = await this.getStateAsync("Aktionen.Schreibe_Debug_Log");
+    this.isDebugLogActive = (debugState == null ? void 0 : debugState.val) === true;
     await this.updateData();
     let intervalSeconds = this.config.interval || 30;
     if (intervalSeconds < 10) {
@@ -77,6 +80,9 @@ class Lwd50a extends utils.Adapter {
       const state = await this.getStateAsync(id);
       if (!state || state.val !== val) {
         await this.setState(id, { val, ack });
+        if (this.isDebugLogActive) {
+          this.log.info(`Setze Werte f\xFCr ${id}: ${val}`);
+        }
       }
     } catch (err) {
       this.log.error(`Fehler in setOwnStateIfDifferent f\xFCr ${id}: ${err.message}`);
@@ -511,7 +517,9 @@ class Lwd50a extends utils.Adapter {
       }
       return;
     }
-    this.log.info(`Nutzerbefehl empfangen f\xFCr ${id}: ${state.val}`);
+    if (this.isDebugLogActive) {
+      this.log.info(`Nutzerbefehl empfangen f\xFCr ${id}: ${state.val}`);
+    }
     const mappingKey = id.split(".").pop();
     if (!mappingKey) {
       this.log.warn(`Ung\xFCltiger State-Schl\xFCssel aus ID extrahiert: ${id}`);
@@ -523,6 +531,12 @@ class Lwd50a extends utils.Adapter {
       return;
     }
     try {
+      if (mappingKey === "Schreibe_Debug_Log") {
+        this.isDebugLogActive = state.val === true;
+        this.log.info(`Erweitertes Logging ist nun ${this.isDebugLogActive ? "AKTIV" : "DEAKTIVIERT"}`);
+        await this.setState(id, { val: state.val, ack: true });
+        return;
+      }
       if (mappingKey === "Regelung_Aktiv") {
         this.log.info(`Interner Schalter bet\xE4tigt: Regelung ist nun ${state.val ? "AKTIV" : "PAUSIERT"}`);
         await this.setState(id, { val: state.val, ack: true });
@@ -553,9 +567,11 @@ class Lwd50a extends utils.Adapter {
           const zipOutState = await this.getStateAsync("Informationen.03_Ausgaenge.ZIPout");
           const isAlreadyRunning = zipOutState ? zipOutState.val === 1 || zipOutState.val === true : false;
           if (isAlreadyRunning || this.zipTimer) {
-            this.log.info(
-              `ZIP ist bereits aktiv (ZIPout). Setze den Abschalt-Timer neu auf ${durationSeconds} Sekunden.`
-            );
+            if (this.isDebugLogActive) {
+              this.log.info(
+                `ZIP ist bereits aktiv (ZIPout). Setze den Abschalt-Timer neu auf ${durationSeconds} Sekunden.`
+              );
+            }
             if (this.zipTimer) {
               clearTimeout(this.zipTimer);
               this.zipTimer = void 0;

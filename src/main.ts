@@ -21,6 +21,7 @@ class Lwd50a extends utils.Adapter {
 	private createdStates = new Set<string>();
 	private lastBzVal = "";
 	private zipTimer?: NodeJS.Timeout;
+	private isDebugLogActive = false;
 
 	public constructor(options: Partial<utils.AdapterOptions> = {}) {
 		super({
@@ -41,6 +42,10 @@ class Lwd50a extends utils.Adapter {
 
 		// Alle virtuellen Datenpunkte aus dem Mapping vorab generieren
 		await initializeVirtualStates(this);
+
+		// Einmaliges Einlesen des Schalters beim Adapterstart
+		const debugState = await this.getStateAsync("Aktionen.Schreibe_Debug_Log");
+		this.isDebugLogActive = debugState?.val === true;
 
 		// Erste Abfrage sofort starten
 		await this.updateData();
@@ -80,6 +85,9 @@ class Lwd50a extends utils.Adapter {
 			const state = await this.getStateAsync(id);
 			if (!state || state.val !== val) {
 				await this.setState(id, { val: val, ack: ack });
+				if (this.isDebugLogActive) {
+					this.log.info(`Setze Werte für ${id}: ${val}`);
+				}
 			}
 		} catch (err: any) {
 			this.log.error(`Fehler in setOwnStateIfDifferent für ${id}: ${err.message}`);
@@ -216,6 +224,7 @@ class Lwd50a extends utils.Adapter {
 						10,
 						false,
 					);
+
 					await this.setOwnStateIfDifferent("Einstellungen.05_ZIP.Activate_Zip", true, false);
 				} else if (istAbtauen) {
 					await this.setOwnStateIfDifferent(
@@ -611,7 +620,9 @@ class Lwd50a extends utils.Adapter {
 			return;
 		}
 
-		this.log.info(`Nutzerbefehl empfangen für ${id}: ${state.val}`);
+		if (this.isDebugLogActive) {
+			this.log.info(`Nutzerbefehl empfangen für ${id}: ${state.val}`);
+		}
 
 		const mappingKey = id.split(".").pop();
 		if (!mappingKey) {
@@ -626,6 +637,14 @@ class Lwd50a extends utils.Adapter {
 		}
 
 		try {
+			if (mappingKey === "Schreibe_Debug_Log") {
+				// Globale Variable sofort updaten!
+				this.isDebugLogActive = state.val === true;
+				this.log.info(`Erweitertes Logging ist nun ${this.isDebugLogActive ? "AKTIV" : "DEAKTIVIERT"}`);
+				await this.setState(id, { val: state.val, ack: true });
+				return;
+			}
+
 			if (mappingKey === "Regelung_Aktiv") {
 				this.log.info(`Interner Schalter betätigt: Regelung ist nun ${state.val ? "AKTIV" : "PAUSIERT"}`);
 				await this.setState(id, { val: state.val, ack: true });
@@ -666,9 +685,11 @@ class Lwd50a extends utils.Adapter {
 
 					if (isAlreadyRunning || this.zipTimer) {
 						// Pumpe läuft schon -> Laufzeit verlängern, keine Hardware-Befehle senden
-						this.log.info(
-							`ZIP ist bereits aktiv (ZIPout). Setze den Abschalt-Timer neu auf ${durationSeconds} Sekunden.`,
-						);
+						if (this.isDebugLogActive) {
+							this.log.info(
+								`ZIP ist bereits aktiv (ZIPout). Setze den Abschalt-Timer neu auf ${durationSeconds} Sekunden.`,
+							);
+						}
 
 						if (this.zipTimer) {
 							clearTimeout(this.zipTimer);

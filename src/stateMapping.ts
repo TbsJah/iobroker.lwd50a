@@ -2671,6 +2671,16 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		write: true,
 		def: true,
 	},
+
+	Schreibe_Debug_Log: {
+		folder: "Aktionen",
+		name: "Erweiterte Logging-Ausgaben ein-/ausschalten",
+		role: "switch",
+		type: "boolean",
+		isVirtual: true,
+		write: true,
+		def: false,
+	},
 };
 
 // Runtime Injection für fehlende IDs
