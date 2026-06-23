@@ -1046,8 +1046,8 @@ const STATE_MAPPING = {
   Activate_Zip: {
     folder: "Einstellungen.05_ZIP",
     name: "Makro: ZIP Entl\xFCftung starten",
-    role: "value",
-    type: "number",
+    role: "switch",
+    type: "boolean",
     write: true,
     states: { 0: "Aus", 1: "Ein" },
     luxWriteId: "Activate_Zip",

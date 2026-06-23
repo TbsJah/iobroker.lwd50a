@@ -20,6 +20,7 @@ class Lwd50a extends utils.Adapter {
 	private pump: any;
 	private createdStates = new Set<string>();
 	private lastBzVal = "";
+	private zipTimer?: NodeJS.Timeout;
 
 	public constructor(options: Partial<utils.AdapterOptions> = {}) {
 		super({
@@ -607,6 +608,11 @@ class Lwd50a extends utils.Adapter {
 				this.pump.disconnect();
 			}
 
+			if (this.zipTimer) {
+				clearTimeout(this.zipTimer);
+				this.zipTimer = undefined;
+			}
+
 			this.log.info("Adapter wurde sauber beendet.");
 			callback();
 		} catch (err: any) {
@@ -654,21 +660,78 @@ class Lwd50a extends utils.Adapter {
 			}
 
 			if (mappingKey === "Activate_Zip") {
-				const zipOutState = await this.getStateAsync("Informationen.03_Ausgaenge.ZIPout");
-				const isCurrentlyRunning = zipOutState ? zipOutState.val === 1 || zipOutState.val === true : false;
+				if (state.val === true) {
+					// 1. Dauer auslesen
+					const durationState = await this.getStateAsync("Einstellungen.05_ZIP.zip_aktiv");
+					const durationSeconds =
+						durationState && typeof durationState.val === "number" ? durationState.val : 120;
 
-				const targetVal = isCurrentlyRunning ? 0 : 1;
-				const actionText = targetVal === 1 ? "Aktiviere" : "Deaktiviere";
+					if (durationSeconds <= 0) {
+						this.log.warn("ZIP Makro abgebrochen: Die eingestellte Dauer ist 0 oder ungültig.");
+						await this.setState(id, { val: false, ack: true });
+						return;
+					}
 
-				this.log.info(`Makro gestartet: ${actionText} ZIP Entlüftung basierend auf ZIPout...`);
+					// 2. Prüfen, ob die ZIP laut Hardware (ZIPout) oder Software (zipTimer) bereits läuft
+					const zipOutState = await this.getStateAsync("Informationen.03_Ausgaenge.ZIPout");
+					const isAlreadyRunning = zipOutState ? zipOutState.val === 1 || zipOutState.val === true : false;
 
-				await this.writePumpAsync("runDeaerate", targetVal);
-				await new Promise(resolve => setTimeout(resolve, 1000));
-				await this.writePumpAsync("hotWaterCircPumpDeaerate", targetVal);
+					if (isAlreadyRunning || this.zipTimer) {
+						// Pumpe läuft schon -> Laufzeit verlängern, keine Hardware-Befehle senden
+						this.log.info(
+							`ZIP ist bereits aktiv (ZIPout). Setze den Abschalt-Timer neu auf ${durationSeconds} Sekunden.`,
+						);
 
-				this.log.info(`Makro erfolgreich: ZIP Entlüftungsprogramm wurde auf ${targetVal} gesetzt.`);
-				await this.setState(id, { val: targetVal, ack: true });
-				await this.updateData();
+						if (this.zipTimer) {
+							clearTimeout(this.zipTimer);
+							this.zipTimer = undefined;
+						}
+					} else {
+						// Pumpe steht -> Normal starten und Hardware-Befehle senden
+						this.log.info(
+							`Makro gestartet: ZIP Entlüftung wird für ${durationSeconds} Sekunden aktiviert...`,
+						);
+
+						await this.writePumpAsync("runDeaerate", 1);
+						await new Promise(resolve => setTimeout(resolve, 1000));
+						await this.writePumpAsync("hotWaterCircPumpDeaerate", 1);
+					}
+
+					// Schalter auf true bestätigen und Werte aktualisieren
+					await this.setState(id, { val: true, ack: true });
+					await this.updateData();
+
+					// 3. Den Timer für die automatische Abschaltung (neu) starten
+					this.zipTimer = setTimeout(async () => {
+						this.log.info("ZIP Entlüftung: Zeit abgelaufen. Deaktiviere Pumpe...");
+						try {
+							await this.writePumpAsync("runDeaerate", 0);
+							await new Promise(resolve => setTimeout(resolve, 1000));
+							await this.writePumpAsync("hotWaterCircPumpDeaerate", 0);
+
+							await this.setState(id, { val: false, ack: true });
+							await this.updateData();
+						} catch (err: any) {
+							this.log.error(`Fehler beim automatischen Deaktivieren der ZIP: ${err.message}`);
+						}
+						this.zipTimer = undefined;
+					}, durationSeconds * 1000);
+				} else {
+					// Manueller Abbruch durch den User (Schalter in der VIS auf "false" gesetzt)
+					this.log.info("Makro manuell abgebrochen: Deaktiviere ZIP Entlüftung sofort...");
+
+					if (this.zipTimer) {
+						clearTimeout(this.zipTimer);
+						this.zipTimer = undefined;
+					}
+
+					await this.writePumpAsync("runDeaerate", 0);
+					await new Promise(resolve => setTimeout(resolve, 1000));
+					await this.writePumpAsync("hotWaterCircPumpDeaerate", 0);
+
+					await this.setState(id, { val: false, ack: true });
+					await this.updateData();
+				}
 
 				return;
 			}

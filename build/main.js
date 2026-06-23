@@ -31,6 +31,7 @@ class Lwd50a extends utils.Adapter {
   pump;
   createdStates = /* @__PURE__ */ new Set();
   lastBzVal = "";
+  zipTimer;
   constructor(options = {}) {
     super({
       ...options,
@@ -506,6 +507,10 @@ class Lwd50a extends utils.Adapter {
       if (this.pump && typeof this.pump.disconnect === "function") {
         this.pump.disconnect();
       }
+      if (this.zipTimer) {
+        clearTimeout(this.zipTimer);
+        this.zipTimer = void 0;
+      }
       this.log.info("Adapter wurde sauber beendet.");
       callback();
     } catch (err) {
@@ -546,17 +551,59 @@ class Lwd50a extends utils.Adapter {
         return;
       }
       if (mappingKey === "Activate_Zip") {
-        const zipOutState = await this.getStateAsync("Informationen.03_Ausgaenge.ZIPout");
-        const isCurrentlyRunning = zipOutState ? zipOutState.val === 1 || zipOutState.val === true : false;
-        const targetVal = isCurrentlyRunning ? 0 : 1;
-        const actionText = targetVal === 1 ? "Aktiviere" : "Deaktiviere";
-        this.log.info(`Makro gestartet: ${actionText} ZIP Entl\xFCftung basierend auf ZIPout...`);
-        await this.writePumpAsync("runDeaerate", targetVal);
-        await new Promise((resolve) => setTimeout(resolve, 1e3));
-        await this.writePumpAsync("hotWaterCircPumpDeaerate", targetVal);
-        this.log.info(`Makro erfolgreich: ZIP Entl\xFCftungsprogramm wurde auf ${targetVal} gesetzt.`);
-        await this.setState(id, { val: targetVal, ack: true });
-        await this.updateData();
+        if (state.val === true) {
+          const durationState = await this.getStateAsync("Einstellungen.05_ZIP.zip_aktiv");
+          const durationSeconds = durationState && typeof durationState.val === "number" ? durationState.val : 120;
+          if (durationSeconds <= 0) {
+            this.log.warn("ZIP Makro abgebrochen: Die eingestellte Dauer ist 0 oder ung\xFCltig.");
+            await this.setState(id, { val: false, ack: true });
+            return;
+          }
+          const zipOutState = await this.getStateAsync("Informationen.03_Ausgaenge.ZIPout");
+          const isAlreadyRunning = zipOutState ? zipOutState.val === 1 || zipOutState.val === true : false;
+          if (isAlreadyRunning || this.zipTimer) {
+            this.log.info(
+              `ZIP ist bereits aktiv (ZIPout). Setze den Abschalt-Timer neu auf ${durationSeconds} Sekunden.`
+            );
+            if (this.zipTimer) {
+              clearTimeout(this.zipTimer);
+              this.zipTimer = void 0;
+            }
+          } else {
+            this.log.info(
+              `Makro gestartet: ZIP Entl\xFCftung wird f\xFCr ${durationSeconds} Sekunden aktiviert...`
+            );
+            await this.writePumpAsync("runDeaerate", 1);
+            await new Promise((resolve) => setTimeout(resolve, 1e3));
+            await this.writePumpAsync("hotWaterCircPumpDeaerate", 1);
+          }
+          await this.setState(id, { val: true, ack: true });
+          await this.updateData();
+          this.zipTimer = setTimeout(async () => {
+            this.log.info("ZIP Entl\xFCftung: Zeit abgelaufen. Deaktiviere Pumpe...");
+            try {
+              await this.writePumpAsync("runDeaerate", 0);
+              await new Promise((resolve) => setTimeout(resolve, 1e3));
+              await this.writePumpAsync("hotWaterCircPumpDeaerate", 0);
+              await this.setState(id, { val: false, ack: true });
+              await this.updateData();
+            } catch (err) {
+              this.log.error(`Fehler beim automatischen Deaktivieren der ZIP: ${err.message}`);
+            }
+            this.zipTimer = void 0;
+          }, durationSeconds * 1e3);
+        } else {
+          this.log.info("Makro manuell abgebrochen: Deaktiviere ZIP Entl\xFCftung sofort...");
+          if (this.zipTimer) {
+            clearTimeout(this.zipTimer);
+            this.zipTimer = void 0;
+          }
+          await this.writePumpAsync("runDeaerate", 0);
+          await new Promise((resolve) => setTimeout(resolve, 1e3));
+          await this.writePumpAsync("hotWaterCircPumpDeaerate", 0);
+          await this.setState(id, { val: false, ack: true });
+          await this.updateData();
+        }
         return;
       }
       if (!definition.luxWriteId || definition.write !== true) {

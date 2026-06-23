@@ -1089,8 +1089,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 	Activate_Zip: {
 		folder: "Einstellungen.05_ZIP",
 		name: "Makro: ZIP Entlüftung starten",
-		role: "value",
-		type: "number",
+		role: "switch",
+		type: "boolean",
 		write: true,
 		states: { 0: "Aus", 1: "Ein" },
 		luxWriteId: "Activate_Zip",
