@@ -51,6 +51,7 @@ class Lwd50a extends utils.Adapter {
     await (0, import_virtualStates.initializeVirtualStates)(this);
     const debugState = await this.getStateAsync((0, import_stateMapping.getDpPath)("Schreibe_Debug_Log"));
     this.isDebugLogActive = (debugState == null ? void 0 : debugState.val) === true;
+    this.log.info(`Hole die ersten Werte...`);
     await this.updateData();
     let intervalSeconds = this.config.interval || 30;
     if (intervalSeconds < 10) {
@@ -80,7 +81,7 @@ class Lwd50a extends utils.Adapter {
       }
       const state = await this.getStateAsync(id);
       if (!state || state.val !== val) {
-        await this.setStateAsync(id, { val, ack });
+        await this.setState(id, { val, ack });
         if (this.isDebugLogActive) {
           this.log.info(`Setze Werte f\xFCr ${id}: ${val}`);
         }
@@ -360,18 +361,21 @@ class Lwd50a extends utils.Adapter {
       let rawParams = [];
       let rawValues = [];
       let coolchipData = null;
+      this.log.debug(`1`);
       try {
         rawParams = await (0, import_rawFunctions.readAllRaw)(this, 3003);
       } catch (err) {
         this.log.debug(`Raw-Parameter (3003) nicht verf\xFCgbar: ${err.message}`);
       }
       await new Promise((resolve) => setTimeout(resolve, 250));
+      this.log.debug(`2`);
       try {
         rawValues = await (0, import_rawFunctions.readAllRaw)(this, 3004);
       } catch (err) {
         this.log.debug(`Raw-Messwerte (3004) nicht verf\xFCgbar: ${err.message}`);
       }
       await new Promise((resolve) => setTimeout(resolve, 250));
+      this.log.debug(`3`);
       try {
         coolchipData = await this.readPumpAsync();
       } catch (err) {
@@ -381,6 +385,7 @@ class Lwd50a extends utils.Adapter {
           this.log.error(`Verbindungsfehler beim Einlesen der Daten: ${err.message}`);
         }
       }
+      this.log.debug(`4`);
       if (!coolchipData) {
         return;
       }

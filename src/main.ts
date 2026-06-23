@@ -39,7 +39,6 @@ class Lwd50a extends utils.Adapter {
 		const port = this.config.port || 8889;
 
 		this.log.info(`Verbinde mit Wärmepumpe auf ${ip}:${port}...`);
-		// WICHTIG: Kein 'new' vor luxtronik.createConnection!
 		this.pump = luxtronik.createConnection(ip, port);
 
 		// Alle virtuellen Datenpunkte aus dem Mapping vorab generieren
@@ -50,6 +49,7 @@ class Lwd50a extends utils.Adapter {
 		this.isDebugLogActive = debugState?.val === true;
 
 		// Erste Abfrage sofort starten
+		this.log.info(`Hole die ersten Werte...`);
 		await this.updateData();
 
 		// Intervall aus der Konfiguration (Minimum 10 Sekunden)
@@ -86,7 +86,7 @@ class Lwd50a extends utils.Adapter {
 
 			const state = await this.getStateAsync(id);
 			if (!state || state.val !== val) {
-				await this.setStateAsync(id, { val: val, ack: ack });
+				await this.setState(id, { val: val, ack: ack });
 				if (this.isDebugLogActive) {
 					this.log.info(`Setze Werte für ${id}: ${val}`);
 				}
@@ -421,6 +421,8 @@ class Lwd50a extends utils.Adapter {
 			let rawValues: number[] = [];
 			let coolchipData: any = null;
 
+			this.log.debug(`1`);
+
 			try {
 				rawParams = await readAllRaw(this, 3003);
 			} catch (err: any) {
@@ -429,7 +431,7 @@ class Lwd50a extends utils.Adapter {
 
 			// 250 Millisekunden Atempause für den WP-Prozessor
 			await new Promise(resolve => setTimeout(resolve, 250));
-
+			this.log.debug(`2`);
 			try {
 				rawValues = await readAllRaw(this, 3004);
 			} catch (err: any) {
@@ -438,7 +440,7 @@ class Lwd50a extends utils.Adapter {
 
 			// Noch einmal 250 Millisekunden Atempause
 			await new Promise(resolve => setTimeout(resolve, 250));
-
+			this.log.debug(`3`);
 			try {
 				coolchipData = await this.readPumpAsync();
 			} catch (err: any) {
@@ -448,7 +450,7 @@ class Lwd50a extends utils.Adapter {
 					this.log.error(`Verbindungsfehler beim Einlesen der Daten: ${err.message}`);
 				}
 			}
-
+			this.log.debug(`4`);
 			if (!coolchipData) {
 				return; // Abbruch, wenn Hauptabfrage fehlschlägt
 			}
