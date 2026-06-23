@@ -94,11 +94,15 @@ class Lwd50a extends utils.Adapter {
   async setIdleDefaults() {
     try {
       const configWithDynamicKeys = this.config;
+      this.log.info(`Setze Wert f\xFCr endpunkt: ${configWithDynamicKeys.endpunkt}`);
       await this.setOwnStateIfDifferent(
         "Einstellungen.02_Heizung.heating_curve_end_point",
         configWithDynamicKeys.endpunkt,
         false
       );
+      if (this.isDebugLogActive) {
+        this.log.debug(`Setze Fusspunkt: ${configWithDynamicKeys.fusspunkt}`);
+      }
       await this.setOwnStateIfDifferent(
         "Einstellungen.02_Heizung.heating_curve_parallel_offset",
         configWithDynamicKeys.fusspunkt,
@@ -289,6 +293,11 @@ class Lwd50a extends utils.Adapter {
       }
       if (istLeerlauf) {
         if (wwSoll - wwIst >= wwHysterese - 1.5 && ruecklauf <= ruecklaufSoll && betriebsart !== 4 && heatingStateStr !== "Heizgrenze") {
+          if (this.isDebugLogActive) {
+            this.log.debug(
+              `Setze 35 Grad Fu\xDFpunkt, da WW-Sollwert (${wwSoll}) - WW-Istwert (${wwIst}) >= Hysterese (${wwHysterese}) - 1.5 und R\xFCcklauf (${ruecklauf}) <= R\xFCcklauf-Soll (${ruecklaufSoll})`
+            );
+          }
           await this.setOwnStateIfDifferent(
             "Einstellungen.02_Heizung.heating_curve_parallel_offset",
             35,

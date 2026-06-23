@@ -1,180 +1,173 @@
 {
-  "common": {
-    "name": "lwd50a",
-    "version": "0.5.0",
-    "news": {
-      "0.5.0": {
-        "en": "Timer für ZIP hinzugefügt\nVP mit optionalen defalt Werten",
-        "de": "Timer für ZIP hinzugefügt\nVP mit optionalen defaltierten Werten",
-        "ru": "Timer für ZIP hinzugefügt\nВице-президент с опциональным дефолтом Вертеном",
-        "pt": "Timer für ZIP hinzugefügt\nVice-presidente com opções opcionais",
-        "nl": "Timer für ZIP hinzugefügt\nVP met optionele defalt Werten",
-        "fr": "Minuteur pour ZIP hinzugefügt\nVP avec options par défaut",
-        "it": "Timer für ZIP hinzugefügt\nVP con facoltativo Werten",
-        "es": "Timer für ZIP hinzugefügt\nVP con opciones por defecto Werten",
-        "pl": "Timer für ZIP hinzugefügt\nVP z opcjonalnym defalt Werten",
-        "uk": "Додати таймер для поштового індексу\nVP mit optionalen default Werten",
-        "zh-cn": "Timer für ZIP hinzugefügt\nVP mit 可选默认 Werten"
-      },
-      "0.4.0": {
-        "en": "Steuerung hinzugefügt",
-        "de": "Steuerung hinzugefügt",
-        "ru": "Steuerung hinzugefügt",
-        "pt": "Steuerung hinzugefügt",
-        "nl": "Steuerung hinzugefügt",
-        "fr": "Steuerung hinzugefügt",
-        "it": "Steuerung hinzugefügt",
-        "es": "Steuerung hinzugefügt",
-        "pl": "Steuerung hinzugefügt",
-        "uk": "Додано керування",
-        "zh-cn": "Steuerung hinzugefügt"
-      },
-      "0.3.0": {
-        "en": "Erweiterung",
-        "de": "Erweiterung",
-        "ru": "Расширение",
-        "pt": "Expansão",
-        "nl": "Erweiterung",
-        "fr": "Erweiterung",
-        "it": "Erweiterung",
-        "es": "Erweiterung",
-        "pl": "Rozwój",
-        "uk": "Додавання",
-        "zh-cn": "Erweiterung"
-      },
-      "0.2.0": {
-        "en": "Zip aktivierbar",
-        "de": "Das ist nicht möglich",
-        "ru": "Зип Активьербар",
-        "pt": "Zip aktivierbar",
-        "nl": "Zip aktivierbar",
-        "fr": "Barre d'accès zippée",
-        "it": "Zip aktivierbar",
-        "es": "Zip aktivierbar",
-        "pl": "Zip aktivierbar",
-        "uk": "Блискавка Aktivierbar",
-        "zh-cn": "西伯利亚语 aktivier 栏"
-      },
-      "0.1.4": {
-        "en": "work",
-        "de": "arbeit",
-        "ru": "работа",
-        "pt": "trabalho",
-        "nl": "werk",
-        "fr": "travail",
-        "it": "lavoro",
-        "es": "trabajo",
-        "pl": "praca",
-        "uk": "робота",
-        "zh-cn": "工作"
-      },
-      "0.1.4-alpha.0": {
-        "en": "Korrekte Einheiten",
-        "de": "Korrekte Einheiten",
-        "ru": "Корректе Эйнхейтен",
-        "pt": "Korrekte Einheiten",
-        "nl": "Korrekte Einheiten",
-        "fr": "Korrekte Einheiten",
-        "it": "Korrekte Einheiten",
-        "es": "Korrekte Einheiten",
-        "pl": "Korrekte Einheiten",
-        "uk": "Корректе Ейнхеітен",
-        "zh-cn": "科雷克特·艾因海滕"
-      },
-      "0.1.3": {
-        "en": "Admin Page",
-        "de": "Admin Seite",
-        "ru": "Страница администратора",
-        "pt": "Página de Administração",
-        "nl": "Beheerpagina",
-        "fr": "Page d'administration",
-        "it": "Pagina iniziale",
-        "es": "Página",
-        "pl": "Strona administratora",
-        "uk": "Реєстрація",
-        "zh-cn": "管理页面"
-      }
-    },
-    "main": "build/main.js",
-    "titleLang": {
-      "en": "LWD50A",
-      "de": "LWD50A",
-      "ru": "LWD50A",
-      "pt": "LWD50A",
-      "nl": "LWD50A",
-      "fr": "LWD50A",
-      "it": "LWD50A",
-      "es": "LWD50A",
-      "pl": "LWD50A",
-      "uk": "LWD50A",
-      "zh-cn": "LWD50A"
-    },
-    "desc": {
-      "en": "Zugriff und Steuerung einer LWD50A Heizung von Alpha Innotec",
-      "de": "Zugriff und Steuerung einer LWD50A Heizung von Alpha Innotec",
-      "ru": "Zugriff und Steuerung einer LWD50A Heizung от Alpha Innotec",
-      "pt": "Zugriff e Steuerung einer LWD50A Heizung von Alpha Innotec",
-      "nl": "Zugriff en besturing van een LWD50A Heizung van Alpha Innotec",
-      "fr": "Prise et commande d'un LWD50A Heizung d'Alpha Innotec",
-      "it": "Zugriff und Steuerung einer LWD50A Heizung von Alpha Innotec",
-      "es": "Grifo y soporte de un LWD50A Heizung de Alpha Innotec",
-      "pl": "Zugriff i Steuerung einer LWD50A Heizung von Alpha Innotec",
-      "uk": "Zugriff und Steuerung einer LWD50A Heizung von Alpha Innotec",
-      "zh-cn": "LWD50A 的 Zugriff und Steuerung einer LWD50A Heizung von Alpha Innotec"
-    },
-    "authors": [
-      "Tbs <Tbs.Jah@gmail.com>"
-    ],
-    "keywords": [
-      "LWD50A",
-      "Alpha Innotec",
-      "Heizung",
-      "Steuerung"
-    ],
-    "licenseInformation": {
-      "type": "free",
-      "license": "MIT"
-    },
-    "platform": "Javascript/Node.js",
-    "icon": "lwd50a.png",
-    "enabled": true,
-    "extIcon": "https://raw.githubusercontent.com/Tbs/ioBroker.lwd50a/main/admin/lwd50a.png",
-    "readme": "https://github.com/Tbs/ioBroker.lwd50a/blob/main/README.md",
-    "loglevel": "info",
-    "tier": 3,
-    "mode": "daemon",
-    "type": "climate-control",
-    "compact": true,
-    "connectionType": "cloud",
-    "dataSource": "poll",
-    "adminUI": {
-      "config": "json"
-    },
-    "dependencies": [
-      {
-        "js-controller": ">=6.0.11"
-      }
-    ],
-    "globalDependencies": [
-      {
-        "admin": ">=7.0.23"
-      }
-    ]
-  },
-  "native": {
-    "host": "192.168.178.81",
-    "port": 8889,
-    "interval": 30,
-    "fusspunkt": 21.7,
-    "endpunkt": 23,
-    "zip_aktiv_ww": 600,
-    "zip_aktiv": 120,
-    "sync_warmwater_target_temperature": 55,
-    "sync_hotwater_temperature_hysteresis": 10,
-    "sync_heating_system_circ_pump_voltage_minimal": 3,
-    "sync_heating_system_circ_pump_voltage_nominal": 7,
-    "sync_return_temperature_hysteresis": 1.5
-  },
-  "objects": [],
-  "instanceObjects": []
+	"common": {
+		"name": "lwd50a",
+		"version": "0.5.0",
+		"news": {
+			"0.5.0": {
+				"en": "Timer für ZIP hinzugefügt\nVP mit optionalen defalt Werten",
+				"de": "Timer für ZIP hinzugefügt\nVP mit optionalen defaltierten Werten",
+				"ru": "Timer für ZIP hinzugefügt\nВице-президент с опциональным дефолтом Вертеном",
+				"pt": "Timer für ZIP hinzugefügt\nVice-presidente com opções opcionais",
+				"nl": "Timer für ZIP hinzugefügt\nVP met optionele defalt Werten",
+				"fr": "Minuteur pour ZIP hinzugefügt\nVP avec options par défaut",
+				"it": "Timer für ZIP hinzugefügt\nVP con facoltativo Werten",
+				"es": "Timer für ZIP hinzugefügt\nVP con opciones por defecto Werten",
+				"pl": "Timer für ZIP hinzugefügt\nVP z opcjonalnym defalt Werten",
+				"uk": "Додати таймер для поштового індексу\nVP mit optionalen default Werten",
+				"zh-cn": "Timer für ZIP hinzugefügt\nVP mit 可选默认 Werten"
+			},
+			"0.4.0": {
+				"en": "Steuerung hinzugefügt",
+				"de": "Steuerung hinzugefügt",
+				"ru": "Steuerung hinzugefügt",
+				"pt": "Steuerung hinzugefügt",
+				"nl": "Steuerung hinzugefügt",
+				"fr": "Steuerung hinzugefügt",
+				"it": "Steuerung hinzugefügt",
+				"es": "Steuerung hinzugefügt",
+				"pl": "Steuerung hinzugefügt",
+				"uk": "Додано керування",
+				"zh-cn": "Steuerung hinzugefügt"
+			},
+			"0.3.0": {
+				"en": "Erweiterung",
+				"de": "Erweiterung",
+				"ru": "Расширение",
+				"pt": "Expansão",
+				"nl": "Erweiterung",
+				"fr": "Erweiterung",
+				"it": "Erweiterung",
+				"es": "Erweiterung",
+				"pl": "Rozwój",
+				"uk": "Додавання",
+				"zh-cn": "Erweiterung"
+			},
+			"0.2.0": {
+				"en": "Zip aktivierbar",
+				"de": "Das ist nicht möglich",
+				"ru": "Зип Активьербар",
+				"pt": "Zip aktivierbar",
+				"nl": "Zip aktivierbar",
+				"fr": "Barre d'accès zippée",
+				"it": "Zip aktivierbar",
+				"es": "Zip aktivierbar",
+				"pl": "Zip aktivierbar",
+				"uk": "Блискавка Aktivierbar",
+				"zh-cn": "西伯利亚语 aktivier 栏"
+			},
+			"0.1.4": {
+				"en": "work",
+				"de": "arbeit",
+				"ru": "работа",
+				"pt": "trabalho",
+				"nl": "werk",
+				"fr": "travail",
+				"it": "lavoro",
+				"es": "trabajo",
+				"pl": "praca",
+				"uk": "робота",
+				"zh-cn": "工作"
+			},
+			"0.1.4-alpha.0": {
+				"en": "Korrekte Einheiten",
+				"de": "Korrekte Einheiten",
+				"ru": "Корректе Эйнхейтен",
+				"pt": "Korrekte Einheiten",
+				"nl": "Korrekte Einheiten",
+				"fr": "Korrekte Einheiten",
+				"it": "Korrekte Einheiten",
+				"es": "Korrekte Einheiten",
+				"pl": "Korrekte Einheiten",
+				"uk": "Корректе Ейнхеітен",
+				"zh-cn": "科雷克特·艾因海滕"
+			},
+			"0.1.3": {
+				"en": "Admin Page",
+				"de": "Admin Seite",
+				"ru": "Страница администратора",
+				"pt": "Página de Administração",
+				"nl": "Beheerpagina",
+				"fr": "Page d'administration",
+				"it": "Pagina iniziale",
+				"es": "Página",
+				"pl": "Strona administratora",
+				"uk": "Реєстрація",
+				"zh-cn": "管理页面"
+			}
+		},
+		"main": "build/main.js",
+		"titleLang": {
+			"en": "LWD50A",
+			"de": "LWD50A",
+			"ru": "LWD50A",
+			"pt": "LWD50A",
+			"nl": "LWD50A",
+			"fr": "LWD50A",
+			"it": "LWD50A",
+			"es": "LWD50A",
+			"pl": "LWD50A",
+			"uk": "LWD50A",
+			"zh-cn": "LWD50A"
+		},
+		"desc": {
+			"en": "Zugriff und Steuerung einer LWD50A Heizung von Alpha Innotec",
+			"de": "Zugriff und Steuerung einer LWD50A Heizung von Alpha Innotec",
+			"ru": "Zugriff und Steuerung einer LWD50A Heizung от Alpha Innotec",
+			"pt": "Zugriff e Steuerung einer LWD50A Heizung von Alpha Innotec",
+			"nl": "Zugriff en besturing van een LWD50A Heizung van Alpha Innotec",
+			"fr": "Prise et commande d'un LWD50A Heizung d'Alpha Innotec",
+			"it": "Zugriff und Steuerung einer LWD50A Heizung von Alpha Innotec",
+			"es": "Grifo y soporte de un LWD50A Heizung de Alpha Innotec",
+			"pl": "Zugriff i Steuerung einer LWD50A Heizung von Alpha Innotec",
+			"uk": "Zugriff und Steuerung einer LWD50A Heizung von Alpha Innotec",
+			"zh-cn": "LWD50A 的 Zugriff und Steuerung einer LWD50A Heizung von Alpha Innotec"
+		},
+		"authors": ["Tbs <Tbs.Jah@gmail.com>"],
+		"keywords": ["LWD50A", "Alpha Innotec", "Heizung", "Steuerung"],
+		"licenseInformation": {
+			"type": "free",
+			"license": "MIT"
+		},
+		"platform": "Javascript/Node.js",
+		"icon": "lwd50a.png",
+		"enabled": true,
+		"extIcon": "https://raw.githubusercontent.com/Tbs/ioBroker.lwd50a/main/admin/lwd50a.png",
+		"readme": "https://github.com/Tbs/ioBroker.lwd50a/blob/main/README.md",
+		"loglevel": "info",
+		"tier": 3,
+		"mode": "daemon",
+		"type": "climate-control",
+		"compact": true,
+		"connectionType": "cloud",
+		"dataSource": "poll",
+		"adminUI": {
+			"config": "json"
+		},
+		"dependencies": [
+			{
+				"js-controller": ">=6.0.11"
+			}
+		],
+		"globalDependencies": [
+			{
+				"admin": ">=7.0.23"
+			}
+		]
+	},
+	"native": {
+		"host": "192.168.178.81",
+		"port": 8889,
+		"interval": 30,
+		"fusspunkt": 21.7,
+		"endpunkt": 23,
+		"zip_aktiv_ww": 600,
+		"zip_aktiv": 120,
+		"sync_warmwater_target_temperature": 54,
+		"sync_hotwater_temperature_hysteresis": 10,
+		"sync_heating_system_circ_pump_voltage_minimal": 3,
+		"sync_heating_system_circ_pump_voltage_nominal": 7,
+		"sync_return_temperature_hysteresis": 1.5
+	},
+	"objects": [],
+	"instanceObjects": []
 }
