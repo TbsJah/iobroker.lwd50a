@@ -144,6 +144,11 @@ For later updates:
    //- Test
 
 ## Changelog
+
+### **WORK IN PROGRESS**
+
+- Fehlerbereinigung & Codeoptimierung
+
 ### 0.5.0 (2026-06-23)
 
 - Timer für ZIP hinzugefügt
