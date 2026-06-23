@@ -133,7 +133,7 @@ class Lwd50a extends utils.Adapter {
 			// VORGABEWERTE BEI BETRIEBSMODUS-WECHSEL SEAMLESS SETZEN
 			// =========================================================
 			if (bzVal !== this.lastBzVal) {
-				this.log.info(
+				this.log.debug(
 					`Betriebsmodus gewechselt von '${this.lastBzVal}' zu '${bzVal}'. Setze Vorgabewerte aus Instanz-Konfiguration...`,
 				);
 
@@ -212,7 +212,7 @@ class Lwd50a extends utils.Adapter {
 						false,
 					);
 					await this.setOwnStateIfDifferent(
-						"Einstellungen.04_Pumpe.heating_system_circ_pump_voltage_nominal",
+						"Einstellungen.04_HUP.heating_system_circ_pump_voltage_nominal",
 						10,
 						false,
 					);
