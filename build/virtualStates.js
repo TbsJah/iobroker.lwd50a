@@ -98,9 +98,9 @@ async function calculateTotalThermalEnergy(adapter) {
 async function calculateTotalEnergy(adapter) {
   await calculateSum(
     adapter,
-    "Informationen.10_Engergie.energy_heating",
-    "Informationen.10_Engergie.energy_warmwater",
-    "Informationen.10_Engergie.energy_total",
+    "Informationen.10_Energie.energy_heating",
+    "Informationen.10_Energie.energy_warmwater",
+    "Informationen.10_Energie.energy_total",
     "Gesamt-Energie"
   );
 }

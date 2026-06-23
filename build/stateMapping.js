@@ -663,7 +663,7 @@ const STATE_MAPPING = {
     dataSource: "value"
   },
   Heizen_nach_Wasser: {
-    folder: "Informationen.08_Betriebszustand",
+    folder: "Einstellungen.02_Heizung",
     name: "Heizen nach Wasser aktiv",
     role: "switch",
     type: "boolean",
@@ -712,7 +712,7 @@ const STATE_MAPPING = {
   },
   // Energie
   energy_heating: {
-    folder: "Informationen.10_Engergie",
+    folder: "Informationen.10_Energie",
     name: "Energie Heizung Erzeugt",
     role: "value.power.consumption",
     luxWriteId: "1136",
@@ -722,7 +722,7 @@ const STATE_MAPPING = {
     factor: 100
   },
   energy_warmwater: {
-    folder: "Informationen.10_Engergie",
+    folder: "Informationen.10_Energie",
     name: "Energie Warmwasser Erzeugt",
     role: "value.power.consumption",
     type: "number",
@@ -732,7 +732,7 @@ const STATE_MAPPING = {
     factor: 100
   },
   energy_ZWE1: {
-    folder: "Informationen.10_Engergie",
+    folder: "Informationen.10_Energie",
     name: "Energie Heizstab Erzeugt",
     role: "value.power.consumption",
     type: "number",
@@ -742,7 +742,7 @@ const STATE_MAPPING = {
     factor: 100
   },
   energy_total: {
-    folder: "Informationen.10_Engergie",
+    folder: "Informationen.10_Energie",
     name: "Energie Gesamt Erzeugt",
     role: "value.power.consumption",
     type: "number",

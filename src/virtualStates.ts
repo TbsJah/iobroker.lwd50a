@@ -107,9 +107,9 @@ export async function calculateTotalThermalEnergy(adapter: any): Promise<void> {
 export async function calculateTotalEnergy(adapter: any): Promise<void> {
 	await calculateSum(
 		adapter,
-		"Informationen.10_Engergie.energy_heating",
-		"Informationen.10_Engergie.energy_warmwater",
-		"Informationen.10_Engergie.energy_total",
+		"Informationen.10_Energie.energy_heating",
+		"Informationen.10_Energie.energy_warmwater",
+		"Informationen.10_Energie.energy_total",
 		"Gesamt-Energie",
 	);
 }

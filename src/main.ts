@@ -99,48 +99,54 @@ class Lwd50a extends utils.Adapter {
 	 */
 	private async setIdleDefaults(): Promise<void> {
 		try {
-			//const configWithDynamicKeys = this.config as Record<string, any>;
+			// Kommentar entfernt, damit TypeScript nicht meckert:
+			const configWithDynamicKeys = this.config as Record<string, any>;
 
-			this.log.info(`Setze Wert für endpunkt: ${this.config.endpunkt}`);
+			if (this.isDebugLogActive) {
+				this.log.debug(`Setze Wert für endpunkt: ${configWithDynamicKeys.endpunkt}`);
+			}
+
 			await this.setOwnStateIfDifferent(
 				"Einstellungen.02_Heizung.heating_curve_end_point",
-				this.config.endpunkt,
+				configWithDynamicKeys.endpunkt,
 				false,
 			);
+
 			if (this.isDebugLogActive) {
-				this.log.debug(`Setze Fusspunkt: ${this.config.fusspunkt}`);
+				this.log.debug(`Setze Fusspunkt: ${configWithDynamicKeys.fusspunkt}`);
 			}
+
 			await this.setOwnStateIfDifferent(
 				"Einstellungen.02_Heizung.heating_curve_parallel_offset",
-				this.config.fusspunkt,
+				configWithDynamicKeys.fusspunkt,
 				false,
 			);
 			await this.setOwnStateIfDifferent(
 				"Einstellungen.04_HUP.heating_system_circ_pump_voltage_minimal",
-				this.config.sync_heating_system_circ_pump_voltage_minimal,
+				configWithDynamicKeys.sync_heating_system_circ_pump_voltage_minimal,
 				false,
 			);
 			await this.setOwnStateIfDifferent(
 				"Einstellungen.04_HUP.heating_system_circ_pump_voltage_nominal",
-				this.config.sync_heating_system_circ_pump_voltage_nominal,
+				configWithDynamicKeys.sync_heating_system_circ_pump_voltage_nominal,
 				false,
 			);
 			await this.setOwnStateIfDifferent(
 				"Einstellungen.03_Warmwasser.warmwater_temperature",
-				this.config.sync_warmwater_target_temperature,
+				configWithDynamicKeys.sync_warmwater_target_temperature,
 				false,
 			);
 			await this.setOwnStateIfDifferent(
 				"Einstellungen.03_Warmwasser.hotWaterTemperatureHysteresis",
-				this.config.sync_hotwater_temperature_hysteresis,
+				configWithDynamicKeys.sync_hotwater_temperature_hysteresis,
 				false,
 			);
 			await this.setOwnStateIfDifferent(
 				"Einstellungen.02_Heizung.returnTemperatureHysteresis",
-				this.config.sync_return_temperature_hysteresis,
+				configWithDynamicKeys.sync_return_temperature_hysteresis,
 				false,
 			);
-			await this.setOwnStateIfDifferent("Einstellungen.05_ZIP.zip_aktiv", this.config.zip_aktiv, false);
+			await this.setOwnStateIfDifferent("Einstellungen.05_ZIP.zip_aktiv", configWithDynamicKeys.zip_aktiv, false);
 			await this.setOwnStateIfDifferent("Einstellungen.02_Heizung.Heizen_nach_Wasser", false, true);
 		} catch (err: any) {
 			this.log.error(`Fehler beim Setzen der Leerlauf-Vorgabewerte: ${err.message}`);
@@ -265,9 +271,10 @@ class Lwd50a extends utils.Adapter {
 				((await this.getStateAsync("Informationen.01_Temperaturen.Wamwassertemperatur_Soll"))?.val as number) ??
 				0;
 			const wwIst =
-				((await this.getStateAsync("Informationen.01_Temperaturen.Warmwassertemperatur"))?.val as number) ?? 0;
+				((await this.getStateAsync("Informationen.01_Temperaturen.Wamwassertemperatur_Ist"))?.val as number) ??
+				0;
 			const ruecklauf =
-				((await this.getStateAsync("Informationen.01_Temperaturen.Rücklauf"))?.val as number) ?? 0;
+				((await this.getStateAsync("Informationen.01_Temperaturen.temperature_return"))?.val as number) ?? 0;
 
 			const spreizung =
 				((await this.getStateAsync("Informationen.01_Temperaturen.spreizung_vorlauf_ruecklauf"))
