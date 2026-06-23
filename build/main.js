@@ -361,21 +361,18 @@ class Lwd50a extends utils.Adapter {
       let rawParams = [];
       let rawValues = [];
       let coolchipData = null;
-      this.log.debug(`1`);
       try {
         rawParams = await (0, import_rawFunctions.readAllRaw)(this, 3003);
       } catch (err) {
         this.log.debug(`Raw-Parameter (3003) nicht verf\xFCgbar: ${err.message}`);
       }
       await new Promise((resolve) => setTimeout(resolve, 250));
-      this.log.debug(`2`);
       try {
         rawValues = await (0, import_rawFunctions.readAllRaw)(this, 3004);
       } catch (err) {
         this.log.debug(`Raw-Messwerte (3004) nicht verf\xFCgbar: ${err.message}`);
       }
       await new Promise((resolve) => setTimeout(resolve, 250));
-      this.log.debug(`3`);
       try {
         coolchipData = await this.readPumpAsync();
       } catch (err) {
@@ -385,7 +382,6 @@ class Lwd50a extends utils.Adapter {
           this.log.error(`Verbindungsfehler beim Einlesen der Daten: ${err.message}`);
         }
       }
-      this.log.debug(`4`);
       if (!coolchipData) {
         return;
       }

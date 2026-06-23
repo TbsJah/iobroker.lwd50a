@@ -421,8 +421,6 @@ class Lwd50a extends utils.Adapter {
 			let rawValues: number[] = [];
 			let coolchipData: any = null;
 
-			this.log.debug(`1`);
-
 			try {
 				rawParams = await readAllRaw(this, 3003);
 			} catch (err: any) {
@@ -431,7 +429,6 @@ class Lwd50a extends utils.Adapter {
 
 			// 250 Millisekunden Atempause für den WP-Prozessor
 			await new Promise(resolve => setTimeout(resolve, 250));
-			this.log.debug(`2`);
 			try {
 				rawValues = await readAllRaw(this, 3004);
 			} catch (err: any) {
@@ -440,7 +437,6 @@ class Lwd50a extends utils.Adapter {
 
 			// Noch einmal 250 Millisekunden Atempause
 			await new Promise(resolve => setTimeout(resolve, 250));
-			this.log.debug(`3`);
 			try {
 				coolchipData = await this.readPumpAsync();
 			} catch (err: any) {
@@ -450,7 +446,6 @@ class Lwd50a extends utils.Adapter {
 					this.log.error(`Verbindungsfehler beim Einlesen der Daten: ${err.message}`);
 				}
 			}
-			this.log.debug(`4`);
 			if (!coolchipData) {
 				return; // Abbruch, wenn Hauptabfrage fehlschlägt
 			}
