@@ -144,8 +144,7 @@ For later updates:
    //- Test
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 0.5.0 (2026-06-23)
 
 - Timer für ZIP hinzugefügt
 - VP mit optionalen defalt Werten
