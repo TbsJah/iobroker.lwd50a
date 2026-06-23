@@ -99,48 +99,48 @@ class Lwd50a extends utils.Adapter {
 	 */
 	private async setIdleDefaults(): Promise<void> {
 		try {
-			const configWithDynamicKeys = this.config as Record<string, any>;
+			//const configWithDynamicKeys = this.config as Record<string, any>;
 
-			this.log.info(`Setze Wert für endpunkt: ${configWithDynamicKeys.endpunkt}`);
+			this.log.info(`Setze Wert für endpunkt: ${this.config.endpunkt}`);
 			await this.setOwnStateIfDifferent(
 				"Einstellungen.02_Heizung.heating_curve_end_point",
-				configWithDynamicKeys.endpunkt,
+				this.config.endpunkt,
 				false,
 			);
 			if (this.isDebugLogActive) {
-				this.log.debug(`Setze Fusspunkt: ${configWithDynamicKeys.fusspunkt}`);
+				this.log.debug(`Setze Fusspunkt: ${this.config.fusspunkt}`);
 			}
 			await this.setOwnStateIfDifferent(
 				"Einstellungen.02_Heizung.heating_curve_parallel_offset",
-				configWithDynamicKeys.fusspunkt,
+				this.config.fusspunkt,
 				false,
 			);
 			await this.setOwnStateIfDifferent(
 				"Einstellungen.04_HUP.heating_system_circ_pump_voltage_minimal",
-				configWithDynamicKeys.sync_heating_system_circ_pump_voltage_minimal,
+				this.config.sync_heating_system_circ_pump_voltage_minimal,
 				false,
 			);
 			await this.setOwnStateIfDifferent(
 				"Einstellungen.04_HUP.heating_system_circ_pump_voltage_nominal",
-				configWithDynamicKeys.sync_heating_system_circ_pump_voltage_nominal,
+				this.config.sync_heating_system_circ_pump_voltage_nominal,
 				false,
 			);
 			await this.setOwnStateIfDifferent(
 				"Einstellungen.03_Warmwasser.warmwater_temperature",
-				configWithDynamicKeys.sync_warmwater_target_temperature,
+				this.config.sync_warmwater_target_temperature,
 				false,
 			);
 			await this.setOwnStateIfDifferent(
 				"Einstellungen.03_Warmwasser.hotWaterTemperatureHysteresis",
-				configWithDynamicKeys.sync_hotwater_temperature_hysteresis,
+				this.config.sync_hotwater_temperature_hysteresis,
 				false,
 			);
 			await this.setOwnStateIfDifferent(
 				"Einstellungen.02_Heizung.returnTemperatureHysteresis",
-				configWithDynamicKeys.sync_return_temperature_hysteresis,
+				this.config.sync_return_temperature_hysteresis,
 				false,
 			);
-			await this.setOwnStateIfDifferent("Einstellungen.05_ZIP.zip_aktiv", configWithDynamicKeys.zip_aktiv, false);
+			await this.setOwnStateIfDifferent("Einstellungen.05_ZIP.zip_aktiv", this.config.zip_aktiv, false);
 			await this.setOwnStateIfDifferent("Einstellungen.02_Heizung.Heizen_nach_Wasser", false, true);
 		} catch (err: any) {
 			this.log.error(`Fehler beim Setzen der Leerlauf-Vorgabewerte: ${err.message}`);
