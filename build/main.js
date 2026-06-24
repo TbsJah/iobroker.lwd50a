@@ -180,44 +180,65 @@ class Lwd50a extends utils.Adapter {
         return;
       }
       if (bzVal !== this.lastBzVal) {
-        if (this.isDebugLogActive) {
-          this.log.debug(
-            `Betriebsmodus gewechselt von '${this.lastBzVal}' zu '${bzVal}'. Setze Vorgabewerte...`
-          );
+        if (this.lastBzVal === "") {
+          if (this.isDebugLogActive) {
+            this.log.debug(
+              `Adapter-Start: Initialer Betriebsmodus ist '${bzVal}'. \xDCbernehme Status, ohne Werte zu \xE4ndern.`
+            );
+          }
+          this.lastBzVal = bzVal;
+        } else {
+          if (this.isDebugLogActive) {
+            this.log.debug(
+              `Betriebsmodus gewechselt von '${this.lastBzVal}' zu '${bzVal}'. Setze Vorgabewerte...`
+            );
+          }
+          const configWithDynamicKeys = this.config;
+          if (istLeerlauf) {
+            await this.setIdleDefaults();
+          } else if (istHeizen) {
+            await this.setOwnStateIfDifferent(
+              (0, import_stateMapping.getDpPath)("zip_aktiv"),
+              configWithDynamicKeys.zip_aktiv,
+              false
+            );
+            await this.setOwnStateIfDifferent(
+              (0, import_stateMapping.getDpPath)("heating_system_circ_pump_voltage_minimal"),
+              configWithDynamicKeys.sync_heating_system_circ_pump_voltage_minimal,
+              false
+            );
+            await this.setOwnStateIfDifferent(
+              (0, import_stateMapping.getDpPath)("heating_system_circ_pump_voltage_nominal"),
+              configWithDynamicKeys.sync_heating_system_circ_pump_voltage_nominal,
+              false
+            );
+            await this.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("Heizen_nach_Wasser"), true, true);
+          } else if (istWarmwasser) {
+            await this.setOwnStateIfDifferent(
+              (0, import_stateMapping.getDpPath)("hotWaterTemperatureHysteresis"),
+              configWithDynamicKeys.hysterese_ww,
+              false
+            );
+            await this.setOwnStateIfDifferent(
+              (0, import_stateMapping.getDpPath)("zip_aktiv"),
+              configWithDynamicKeys.zip_aktiv_ww,
+              false
+            );
+            await this.setOwnStateIfDifferent(
+              (0, import_stateMapping.getDpPath)("heating_system_circ_pump_voltage_nominal"),
+              10,
+              false
+            );
+            await this.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("Activate_Zip"), true, false);
+          } else if (istAbtauen) {
+            await this.setOwnStateIfDifferent(
+              (0, import_stateMapping.getDpPath)("heating_system_circ_pump_voltage_nominal"),
+              10,
+              false
+            );
+          }
+          this.lastBzVal = bzVal;
         }
-        const configWithDynamicKeys = this.config;
-        if (istLeerlauf) {
-          await this.setIdleDefaults();
-        } else if (istHeizen) {
-          await this.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("zip_aktiv"), configWithDynamicKeys.zip_aktiv, false);
-          await this.setOwnStateIfDifferent(
-            (0, import_stateMapping.getDpPath)("heating_system_circ_pump_voltage_minimal"),
-            configWithDynamicKeys.sync_heating_system_circ_pump_voltage_minimal,
-            false
-          );
-          await this.setOwnStateIfDifferent(
-            (0, import_stateMapping.getDpPath)("heating_system_circ_pump_voltage_nominal"),
-            configWithDynamicKeys.sync_heating_system_circ_pump_voltage_nominal,
-            false
-          );
-          await this.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("Heizen_nach_Wasser"), true, true);
-        } else if (istWarmwasser) {
-          await this.setOwnStateIfDifferent(
-            (0, import_stateMapping.getDpPath)("hotWaterTemperatureHysteresis"),
-            configWithDynamicKeys.hysterese_ww,
-            false
-          );
-          await this.setOwnStateIfDifferent(
-            (0, import_stateMapping.getDpPath)("zip_aktiv"),
-            configWithDynamicKeys.zip_aktiv_ww,
-            false
-          );
-          await this.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("heating_system_circ_pump_voltage_nominal"), 10, false);
-          await this.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("Activate_Zip"), true, false);
-        } else if (istAbtauen) {
-          await this.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("heating_system_circ_pump_voltage_nominal"), 10, false);
-        }
-        this.lastBzVal = bzVal;
       }
       const [
         wwSollState,
