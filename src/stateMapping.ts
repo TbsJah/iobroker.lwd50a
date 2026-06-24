@@ -2771,6 +2771,34 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		write: true,
 		def: false,
 	},
+
+	ZIP_Bewegung_Pfad_1: {
+		folder: "Extern.Bewegung",
+		name: "Pfad Bewegungsmelder 1",
+		role: "text",
+		type: "string",
+		isVirtual: true,
+		write: true,
+		def: "",
+	},
+	ZIP_Bewegung_Pfad_2: {
+		folder: "Extern.Bewegung",
+		name: "Pfad Bewegungsmelder 2",
+		role: "text",
+		type: "string",
+		isVirtual: true,
+		write: true,
+		def: "",
+	},
+	ZIP_Bewegung_Pfad_3: {
+		folder: "Extern.Bewegung",
+		name: "Pfad Bewegungsmelder 3",
+		role: "text",
+		type: "string",
+		isVirtual: true,
+		write: true,
+		def: "",
+	},
 };
 
 // Runtime Injection für fehlende IDs

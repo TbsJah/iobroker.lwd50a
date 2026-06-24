@@ -63,6 +63,16 @@ class Lwd50a extends utils.Adapter {
     this.pollingInterval = setInterval(() => {
       void this.updateData();
     }, intervalSeconds * 1e3);
+    const sensoren = [
+      await this.getStateAsync((0, import_stateMapping.getDpPath)("ZIP_Bewegung_Pfad_1")),
+      await this.getStateAsync((0, import_stateMapping.getDpPath)("ZIP_Bewegung_Pfad_2")),
+      await this.getStateAsync((0, import_stateMapping.getDpPath)("ZIP_Bewegung_Pfad_3"))
+    ];
+    for (const s of sensoren) {
+      if (s == null ? void 0 : s.val) {
+        this.subscribeForeignStates(s.val);
+      }
+    }
   }
   // =========================================================
   // SKRIPT-OPTIMIERUNG: HILFSFUNKTIONEN & SCHEDULE
@@ -727,6 +737,26 @@ class Lwd50a extends utils.Adapter {
           await this.setState(id, { val: false, ack: true });
         }
         return;
+      }
+      if (mappingKey == null ? void 0 : mappingKey.startsWith("ZIP_Bewegung_Pfad_")) {
+        await this.setState(id, { val: state.val, ack: true });
+        return;
+      }
+      const sensoren = [
+        await this.getStateAsync((0, import_stateMapping.getDpPath)("ZIP_Bewegung_Pfad_1")),
+        await this.getStateAsync((0, import_stateMapping.getDpPath)("ZIP_Bewegung_Pfad_2")),
+        await this.getStateAsync((0, import_stateMapping.getDpPath)("ZIP_Bewegung_Pfad_3"))
+      ];
+      for (const s of sensoren) {
+        const sensorPath = s == null ? void 0 : s.val;
+        if (sensorPath && id === sensorPath && state.val === true) {
+          const lastChange = state.lc || 0;
+          const vorZehnMinuten = Date.now() - 10 * 60 * 1e3;
+          if (lastChange < vorZehnMinuten) {
+            this.log.info(`Bewegung an ${id} erkannt (\xE4lter als 10 Min). Triggere ZIP.`);
+            await this.setStateAsync((0, import_stateMapping.getDpPath)("Activate_Zip"), { val: true, ack: false });
+          }
+        }
       }
       if (mappingKey === "Activate_Zip") {
         if (state.val === true) {

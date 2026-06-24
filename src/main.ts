@@ -64,6 +64,17 @@ class Lwd50a extends utils.Adapter {
 		this.pollingInterval = setInterval(() => {
 			void this.updateData();
 		}, intervalSeconds * 1000);
+
+		const sensoren = [
+			await this.getStateAsync(getDpPath("ZIP_Bewegung_Pfad_1")),
+			await this.getStateAsync(getDpPath("ZIP_Bewegung_Pfad_2")),
+			await this.getStateAsync(getDpPath("ZIP_Bewegung_Pfad_3")),
+		];
+		for (const s of sensoren) {
+			if (s?.val) {
+				this.subscribeForeignStates(s.val as string);
+			}
+		}
 	}
 
 	// =========================================================
@@ -859,6 +870,32 @@ class Lwd50a extends utils.Adapter {
 					await this.setState(id, { val: false, ack: true });
 				}
 				return;
+			}
+
+			// Trigger für Bewegungsmelder-gesteuerte ZIP
+			if (mappingKey?.startsWith("ZIP_Bewegung_Pfad_")) {
+				await this.setState(id, { val: state.val, ack: true });
+				return;
+			}
+
+			const sensoren = [
+				await this.getStateAsync(getDpPath("ZIP_Bewegung_Pfad_1")),
+				await this.getStateAsync(getDpPath("ZIP_Bewegung_Pfad_2")),
+				await this.getStateAsync(getDpPath("ZIP_Bewegung_Pfad_3")),
+			];
+
+			for (const s of sensoren) {
+				const sensorPath = s?.val as string;
+				if (sensorPath && id === sensorPath && state.val === true) {
+					// Sensor hat ausgelöst. Prüfe Zeit:
+					const lastChange = state.lc || 0;
+					const vorZehnMinuten = Date.now() - 10 * 60 * 1000;
+
+					if (lastChange < vorZehnMinuten) {
+						this.log.info(`Bewegung an ${id} erkannt (älter als 10 Min). Triggere ZIP.`);
+						await this.setStateAsync(getDpPath("Activate_Zip"), { val: true, ack: false });
+					}
+				}
 			}
 
 			if (mappingKey === "Activate_Zip") {
