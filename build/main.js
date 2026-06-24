@@ -737,32 +737,21 @@ class Lwd50a extends utils.Adapter {
             await this.setState(id, { val: false, ack: true });
             return;
           }
-          const onTimeMinutes = Math.ceil(durationSeconds / 60);
-          if (!this.originalZipConfig) {
-            const keysToSave = [
-              "hotWaterCircPumpTimerTableSelected",
-              "WW_MoSo_Start1",
-              "WW_MoSo_End1",
-              "WW_MoSo_Start2",
-              "WW_MoSo_End2",
-              "WW_MoSo_Start3",
-              "WW_MoSo_End3",
-              "WW_MoSo_Start4",
-              "WW_MoSo_End4",
-              "WW_MoSo_Start5",
-              "WW_MoSo_End5",
-              "hotWaterCircPumpOnTime",
-              "hotWaterCircPumpOffTime"
-            ];
-            this.originalZipConfig = {};
-            for (const k of keysToSave) {
-              const s = await this.getStateAsync((0, import_stateMapping.getDpPath)(k));
-              this.originalZipConfig[k] = s ? s.val : null;
-            }
-            if (this.isDebugLogActive) {
-              this.log.info("Originale ZIP-Zirkulationstabelle f\xFCr sp\xE4tere Wiederherstellung gesichert.");
-            }
-          }
+          const bzState = await this.getStateAsync((0, import_stateMapping.getDpPath)("WP_BZ_akt"));
+          const bzVal = bzState ? Number(bzState.val) : 5;
+          const wwIstState = await this.getStateAsync((0, import_stateMapping.getDpPath)("Wamwassertemperatur_Ist"));
+          const wwSollState = await this.getStateAsync((0, import_stateMapping.getDpPath)("Wamwassertemperatur_Soll"));
+          const wwHystereseState = await this.getStateAsync((0, import_stateMapping.getDpPath)("hotWaterTemperatureHysteresis"));
+          const wwIst = wwIstState ? Number(wwIstState.val) : 0;
+          const wwSoll = wwSollState ? Number(wwSollState.val) : 0;
+          const wwHyst = wwHystereseState ? Number(wwHystereseState.val) : 0;
+          const ruecklaufState = await this.getStateAsync((0, import_stateMapping.getDpPath)("temperature_return"));
+          const rueckSollState = await this.getStateAsync((0, import_stateMapping.getDpPath)("temperature_target_return"));
+          const heizenHystereseState = await this.getStateAsync((0, import_stateMapping.getDpPath)("returnTemperatureHysteresis"));
+          const rueck = ruecklaufState ? Number(ruecklaufState.val) : 0;
+          const rueckSoll = rueckSollState ? Number(rueckSollState.val) : 0;
+          const hzHyst = heizenHystereseState ? Number(heizenHystereseState.val) : 0;
+          const useDeaeration = bzVal === 5 && wwIst > wwSoll - wwHyst && rueck > rueckSoll - hzHyst;
           if (this.zipTimer) {
             if (this.isDebugLogActive) {
               this.log.info(
@@ -771,58 +760,87 @@ class Lwd50a extends utils.Adapter {
             }
             clearTimeout(this.zipTimer);
             this.zipTimer = void 0;
-          } else {
+          }
+          if (useDeaeration) {
             if (this.isDebugLogActive) {
               this.log.info(
-                `Makro gestartet: ZIP Zirkulationstabelle wird f\xFCr ${durationSeconds} s (${onTimeMinutes} min) \xFCberschrieben...`
+                `Makro gestartet: ZIP Entl\xFCftung (Hardware) wird f\xFCr ${durationSeconds} s aktiviert (Sicherer Leerlauf)...`
               );
             }
-          }
-          const updatesRaw = [
-            { key: "hotWaterCircPumpTimerTableSelected", val: 0, raw: 0 },
-            { key: "WW_MoSo_Start1", val: "00:00", raw: 0 },
-            { key: "WW_MoSo_End1", val: "23:59", raw: 86340 },
-            { key: "WW_MoSo_Start2", val: "00:00", raw: 0 },
-            { key: "WW_MoSo_End2", val: "00:00", raw: 0 },
-            { key: "WW_MoSo_Start3", val: "00:00", raw: 0 },
-            { key: "WW_MoSo_End3", val: "00:00", raw: 0 },
-            { key: "WW_MoSo_Start4", val: "00:00", raw: 0 },
-            { key: "WW_MoSo_End4", val: "00:00", raw: 0 },
-            { key: "WW_MoSo_Start5", val: "00:00", raw: 0 },
-            { key: "WW_MoSo_End5", val: "00:00", raw: 0 },
-            { key: "hotWaterCircPumpOnTime", val: onTimeMinutes, raw: onTimeMinutes },
-            { key: "hotWaterCircPumpOffTime", val: 60, raw: 60 }
-          ];
-          for (const u of updatesRaw) {
-            const luxId = parseInt(import_stateMapping.STATE_MAPPING[u.key].luxWriteId, 10);
-            await this.writePumpAsync(luxId, u.raw, true);
+            await this.writePumpAsync(158, 1, true);
             await new Promise((resolve) => setTimeout(resolve, 100));
-            await this.setState((0, import_stateMapping.getDpPath)(u.key), { val: u.val, ack: true });
+            await this.writePumpAsync(684, 1, true);
+            await this.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("runDeaerate"), 1, true);
+            await this.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("hotWaterCircPumpDeaerate"), 1, true);
+          } else {
+            const onTimeMinutes = Math.ceil(durationSeconds / 60);
+            if (!this.originalZipConfig) {
+              const keysToSave = [
+                "hotWaterCircPumpTimerTableSelected",
+                "WW_MoSo_Start1",
+                "WW_MoSo_End1",
+                "WW_MoSo_Start2",
+                "WW_MoSo_End2",
+                "WW_MoSo_Start3",
+                "WW_MoSo_End3",
+                "WW_MoSo_Start4",
+                "WW_MoSo_End4",
+                "WW_MoSo_Start5",
+                "WW_MoSo_End5",
+                "hotWaterCircPumpOnTime",
+                "hotWaterCircPumpOffTime"
+              ];
+              this.originalZipConfig = {};
+              for (const k of keysToSave) {
+                const s = await this.getStateAsync((0, import_stateMapping.getDpPath)(k));
+                this.originalZipConfig[k] = s ? s.val : null;
+              }
+              if (this.isDebugLogActive) {
+                this.log.info(
+                  "Originale ZIP-Zirkulationstabelle f\xFCr sp\xE4tere Wiederherstellung gesichert."
+                );
+              }
+            }
+            if (this.isDebugLogActive) {
+              this.log.info(
+                `Makro gestartet: ZIP Zirkulationstabelle wird f\xFCr ${durationSeconds} s (${onTimeMinutes} min) \xFCberschrieben (WP ist aktiv oder kurz davor)...`
+              );
+            }
+            const updatesRaw = [
+              { key: "hotWaterCircPumpTimerTableSelected", val: 0, raw: 0 },
+              { key: "WW_MoSo_Start1", val: "00:00", raw: 0 },
+              { key: "WW_MoSo_End1", val: "23:59", raw: 86340 },
+              { key: "WW_MoSo_Start2", val: "00:00", raw: 0 },
+              { key: "WW_MoSo_End2", val: "00:00", raw: 0 },
+              { key: "WW_MoSo_Start3", val: "00:00", raw: 0 },
+              { key: "WW_MoSo_End3", val: "00:00", raw: 0 },
+              { key: "WW_MoSo_Start4", val: "00:00", raw: 0 },
+              { key: "WW_MoSo_End4", val: "00:00", raw: 0 },
+              { key: "WW_MoSo_Start5", val: "00:00", raw: 0 },
+              { key: "WW_MoSo_End5", val: "00:00", raw: 0 },
+              { key: "hotWaterCircPumpOnTime", val: onTimeMinutes, raw: onTimeMinutes },
+              { key: "hotWaterCircPumpOffTime", val: 60, raw: 60 }
+            ];
+            for (const u of updatesRaw) {
+              const luxId = parseInt(import_stateMapping.STATE_MAPPING[u.key].luxWriteId, 10);
+              await this.writePumpAsync(luxId, u.raw, true);
+              await new Promise((resolve) => setTimeout(resolve, 100));
+              await this.setState((0, import_stateMapping.getDpPath)(u.key), { val: u.val, ack: true });
+            }
           }
           await this.setState(id, { val: true, ack: true });
           this.zipTimer = setTimeout(async () => {
             if (this.isDebugLogActive) {
-              this.log.info(
-                "ZIP Makro-Zeit abgelaufen. Stelle urspr\xFCngliche Zirkulationstabelle wieder her..."
-              );
+              this.log.info("ZIP Makro-Zeit abgelaufen. Stelle Ursprungszustand wieder her...");
             }
-            await this.restoreOriginalZipConfig();
-            await this.setState(id, { val: false, ack: true });
+            await this.stopZipAndDeaeration();
             await this.updateData();
-            this.zipTimer = void 0;
           }, durationSeconds * 1e3);
         } else {
           if (this.isDebugLogActive) {
-            this.log.info(
-              "Makro manuell abgebrochen: Stelle urspr\xFCngliche Zirkulationstabelle sofort wieder her..."
-            );
+            this.log.info("Makro manuell abgebrochen: Stelle Ursprungszustand sofort wieder her...");
           }
-          if (this.zipTimer) {
-            clearTimeout(this.zipTimer);
-            this.zipTimer = void 0;
-          }
-          await this.restoreOriginalZipConfig();
-          await this.setState(id, { val: false, ack: true });
+          await this.stopZipAndDeaeration();
           await this.updateData();
         }
         return;
