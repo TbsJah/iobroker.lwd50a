@@ -47,6 +47,11 @@
 					"label": "Dauer ZIP aktiv bei WW (Sekunden)",
 					"default": 300
 				},
+				"zip_last_run_min": {
+					"type": "number",
+					"label": "Zeitlicher Abstand bis die ZIP wie laufen darf",
+					"default": 600
+				},
 				"regelung_aktiv": {
 					"type": "checkbox",
 					"label": "Regelung aktiv (sonst nur Beobachtung)",

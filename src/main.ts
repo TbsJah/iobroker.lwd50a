@@ -111,11 +111,6 @@ class Lwd50a extends utils.Adapter {
 		try {
 			const configWithDynamicKeys = this.config as Record<string, any>;
 
-			if (this.isDebugLogActive) {
-				this.log.debug(`Setze Wert für endpunkt: ${configWithDynamicKeys.endpunkt}`);
-				this.log.debug(`Setze Fusspunkt: ${configWithDynamicKeys.fusspunkt}`);
-			}
-
 			await this.setOwnStateIfDifferent(
 				getDpPath("heating_curve_end_point"),
 				configWithDynamicKeys.endpunkt,
@@ -427,7 +422,7 @@ class Lwd50a extends utils.Adapter {
 				}
 				isFinished = true;
 				reject(new Error("Timeout (10s): Luxtronik hat keine Antwort geliefert."));
-			}, 10000);
+			}, 25000);
 
 			this.pump.read((err: any, data: any): void => {
 				if (isFinished) {
@@ -455,7 +450,7 @@ class Lwd50a extends utils.Adapter {
 				}
 				isFinished = true;
 				reject(new Error(`Timeout (10s) beim Schreiben von [${cmd}].`));
-			}, 10000);
+			}, 25000);
 
 			const cb = (err: any): void => {
 				if (isFinished) {
@@ -680,26 +675,57 @@ class Lwd50a extends utils.Adapter {
 	}
 
 	private async onStateChange(id: string, state: ioBroker.State | null | undefined): Promise<void> {
-		if (!state || state.ack) {
+		if (!state) {
 			return;
 		}
 
-		// Dynamischer Bewegungsmelder-Trigger (Externe States)
+		// =========================================================
+		// 1. EXTERNE SENSOREN (Kommen von Fremd-Adaptern mit ack: true)
+		// =========================================================
 		const sensorKeys = ["ZIP_Bewegung_Pfad_1", "ZIP_Bewegung_Pfad_2", "ZIP_Bewegung_Pfad_3"] as const;
 		for (const key of sensorKeys) {
 			const pathState = await this.getStateAsync(getDpPath(key));
 			const path = pathState?.val as string;
 
 			if (path && path.length > 0 && id === path && state.val === true) {
-				const lastChange = state.lc || 0;
-				if (lastChange < Date.now() - 10 * 60 * 1000) {
+				const now = Date.now();
+
+				// NEU: Hardware-Status der ZIP abfragen (Single Source of Truth)
+				const zipOutState = await this.getStateAsync(getDpPath("ZIPout"));
+
+				// lc = Last Change (Zeitstempel der letzten Änderung in Millisekunden)
+				const lastZipChange = zipOutState?.lc || 0;
+
+				// Prüfen, ob die Pumpe in den letzten 10 Minuten (600.000 ms) geschaltet hat
+				const configWithDynamicKeys = this.config as Record<string, any>;
+
+				if (now - lastZipChange > configWithDynamicKeys.zip_last_run_min * 1000) {
 					if (this.isDebugLogActive) {
-						this.log.info(`Bewegung an ${path} erkannt. Triggere ZIP Makro.`);
+						this.log.info(
+							`Bewegung an ${path} erkannt. Letzte ZIP-Aktion (Hardware) ist über 10 Min her. Triggere ZIP Makro.`,
+						);
 					}
+
+					// Makro als NUTZERBEFEHL (ack: false) triggern
 					await this.setState(getDpPath("Activate_Zip"), { val: true, ack: false });
+				} else {
+					if (this.isDebugLogActive) {
+						this.log.debug(
+							`Bewegung an ${path} erkannt, aber ZIP hat in den letzten 10 Minuten bereits gearbeitet.`,
+						);
+					}
 				}
+
+				// WICHTIG: Nach einem Bewegungsmelder brechen wir hier ab
 				return;
 			}
+		}
+
+		// =========================================================
+		// 2. EIGENE DATENPUNKTE (Nur ack: false = Nutzerbefehle zulassen!)
+		// =========================================================
+		if (state.ack) {
+			return;
 		}
 
 		const mappingKey = id.split(".").pop();

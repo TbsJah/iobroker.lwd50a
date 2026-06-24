@@ -103,10 +103,6 @@ class Lwd50a extends utils.Adapter {
   async setIdleDefaults() {
     try {
       const configWithDynamicKeys = this.config;
-      if (this.isDebugLogActive) {
-        this.log.debug(`Setze Wert f\xFCr endpunkt: ${configWithDynamicKeys.endpunkt}`);
-        this.log.debug(`Setze Fusspunkt: ${configWithDynamicKeys.fusspunkt}`);
-      }
       await this.setOwnStateIfDifferent(
         (0, import_stateMapping.getDpPath)("heating_curve_end_point"),
         configWithDynamicKeys.endpunkt,
@@ -377,7 +373,7 @@ class Lwd50a extends utils.Adapter {
         }
         isFinished = true;
         reject(new Error("Timeout (10s): Luxtronik hat keine Antwort geliefert."));
-      }, 1e4);
+      }, 25e3);
       this.pump.read((err, data) => {
         if (isFinished) {
           return;
@@ -401,7 +397,7 @@ class Lwd50a extends utils.Adapter {
         }
         isFinished = true;
         reject(new Error(`Timeout (10s) beim Schreiben von [${cmd}].`));
-      }, 1e4);
+      }, 25e3);
       const cb = (err) => {
         if (isFinished) {
           return;
@@ -590,7 +586,7 @@ class Lwd50a extends utils.Adapter {
     callback();
   }
   async onStateChange(id, state) {
-    if (!state || state.ack) {
+    if (!state) {
       return;
     }
     const sensorKeys = ["ZIP_Bewegung_Pfad_1", "ZIP_Bewegung_Pfad_2", "ZIP_Bewegung_Pfad_3"];
@@ -598,15 +594,29 @@ class Lwd50a extends utils.Adapter {
       const pathState = await this.getStateAsync((0, import_stateMapping.getDpPath)(key));
       const path = pathState == null ? void 0 : pathState.val;
       if (path && path.length > 0 && id === path && state.val === true) {
-        const lastChange = state.lc || 0;
-        if (lastChange < Date.now() - 10 * 60 * 1e3) {
+        const now = Date.now();
+        const zipOutState = await this.getStateAsync((0, import_stateMapping.getDpPath)("ZIPout"));
+        const lastZipChange = (zipOutState == null ? void 0 : zipOutState.lc) || 0;
+        const configWithDynamicKeys = this.config;
+        if (now - lastZipChange > configWithDynamicKeys.zip_last_run_min * 1e3) {
           if (this.isDebugLogActive) {
-            this.log.info(`Bewegung an ${path} erkannt. Triggere ZIP Makro.`);
+            this.log.info(
+              `Bewegung an ${path} erkannt. Letzte ZIP-Aktion (Hardware) ist \xFCber 10 Min her. Triggere ZIP Makro.`
+            );
           }
           await this.setState((0, import_stateMapping.getDpPath)("Activate_Zip"), { val: true, ack: false });
+        } else {
+          if (this.isDebugLogActive) {
+            this.log.debug(
+              `Bewegung an ${path} erkannt, aber ZIP hat in den letzten 10 Minuten bereits gearbeitet.`
+            );
+          }
         }
         return;
       }
+    }
+    if (state.ack) {
+      return;
     }
     const mappingKey = id.split(".").pop();
     if (!mappingKey) {
