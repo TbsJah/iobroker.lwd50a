@@ -88,7 +88,7 @@ class Lwd50a extends utils.Adapter {
 			if (!state || state.val !== val) {
 				await this.setState(id, { val: val, ack: ack });
 				if (this.isDebugLogActive) {
-					this.log.info(`Setze Werte für ${id}: ${val}`);
+					this.log.info(`Setze Werte für ${id}: von ${state?.val} auf ${val}`);
 				}
 			}
 		} catch (err: any) {
@@ -102,11 +102,6 @@ class Lwd50a extends utils.Adapter {
 	private async setIdleDefaults(): Promise<void> {
 		try {
 			const configWithDynamicKeys = this.config as Record<string, any>;
-
-			if (this.isDebugLogActive) {
-				this.log.debug(`Setze Wert für endpunkt: ${configWithDynamicKeys.endpunkt}`);
-				this.log.debug(`Setze Fusspunkt: ${configWithDynamicKeys.fusspunkt}`);
-			}
 
 			await this.setOwnStateIfDifferent(
 				getDpPath("heating_curve_end_point"),
@@ -406,7 +401,7 @@ class Lwd50a extends utils.Adapter {
 				}
 				isFinished = true;
 				reject(new Error("Timeout (10s): Die Luxtronik-Bibliothek hat keine Antwort geliefert."));
-			}, 10000);
+			}, 15000);
 
 			this.pump.read((err: any, data: any): void => {
 				if (isFinished) {
@@ -435,7 +430,7 @@ class Lwd50a extends utils.Adapter {
 				}
 				isFinished = true;
 				reject(new Error(`Timeout (10s) beim Schreiben von Befehl [${cmd}].`));
-			}, 10000);
+			}, 15000);
 
 			const cb = (err: any): void => {
 				if (isFinished) {
