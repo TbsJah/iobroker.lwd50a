@@ -53,6 +53,13 @@ class Lwd50a extends utils.Adapter {
     await (0, import_virtualStates.initializeVirtualStates)(this);
     const debugState = await this.getStateAsync((0, import_stateMapping.getDpPath)("Schreibe_Debug_Log"));
     this.isDebugLogActive = (debugState == null ? void 0 : debugState.val) === true;
+    const sensorKeys = ["ZIP_Bewegung_Pfad_1", "ZIP_Bewegung_Pfad_2", "ZIP_Bewegung_Pfad_3"];
+    for (const key of sensorKeys) {
+      const s = await this.getStateAsync((0, import_stateMapping.getDpPath)(key));
+      if (s && s.val && typeof s.val === "string" && s.val.length > 0) {
+        this.subscribeForeignStates(s.val);
+      }
+    }
     await this.updateData();
     let intervalSeconds = this.config.interval || 30;
     if (intervalSeconds < 10) {
@@ -63,27 +70,16 @@ class Lwd50a extends utils.Adapter {
     this.pollingInterval = setInterval(() => {
       void this.updateData();
     }, intervalSeconds * 1e3);
-    const sensoren = [
-      await this.getStateAsync((0, import_stateMapping.getDpPath)("ZIP_Bewegung_Pfad_1")),
-      await this.getStateAsync((0, import_stateMapping.getDpPath)("ZIP_Bewegung_Pfad_2")),
-      await this.getStateAsync((0, import_stateMapping.getDpPath)("ZIP_Bewegung_Pfad_3"))
-    ];
-    for (const s of sensoren) {
-      if (s == null ? void 0 : s.val) {
-        this.subscribeForeignStates(s.val);
-      }
-    }
   }
   // =========================================================
   // SKRIPT-OPTIMIERUNG: HILFSFUNKTIONEN & SCHEDULE
   // =========================================================
   /**
-   * Setzt einen eigenen State nur, wenn der Wert abweicht oder noch nicht existiert.
-   * Verhindert unnötige Schreibbefehle (Traffic) an die Datenbank.
+   * Setzt einen eigenen State synchron via setState, wenn der Wert abweicht.
    *
-   * @param id Die ID des zu setzenden States.
-   * @param val Der zu setzende Wert für den State.
-   * @param ack Bestätigung des States.
+   * @param id - Die Objekt-ID des zu setzenden States
+   * @param val - Der neue Wert, der gesetzt werden soll
+   * @param ack - Acknowledged-Flag (true, wenn von Gerät bestätigt)
    */
   async setOwnStateIfDifferent(id, val, ack = false) {
     try {
@@ -94,7 +90,7 @@ class Lwd50a extends utils.Adapter {
       if (!state || state.val !== val) {
         await this.setState(id, { val, ack });
         if (this.isDebugLogActive) {
-          this.log.info(`Setze Werte f\xFCr ${id}: von ${state == null ? void 0 : state.val} zu ${val}`);
+          this.log.info(`Setze Werte f\xFCr ${id}: ${val}`);
         }
       }
     } catch (err) {
@@ -107,6 +103,10 @@ class Lwd50a extends utils.Adapter {
   async setIdleDefaults() {
     try {
       const configWithDynamicKeys = this.config;
+      if (this.isDebugLogActive) {
+        this.log.debug(`Setze Wert f\xFCr endpunkt: ${configWithDynamicKeys.endpunkt}`);
+        this.log.debug(`Setze Fusspunkt: ${configWithDynamicKeys.fusspunkt}`);
+      }
       await this.setOwnStateIfDifferent(
         (0, import_stateMapping.getDpPath)("heating_curve_end_point"),
         configWithDynamicKeys.endpunkt,
@@ -192,9 +192,7 @@ class Lwd50a extends utils.Adapter {
       const isDeaerateActive = (runDeaerateState == null ? void 0 : runDeaerateState.val) === 1 || (runDeaerateState == null ? void 0 : runDeaerateState.val) === true;
       if (isZipActive || isDeaerateActive) {
         if (this.isDebugLogActive) {
-          this.log.info(
-            "Zieltemperaturen im Leerlauf erreicht: Stoppe aktives ZIP Makro und Entl\xFCftungsprogramm..."
-          );
+          this.log.info("Bedingungen erf\xFCllt: Stoppe aktives ZIP Makro und Entl\xFCftungsprogramm...");
         }
         if (this.zipTimer) {
           clearTimeout(this.zipTimer);
@@ -228,7 +226,6 @@ class Lwd50a extends utils.Adapter {
   }
   /**
    * Führt die Überwachung und dynamische Anpassung der Heizkurve/HUP aus.
-   * Wird automatisch am Ende von updateData() aufgerufen.
    */
   async runOptimizationSchedule() {
     var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j;
@@ -244,58 +241,35 @@ class Lwd50a extends utils.Adapter {
       const istAbtauen = bzVal === "4";
       const istLeerlauf = bzVal === "5";
       if (!istHeizen && !istWarmwasser && !istLeerlauf && !istAbtauen) {
-        if (this.isDebugLogActive) {
-          this.log.debug(
-            `Betriebsmodus gewechselt von '${this.lastBzVal}' zu '${bzVal}'. Keine Optimierung vorgesehen. \xDCberspringe.`
-          );
-        }
         return;
       }
       if (bzVal !== this.lastBzVal) {
         if (this.lastBzVal === "") {
-          if (this.isDebugLogActive) {
-            this.log.debug(
-              `Adapter-Start: Initialer Betriebsmodus ist '${bzVal}'. \xDCbernehme Status, ohne Werte zu \xE4ndern.`
-            );
-          }
           this.lastBzVal = bzVal;
         } else {
-          if (this.isDebugLogActive) {
-            this.log.debug(
-              `Betriebsmodus gewechselt von '${this.lastBzVal}' zu '${bzVal}'. Setze Vorgabewerte...`
-            );
-          }
-          const configWithDynamicKeys = this.config;
+          const config = this.config;
           if (istLeerlauf) {
             await this.setIdleDefaults();
           } else if (istHeizen) {
-            await this.setOwnStateIfDifferent(
-              (0, import_stateMapping.getDpPath)("zip_aktiv"),
-              configWithDynamicKeys.zip_aktiv,
-              false
-            );
+            await this.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("zip_aktiv"), config.zip_aktiv, false);
             await this.setOwnStateIfDifferent(
               (0, import_stateMapping.getDpPath)("heating_system_circ_pump_voltage_minimal"),
-              configWithDynamicKeys.sync_heating_system_circ_pump_voltage_minimal,
+              config.sync_heating_system_circ_pump_voltage_minimal,
               false
             );
             await this.setOwnStateIfDifferent(
               (0, import_stateMapping.getDpPath)("heating_system_circ_pump_voltage_nominal"),
-              configWithDynamicKeys.sync_heating_system_circ_pump_voltage_nominal,
+              config.sync_heating_system_circ_pump_voltage_nominal,
               false
             );
             await this.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("Heizen_nach_Wasser"), true, true);
           } else if (istWarmwasser) {
             await this.setOwnStateIfDifferent(
               (0, import_stateMapping.getDpPath)("hotWaterTemperatureHysteresis"),
-              configWithDynamicKeys.hysterese_ww,
+              config.hysterese_ww,
               false
             );
-            await this.setOwnStateIfDifferent(
-              (0, import_stateMapping.getDpPath)("zip_aktiv"),
-              configWithDynamicKeys.zip_aktiv_ww,
-              false
-            );
+            await this.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("zip_aktiv"), config.zip_aktiv_ww, false);
             await this.setOwnStateIfDifferent(
               (0, import_stateMapping.getDpPath)("heating_system_circ_pump_voltage_nominal"),
               10,
@@ -355,10 +329,10 @@ class Lwd50a extends utils.Adapter {
         if (aelterAls10 && vd1) {
           const fusspunkt = (_j = await this.getStateAsync((0, import_stateMapping.getDpPath)("heating_curve_parallel_offset"))) == null ? void 0 : _j.val;
           if (fusspunkt === 35) {
-            const configWithDynamicKeys = this.config;
+            const config = this.config;
             await this.setOwnStateIfDifferent(
               (0, import_stateMapping.getDpPath)("heating_curve_parallel_offset"),
-              configWithDynamicKeys.fusspunkt,
+              config.fusspunkt,
               false
             );
           }
@@ -372,48 +346,27 @@ class Lwd50a extends utils.Adapter {
           if (aelterAls10) {
             await this.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("Heizen_nach_Wasser"), false, true);
           }
-        } else {
-          if (!nachWasser) {
-            await this.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("Heizen_nach_Wasser"), true, true);
-          }
+        } else if (!nachWasser) {
+          await this.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("Heizen_nach_Wasser"), true, true);
         }
         if (wwSoll - wwIst > 2 && ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1) {
-          if (this.isDebugLogActive) {
-            this.log.debug("Starte WW Erzeugung nach Heizung");
-          }
           await this.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("hotWaterTemperatureHysteresis"), 2, false);
         }
       }
-      if (istWarmwasser) {
-        if (nachWasser) {
-          await this.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("heating_curve_parallel_offset"), 35, false);
-        }
+      if (istWarmwasser && nachWasser) {
+        await this.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("heating_curve_parallel_offset"), 35, false);
       }
       if (istLeerlauf) {
         if (wwIst <= wwSoll - wwHysterese || ruecklauf <= ruecklaufSoll - heizenHysterese) {
           await this.stopZipAndDeaeration();
         }
         if (wwSoll - wwIst >= wwHysterese - 1.5 && ruecklauf <= ruecklaufSoll && betriebsart !== 4 && heatingStateStr !== "Heizgrenze") {
-          if (this.isDebugLogActive) {
-            this.log.debug(
-              `Setze 35 Grad Fu\xDFpunkt: WW-Soll (${wwSoll}) - WW-Ist (${wwIst}) >= Hysterese (${wwHysterese}) - 1.5 UND R\xFCcklauf (${ruecklauf}) <= Soll (${ruecklaufSoll})`
-            );
-          }
           await this.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("heating_curve_parallel_offset"), 35, false);
         }
       }
     } catch (err) {
       this.log.error(`Fehler im runOptimizationSchedule-Ablauf: ${err.message}`);
     }
-  }
-  formatSecondsToHMS(totalSeconds) {
-    if (totalSeconds < 0 || isNaN(totalSeconds)) {
-      return "00:00:00";
-    }
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor(totalSeconds % 3600 / 60);
-    const seconds = totalSeconds % 60;
-    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
   }
   readPumpAsync() {
     return new Promise((resolve, reject) => {
@@ -423,7 +376,7 @@ class Lwd50a extends utils.Adapter {
           return;
         }
         isFinished = true;
-        reject(new Error("Timeout (10s): Die Luxtronik-Bibliothek hat keine Antwort geliefert."));
+        reject(new Error("Timeout (10s): Luxtronik hat keine Antwort geliefert."));
       }, 1e4);
       this.pump.read((err, data) => {
         if (isFinished) {
@@ -447,7 +400,7 @@ class Lwd50a extends utils.Adapter {
           return;
         }
         isFinished = true;
-        reject(new Error(`Timeout (10s) beim Schreiben von Befehl [${cmd}].`));
+        reject(new Error(`Timeout (10s) beim Schreiben von [${cmd}].`));
       }, 1e4);
       const cb = (err) => {
         if (isFinished) {
@@ -468,14 +421,23 @@ class Lwd50a extends utils.Adapter {
       }
     });
   }
-  async updateData() {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _i;
-    if (this.updateRunning) {
-      this.log.debug("Polling \xFCbersprungen - letzter Zyklus l\xE4uft noch.");
-      return;
+  /**
+   * Konvertiert reine Sekunden in das Format HH:MM:SS
+   *
+   * @param totalSeconds Die Anzahl der Sekunden, die formatiert werden sollen.
+   */
+  formatSecondsToHMS(totalSeconds) {
+    if (totalSeconds < 0 || isNaN(totalSeconds)) {
+      return "00:00:00";
     }
-    if (!this.pump) {
-      this.log.error("Abfrage abgebrochen: Keine aktive Verbindung zur W\xE4rmepumpe vorhanden.");
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor(totalSeconds % 3600 / 60);
+    const seconds = Math.floor(totalSeconds % 60);
+    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+  }
+  async updateData() {
+    var _a, _b, _c, _d, _e, _f, _g, _h;
+    if (this.updateRunning) {
       return;
     }
     this.updateRunning = true;
@@ -486,23 +448,19 @@ class Lwd50a extends utils.Adapter {
       try {
         rawParams = await (0, import_rawFunctions.readAllRaw)(this, 3003);
       } catch (err) {
-        this.log.debug(`Raw-Parameter (3003) nicht verf\xFCgbar: ${err.message}`);
+        this.log.debug(`Raw 3003 Fehler: ${err.message}`);
       }
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((r) => setTimeout(r, 500));
       try {
         rawValues = await (0, import_rawFunctions.readAllRaw)(this, 3004);
       } catch (err) {
-        this.log.debug(`Raw-Messwerte (3004) nicht verf\xFCgbar: ${err.message}`);
+        this.log.debug(`Raw 3004 Fehler: ${err.message}`);
       }
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((r) => setTimeout(r, 500));
       try {
         coolchipData = await this.readPumpAsync();
       } catch (err) {
-        if ((_a = err.message) == null ? void 0 : _a.toLowerCase().includes("busy")) {
-          this.log.warn("W\xE4rmepumpe ist ausgelastet (busy). \xDCberspringe diesen Abfrage-Zyklus.");
-        } else {
-          this.log.error(`Verbindungsfehler beim Einlesen der Daten: ${err.message}`);
-        }
+        this.log.error(`Verbindungsfehler: ${err.message}`);
       }
       if (!coolchipData) {
         return;
@@ -511,107 +469,65 @@ class Lwd50a extends utils.Adapter {
         if (definition.isVirtual) {
           continue;
         }
-        const configWithDynamicKeys = this.config;
-        if (configWithDynamicKeys[`sync_${key}`] === false) {
+        const config = this.config;
+        if (config[`sync_${key}`] === false) {
           continue;
         }
         const luxId = definition.luxWriteId || key;
         let value = void 0;
         if (definition.dataSource) {
           switch (definition.dataSource) {
-            case "raw_parameter": {
-              const index = parseInt(luxId, 10);
-              if (!isNaN(index) && (rawParams == null ? void 0 : rawParams[index]) !== void 0) {
-                value = rawParams[index];
-                if (definition.factor) {
-                  value /= definition.factor;
-                }
+            case "raw_parameter":
+              value = rawParams == null ? void 0 : rawParams[parseInt(luxId, 10)];
+              if (value !== void 0 && definition.factor) {
+                value /= definition.factor;
               }
               break;
-            }
-            case "raw_value": {
-              const index = parseInt(luxId, 10);
-              if (!isNaN(index) && (rawValues == null ? void 0 : rawValues[index]) !== void 0) {
-                value = rawValues[index];
-                if (definition.factor) {
-                  value /= definition.factor;
-                }
+            case "raw_value":
+              value = rawValues == null ? void 0 : rawValues[parseInt(luxId, 10)];
+              if (value !== void 0 && definition.factor) {
+                value /= definition.factor;
               }
               break;
-            }
             case "parameter":
-              value = (_b = coolchipData == null ? void 0 : coolchipData.parameters) == null ? void 0 : _b[luxId];
+              value = (_a = coolchipData == null ? void 0 : coolchipData.parameters) == null ? void 0 : _a[luxId];
               break;
             case "value":
-              value = (_c = coolchipData == null ? void 0 : coolchipData.values) == null ? void 0 : _c[luxId];
+              value = (_b = coolchipData == null ? void 0 : coolchipData.values) == null ? void 0 : _b[luxId];
               break;
             case "additional":
-              value = (_d = coolchipData == null ? void 0 : coolchipData.additional) == null ? void 0 : _d[luxId];
+              value = (_c = coolchipData == null ? void 0 : coolchipData.additional) == null ? void 0 : _c[luxId];
               break;
           }
         } else {
-          const isRawNumber = /^\d+$/.test(luxId);
-          if (isRawNumber) {
-            const index = parseInt(luxId, 10);
-            if (!isNaN(index)) {
-              if (definition.folder.startsWith("Einstellungen") && (rawParams == null ? void 0 : rawParams[index]) !== void 0) {
-                value = rawParams[index];
-              } else if (definition.folder.startsWith("Informationen") && (rawValues == null ? void 0 : rawValues[index]) !== void 0) {
-                value = rawValues[index];
-              }
-              if (value !== void 0 && typeof value === "number" && definition.factor) {
-                value = value / definition.factor;
-              }
+          if (/^\d+$/.test(luxId)) {
+            const idx = parseInt(luxId, 10);
+            value = definition.folder.startsWith("Einstellungen") ? rawParams == null ? void 0 : rawParams[idx] : rawValues == null ? void 0 : rawValues[idx];
+            if (value !== void 0 && definition.factor) {
+              value /= definition.factor;
             }
           } else {
-            value = (_i = (_g = (_e = coolchipData == null ? void 0 : coolchipData.values) == null ? void 0 : _e[luxId]) != null ? _g : (_f = coolchipData == null ? void 0 : coolchipData.parameters) == null ? void 0 : _f[luxId]) != null ? _i : (_h = coolchipData == null ? void 0 : coolchipData.additional) == null ? void 0 : _h[luxId];
+            value = (_h = (_f = (_d = coolchipData == null ? void 0 : coolchipData.values) == null ? void 0 : _d[luxId]) != null ? _f : (_e = coolchipData == null ? void 0 : coolchipData.parameters) == null ? void 0 : _e[luxId]) != null ? _h : (_g = coolchipData == null ? void 0 : coolchipData.additional) == null ? void 0 : _g[luxId];
           }
         }
         if (value !== void 0) {
           if (definition.type === "number" && typeof value === "string") {
-            const textVal = value.toLowerCase();
-            value = textVal === "ein" ? 1 : textVal === "aus" ? 0 : parseFloat(value);
+            value = value.toLowerCase() === "ein" ? 1 : value.toLowerCase() === "aus" ? 0 : parseFloat(value);
           } else if (definition.type === "boolean") {
-            if (typeof value === "string") {
-              const textVal = value.toLowerCase();
-              value = textVal === "ein" || textVal === "true" || textVal === "1";
-            } else {
-              value = value === true || value === 1;
-            }
+            value = value === true || value === 1 || String(value).toLowerCase() === "ein" || String(value).toLowerCase() === "true";
           } else if (definition.type === "json" && typeof value === "object") {
             value = JSON.stringify(value);
           }
           let targetType = definition.type === "json" ? "string" : definition.type;
-          let targetRole = definition.role;
-          let targetUnit = definition.unit;
-          if (definition.unit === "s") {
-            const totalSeconds = typeof value === "number" ? value : parseInt(value, 10);
-            if (!isNaN(totalSeconds)) {
-              value = this.formatSecondsToHMS(totalSeconds);
-              targetType = "string";
-              targetRole = "text";
-              targetUnit = void 0;
-            }
-          } else if (definition.role === "value.datetime") {
-            const totalSeconds = typeof value === "number" ? value : parseInt(value, 10);
-            if (!isNaN(totalSeconds) && totalSeconds >= 0) {
-              if (totalSeconds < 86400) {
-                const h = Math.floor(totalSeconds / 3600).toString().padStart(2, "0");
-                const m = Math.floor(totalSeconds % 3600 / 60).toString().padStart(2, "0");
-                value = `${h}:${m}`;
-              } else {
-                value = new Date(totalSeconds * 1e3).toLocaleString("de-DE");
-              }
-              targetType = "string";
-              targetUnit = void 0;
-            }
+          if (definition.unit === "s" && typeof value === "number") {
+            value = this.formatSecondsToHMS(value);
+            targetType = "string";
           }
-          const folderId = definition.folder;
-          const stateId = `${folderId}.${key}`;
+          const stateId = `${definition.folder}.${key}`;
           if (!this.createdStates.has(stateId)) {
-            await this.setObjectNotExistsAsync(folderId, {
+            await this.setObjectNotExistsAsync(definition.folder, {
               type: "channel",
-              common: { name: folderId.split(".").pop() || folderId },
+              common: { name: definition.folder.split(".").pop() || definition.folder },
               native: {}
             });
             await this.setObjectNotExistsAsync(stateId, {
@@ -619,8 +535,8 @@ class Lwd50a extends utils.Adapter {
               common: {
                 name: definition.name,
                 type: targetType,
-                role: targetRole,
-                unit: targetUnit,
+                role: definition.role,
+                unit: definition.unit,
                 read: true,
                 write: definition.write || false,
                 min: definition.min,
@@ -634,7 +550,7 @@ class Lwd50a extends utils.Adapter {
             }
             this.createdStates.add(stateId);
           }
-          await this.setStateChangedAsync(stateId, { val: value, ack: true });
+          await this.setState(stateId, { val: value, ack: true });
         }
       }
       await (0, import_virtualStates.calculateTotalThermalEnergy)(this);
@@ -643,162 +559,97 @@ class Lwd50a extends utils.Adapter {
       await (0, import_virtualStates.updateOutageHistory)(this, rawValues);
       await (0, import_virtualStates.calculateTemperatureSpread)(this);
       await this.runOptimizationSchedule();
-    } catch (catchErr) {
-      this.log.error(`Fehler im updateData-Ablauf: ${catchErr.message}`);
+    } catch (err) {
+      this.log.error(`Fehler im updateData-Ablauf: ${err.message}`);
     } finally {
       this.updateRunning = false;
     }
   }
   onUnload(callback) {
-    try {
-      if (this.pollingInterval) {
-        clearInterval(this.pollingInterval);
-        this.pollingInterval = void 0;
-        if (this.isDebugLogActive) {
-          this.log.info("Polling-Intervall erfolgreich gestoppt.");
-        }
-      }
-      if (this.pump && typeof this.pump.disconnect === "function") {
-        this.pump.disconnect();
-      }
-      if (this.zipTimer) {
-        clearTimeout(this.zipTimer);
-        this.zipTimer = void 0;
-      }
-      if (this.isDebugLogActive) {
-        this.log.info("Adapter wurde sauber beendet.");
-      }
-      callback();
-    } catch (err) {
-      this.log.error(`Fehler beim Beenden des Adapters: ${err.message}`);
-      callback();
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
     }
+    if (this.pump && typeof this.pump.disconnect === "function") {
+      this.pump.disconnect();
+    }
+    if (this.zipTimer) {
+      clearTimeout(this.zipTimer);
+    }
+    callback();
   }
   async onStateChange(id, state) {
     if (!state || state.ack) {
-      if (!state) {
-        if (this.isDebugLogActive) {
-          this.log.info(`State ${id} wurde gel\xF6scht.`);
-        }
-      }
       return;
     }
-    if (this.isDebugLogActive) {
-      this.log.info(`Nutzerbefehl empfangen f\xFCr ${id}: ${state.val}`);
+    const sensorKeys = ["ZIP_Bewegung_Pfad_1", "ZIP_Bewegung_Pfad_2", "ZIP_Bewegung_Pfad_3"];
+    for (const key of sensorKeys) {
+      const pathState = await this.getStateAsync((0, import_stateMapping.getDpPath)(key));
+      const path = pathState == null ? void 0 : pathState.val;
+      if (path && path.length > 0 && id === path && state.val === true) {
+        const lastChange = state.lc || 0;
+        if (lastChange < Date.now() - 10 * 60 * 1e3) {
+          if (this.isDebugLogActive) {
+            this.log.info(`Bewegung an ${path} erkannt. Triggere ZIP Makro.`);
+          }
+          await this.setState((0, import_stateMapping.getDpPath)("Activate_Zip"), { val: true, ack: false });
+        }
+        return;
+      }
     }
     const mappingKey = id.split(".").pop();
     if (!mappingKey) {
-      this.log.warn(`Ung\xFCltiger State-Schl\xFCssel aus ID extrahiert: ${id}`);
       return;
     }
     const definition = import_stateMapping.STATE_MAPPING[mappingKey];
     if (!definition) {
-      this.log.warn(`Kein Mapping f\xFCr ${mappingKey} gefunden.`);
       return;
     }
     try {
       if (mappingKey === "Schreibe_Debug_Log") {
         this.isDebugLogActive = state.val === true;
-        if (this.isDebugLogActive) {
-          this.log.info(`Erweitertes Logging ist nun ${this.isDebugLogActive ? "AKTIV" : "DEAKTIVIERT"}`);
-        }
         await this.setState(id, { val: state.val, ack: true });
         return;
       }
-      if (mappingKey === "Regelung_Aktiv") {
-        if (this.isDebugLogActive) {
-          this.log.info(`Interner Schalter bet\xE4tigt: Regelung ist nun ${state.val ? "AKTIV" : "PAUSIERT"}`);
-        }
+      if (mappingKey === "Regelung_Aktiv" || mappingKey === "zip_aktiv" || mappingKey.startsWith("ZIP_Bewegung_Pfad_")) {
         await this.setState(id, { val: state.val, ack: true });
         return;
       }
-      if (mappingKey === "Setze_Vorgabewerte") {
-        if (state.val === true) {
-          this.log.info("Manueller Trigger: Setze alle Vorgabewerte auf Leerlauf-Standard zur\xFCck...");
-          await this.setIdleDefaults();
-          await this.setState(id, { val: false, ack: true });
-          this.log.info("Vorgabewerte erfolgreich gesetzt.");
-        }
+      if (mappingKey === "Setze_Vorgabewerte" && state.val === true) {
+        await this.setIdleDefaults();
+        await this.setState(id, { val: false, ack: true });
         return;
       }
-      if (mappingKey === "zip_aktiv") {
-        if (this.isDebugLogActive) {
-          this.log.info(`Zip Dauer auf ${state.val} ge\xE4ndert`);
-        }
-        await this.setState(id, { val: state.val, ack: true });
+      if (mappingKey === "Dump_Raw_To_Log" && state.val === true) {
+        await (0, import_rawFunctions.dumpAllRawToLog)(this);
+        await this.setState(id, { val: false, ack: true });
         return;
-      }
-      if (mappingKey === "Dump_Raw_To_Log") {
-        if (state.val === true) {
-          if (this.isDebugLogActive) {
-            this.log.info("Manueller Raw-Dump \xFCber Datenpunkt getriggert...");
-          }
-          await (0, import_rawFunctions.dumpAllRawToLog)(this);
-          await this.setState(id, { val: false, ack: true });
-        }
-        return;
-      }
-      if (mappingKey == null ? void 0 : mappingKey.startsWith("ZIP_Bewegung_Pfad_")) {
-        await this.setState(id, { val: state.val, ack: true });
-        return;
-      }
-      const sensoren = [
-        await this.getStateAsync((0, import_stateMapping.getDpPath)("ZIP_Bewegung_Pfad_1")),
-        await this.getStateAsync((0, import_stateMapping.getDpPath)("ZIP_Bewegung_Pfad_2")),
-        await this.getStateAsync((0, import_stateMapping.getDpPath)("ZIP_Bewegung_Pfad_3"))
-      ];
-      for (const s of sensoren) {
-        const sensorPath = s == null ? void 0 : s.val;
-        if (sensorPath && id === sensorPath && state.val === true) {
-          const lastChange = state.lc || 0;
-          const vorZehnMinuten = Date.now() - 10 * 60 * 1e3;
-          if (lastChange < vorZehnMinuten) {
-            this.log.info(`Bewegung an ${id} erkannt (\xE4lter als 10 Min). Triggere ZIP.`);
-            await this.setStateAsync((0, import_stateMapping.getDpPath)("Activate_Zip"), { val: true, ack: false });
-          }
-        }
       }
       if (mappingKey === "Activate_Zip") {
         if (state.val === true) {
           const durationState = await this.getStateAsync((0, import_stateMapping.getDpPath)("zip_aktiv"));
           const durationSeconds = durationState && typeof durationState.val === "number" ? durationState.val : 120;
           if (durationSeconds <= 0) {
-            this.log.warn("ZIP Makro abgebrochen: Die eingestellte Dauer ist 0 oder ung\xFCltig.");
             await this.setState(id, { val: false, ack: true });
             return;
           }
           const bzState = await this.getStateAsync((0, import_stateMapping.getDpPath)("WP_BZ_akt"));
           const bzVal = bzState ? Number(bzState.val) : 5;
-          const wwIstState = await this.getStateAsync((0, import_stateMapping.getDpPath)("Wamwassertemperatur_Ist"));
-          const wwSollState = await this.getStateAsync((0, import_stateMapping.getDpPath)("Wamwassertemperatur_Soll"));
-          const wwHystereseState = await this.getStateAsync((0, import_stateMapping.getDpPath)("hotWaterTemperatureHysteresis"));
-          const wwIst = wwIstState ? Number(wwIstState.val) : 0;
-          const wwSoll = wwSollState ? Number(wwSollState.val) : 0;
-          const wwHyst = wwHystereseState ? Number(wwHystereseState.val) : 0;
-          const ruecklaufState = await this.getStateAsync((0, import_stateMapping.getDpPath)("temperature_return"));
-          const rueckSollState = await this.getStateAsync((0, import_stateMapping.getDpPath)("temperature_target_return"));
-          const heizenHystereseState = await this.getStateAsync((0, import_stateMapping.getDpPath)("returnTemperatureHysteresis"));
-          const rueck = ruecklaufState ? Number(ruecklaufState.val) : 0;
-          const rueckSoll = rueckSollState ? Number(rueckSollState.val) : 0;
-          const hzHyst = heizenHystereseState ? Number(heizenHystereseState.val) : 0;
-          const useDeaeration = bzVal === 5 && wwIst > wwSoll - wwHyst && rueck > rueckSoll - hzHyst;
+          const [wwIstS, wwSollS, wwHystS, rLState, rSollState, hzHystState] = await Promise.all([
+            this.getStateAsync((0, import_stateMapping.getDpPath)("Wamwassertemperatur_Ist")),
+            this.getStateAsync((0, import_stateMapping.getDpPath)("Wamwassertemperatur_Soll")),
+            this.getStateAsync((0, import_stateMapping.getDpPath)("hotWaterTemperatureHysteresis")),
+            this.getStateAsync((0, import_stateMapping.getDpPath)("temperature_return")),
+            this.getStateAsync((0, import_stateMapping.getDpPath)("temperature_target_return")),
+            this.getStateAsync((0, import_stateMapping.getDpPath)("returnTemperatureHysteresis"))
+          ]);
+          const useDeaeration = bzVal === 5 && Number(wwIstS == null ? void 0 : wwIstS.val) > Number(wwSollS == null ? void 0 : wwSollS.val) - Number(wwHystS == null ? void 0 : wwHystS.val) && Number(rLState == null ? void 0 : rLState.val) > Number(rSollState == null ? void 0 : rSollState.val) - Number(hzHystState == null ? void 0 : hzHystState.val);
           if (this.zipTimer) {
-            if (this.isDebugLogActive) {
-              this.log.info(
-                `ZIP Makro wird verl\xE4ngert. Setze Abschalt-Timer neu auf ${durationSeconds} Sekunden.`
-              );
-            }
             clearTimeout(this.zipTimer);
             this.zipTimer = void 0;
           }
           if (useDeaeration) {
-            if (this.isDebugLogActive) {
-              this.log.info(
-                `Makro gestartet: ZIP Entl\xFCftung (Hardware) wird f\xFCr ${durationSeconds} s aktiviert (Sicherer Leerlauf)...`
-              );
-            }
             await this.writePumpAsync(158, 1, true);
-            await new Promise((resolve) => setTimeout(resolve, 100));
+            await new Promise((r) => setTimeout(r, 100));
             await this.writePumpAsync(684, 1, true);
             await this.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("runDeaerate"), 1, true);
             await this.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("hotWaterCircPumpDeaerate"), 1, true);
@@ -825,128 +676,59 @@ class Lwd50a extends utils.Adapter {
                 const s = await this.getStateAsync((0, import_stateMapping.getDpPath)(k));
                 this.originalZipConfig[k] = s ? s.val : null;
               }
-              if (this.isDebugLogActive) {
-                this.log.info(
-                  "Originale ZIP-Zirkulationstabelle f\xFCr sp\xE4tere Wiederherstellung gesichert."
-                );
-              }
             }
-            if (this.isDebugLogActive) {
-              this.log.info(
-                `Makro gestartet: ZIP Zirkulationstabelle wird f\xFCr ${durationSeconds} s (${onTimeMinutes} min) \xFCberschrieben (WP ist aktiv oder kurz davor)...`
-              );
-            }
-            const updatesRaw = [
-              { key: "hotWaterCircPumpTimerTableSelected", val: 0, raw: 0 },
-              { key: "WW_MoSo_Start1", val: "00:00", raw: 0 },
-              { key: "WW_MoSo_End1", val: "23:59", raw: 86340 },
-              { key: "WW_MoSo_Start2", val: "00:00", raw: 0 },
-              { key: "WW_MoSo_End2", val: "00:00", raw: 0 },
-              { key: "WW_MoSo_Start3", val: "00:00", raw: 0 },
-              { key: "WW_MoSo_End3", val: "00:00", raw: 0 },
-              { key: "WW_MoSo_Start4", val: "00:00", raw: 0 },
-              { key: "WW_MoSo_End4", val: "00:00", raw: 0 },
-              { key: "WW_MoSo_Start5", val: "00:00", raw: 0 },
-              { key: "WW_MoSo_End5", val: "00:00", raw: 0 },
-              { key: "hotWaterCircPumpOnTime", val: onTimeMinutes, raw: onTimeMinutes },
-              { key: "hotWaterCircPumpOffTime", val: 60, raw: 60 }
+            const updates = [
+              { key: "hotWaterCircPumpTimerTableSelected", raw: 0 },
+              { key: "WW_MoSo_Start1", raw: 0 },
+              { key: "WW_MoSo_End1", raw: 86340 },
+              { key: "WW_MoSo_Start2", raw: 0 },
+              { key: "WW_MoSo_End2", raw: 0 },
+              { key: "hotWaterCircPumpOnTime", raw: onTimeMinutes },
+              { key: "hotWaterCircPumpOffTime", raw: 60 }
             ];
-            for (const u of updatesRaw) {
-              const luxId = parseInt(import_stateMapping.STATE_MAPPING[u.key].luxWriteId, 10);
-              await this.writePumpAsync(luxId, u.raw, true);
-              await new Promise((resolve) => setTimeout(resolve, 100));
-              await this.setState((0, import_stateMapping.getDpPath)(u.key), { val: u.val, ack: true });
+            for (const u of updates) {
+              await this.writePumpAsync(parseInt(import_stateMapping.STATE_MAPPING[u.key].luxWriteId, 10), u.raw, true);
+              await new Promise((r) => setTimeout(r, 100));
             }
           }
           await this.setState(id, { val: true, ack: true });
           this.zipTimer = setTimeout(async () => {
-            if (this.isDebugLogActive) {
-              this.log.info("ZIP Makro-Zeit abgelaufen. Stelle Ursprungszustand wieder her...");
-            }
             await this.stopZipAndDeaeration();
             await this.updateData();
           }, durationSeconds * 1e3);
         } else {
-          if (this.isDebugLogActive) {
-            this.log.info("Makro manuell abgebrochen: Stelle Ursprungszustand sofort wieder her...");
-          }
           await this.stopZipAndDeaeration();
           await this.updateData();
         }
         return;
       }
       if (!definition.luxWriteId || definition.write !== true) {
-        this.log.warn(`Kein Schreib-Mapping f\xFCr ${mappingKey} vorhanden oder erlaubt.`);
         return;
-      }
-      if (typeof state.val === "number") {
-        if (definition.min !== void 0 && state.val < definition.min) {
-          this.log.warn(`Wert ${state.val} unterschreitet Minimum von ${definition.min}. Abgebrochen.`);
-          return;
-        }
-        if (definition.max !== void 0 && state.val > definition.max) {
-          this.log.warn(`Wert ${state.val} \xFCberschreitet Maximum von ${definition.max}. Abgebrochen.`);
-          return;
-        }
       }
       let valueToWrite = state.val;
       if (definition.role === "value.datetime") {
         const valStr = String(state.val).trim();
-        const timeMatch = valStr.match(/^(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?$/);
-        const dateMatch = valStr.match(
-          /^(\d{1,2})\.(\d{1,2})\.(\d{4})(?:,\s*|\s+)(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?/
-        );
+        const timeMatch = valStr.match(/^(\d{1,2}):(\d{1,2})/);
         if (timeMatch) {
-          const hour = parseInt(timeMatch[1], 10);
-          const minute = parseInt(timeMatch[2], 10);
-          const second = timeMatch[3] ? parseInt(timeMatch[3], 10) : 0;
-          valueToWrite = hour * 3600 + minute * 60 + second;
-        } else if (dateMatch) {
-          const day = parseInt(dateMatch[1], 10);
-          const month = parseInt(dateMatch[2], 10) - 1;
-          const year = parseInt(dateMatch[3], 10);
-          const hour = parseInt(dateMatch[4], 10);
-          const minute = parseInt(dateMatch[5], 10);
-          const second = dateMatch[6] ? parseInt(dateMatch[6], 10) : 0;
-          const date = new Date(year, month, day, hour, minute, second);
-          valueToWrite = Math.floor(date.getTime() / 1e3);
-        } else if (/^\d+$/.test(valStr)) {
-          valueToWrite = parseInt(valStr, 10);
-        } else {
-          this.log.error(
-            `Ung\xFCltiges Format f\xFCr ${id}: ${state.val}. Erwartet wird "HH:MM" oder "TT.MM.JJJJ, HH:MM"`
-          );
-          return;
+          valueToWrite = parseInt(timeMatch[1], 10) * 3600 + parseInt(timeMatch[2], 10) * 60;
         }
       } else if (definition.factor && typeof state.val === "number") {
         valueToWrite = state.val * definition.factor;
       }
-      const luxWriteId = definition.luxWriteId;
-      const isRawWrite = definition.dataSource === "raw_parameter" || definition.dataSource === "raw_value" || !definition.dataSource && /^\d+$/.test(luxWriteId || "");
-      if (isRawWrite && definition.unit === "\xB0C" && !definition.factor && typeof state.val === "number") {
-        this.log.info(`Raw-Temperatur erkannt. Multipliziere Wert ${state.val} mit Faktor 10 f\xFCr Luxtronik.`);
+      const isRawWrite = definition.dataSource === "raw_parameter" || definition.dataSource === "raw_value" || !definition.dataSource && /^\d+$/.test(definition.luxWriteId || "");
+      if (isRawWrite && definition.unit === "\xB0C" && typeof state.val === "number" && !definition.factor) {
         valueToWrite = state.val * 10;
       }
-      if (isRawWrite) {
-        const paramId = parseInt(luxWriteId, 10);
-        if (this.isDebugLogActive) {
-          this.log.info(`Sende RAW-NUMBER an Luxtronik: ID ${paramId} = ${valueToWrite}`);
-        }
-        await this.writePumpAsync(paramId, valueToWrite, true);
-      } else {
-        if (this.isDebugLogActive) {
-          this.log.info(`Sende STANDARD-STRING an Luxtronik: Name "${luxWriteId}" = ${valueToWrite}`);
-        }
-        await this.writePumpAsync(luxWriteId, valueToWrite, false);
-      }
-      if (this.isDebugLogActive) {
-        this.log.info(`Wert ${state.val} erfolgreich via [${luxWriteId}] an W\xE4rmepumpe \xFCbertragen.`);
-      }
+      await this.writePumpAsync(
+        isRawWrite ? parseInt(definition.luxWriteId, 10) : definition.luxWriteId,
+        valueToWrite,
+        isRawWrite
+      );
       await this.setState(id, { val: state.val, ack: true });
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((r) => setTimeout(r, 500));
       await this.updateData();
     } catch (err) {
-      this.log.error(`Fehler bei der Befehlsausf\xFChrung: ${err.message}`);
+      this.log.error(`Fehler bei Befehlsausf\xFChrung: ${err.message}`);
     }
   }
 }
