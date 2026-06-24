@@ -23,6 +23,7 @@ class Lwd50a extends utils.Adapter {
 	private zipTimer?: NodeJS.Timeout;
 	private isDebugLogActive = false;
 	private updateRunning = false;
+	private originalZipConfig: Record<string, any> | null = null; // Backup der Zirkulationstabelle
 
 	public constructor(options: Partial<utils.AdapterOptions> = {}) {
 		super({
@@ -49,7 +50,6 @@ class Lwd50a extends utils.Adapter {
 		this.isDebugLogActive = debugState?.val === true;
 
 		// Erste Abfrage sofort starten
-		this.log.info(`Hole die ersten Werte...`);
 		await this.updateData();
 
 		// Intervall aus der Konfiguration (Minimum 10 Sekunden)
@@ -75,8 +75,8 @@ class Lwd50a extends utils.Adapter {
 	 * Verhindert unnötige Schreibbefehle (Traffic) an die Datenbank.
 	 *
 	 * @param id Die ID des zu setzenden States.
-	 * @param val Der neue Wert.
-	 * @param ack Ob der Wert als bestätigt gesetzt werden soll.
+	 * @param val Der zu setzende Wert für den State.
+	 * @param ack Bestätigung des States.
 	 */
 	private async setOwnStateIfDifferent(id: string, val: any, ack = false): Promise<void> {
 		try {
@@ -88,7 +88,7 @@ class Lwd50a extends utils.Adapter {
 			if (!state || state.val !== val) {
 				await this.setState(id, { val: val, ack: ack });
 				if (this.isDebugLogActive) {
-					this.log.info(`Setze Werte für ${id}: von ${state?.val} auf ${val}`);
+					this.log.info(`Setze Werte für ${id}: von ${state?.val} zu ${val}`);
 				}
 			}
 		} catch (err: any) {
@@ -146,6 +146,87 @@ class Lwd50a extends utils.Adapter {
 	}
 
 	/**
+	 * Stellt die gesicherte ZIP Zirkulationstabelle wieder her.
+	 */
+	private async restoreOriginalZipConfig(): Promise<void> {
+		if (!this.originalZipConfig) {
+			return;
+		}
+
+		try {
+			for (const [key, val] of Object.entries(this.originalZipConfig)) {
+				if (val === null || val === undefined) {
+					continue;
+				}
+
+				const def = STATE_MAPPING[key];
+				let rawVal = val;
+
+				if (def.role === "value.datetime" && typeof val === "string") {
+					const timeMatch = val.match(/^(\d{1,2}):(\d{1,2})/);
+					if (timeMatch) {
+						rawVal = parseInt(timeMatch[1], 10) * 3600 + parseInt(timeMatch[2], 10) * 60;
+					} else {
+						rawVal = 0;
+					}
+				}
+
+				const luxId = parseInt(def.luxWriteId!, 10);
+				await this.writePumpAsync(luxId, rawVal, true);
+				await new Promise(resolve => setTimeout(resolve, 100)); // Kurze Pause für die WP
+				await this.setState(getDpPath(key as any), { val: val, ack: true });
+			}
+		} catch (err: any) {
+			this.log.error(`Fehler bei der Wiederherstellung der ZIP Konfiguration: ${err.message}`);
+		} finally {
+			this.originalZipConfig = null; // Backup löschen
+		}
+	}
+
+	/**
+	 * Prüft, ob das ZIP-Makro oder das Entlüftungsprogramm noch läuft und beendet es sicher.
+	 */
+	private async stopZipAndDeaeration(): Promise<void> {
+		try {
+			const activateZipState = await this.getStateAsync(getDpPath("Activate_Zip"));
+			const runDeaerateState = await this.getStateAsync(getDpPath("runDeaerate"));
+
+			const isZipActive = activateZipState?.val === true || this.zipTimer || this.originalZipConfig !== null;
+			const isDeaerateActive = runDeaerateState?.val === 1 || runDeaerateState?.val === true;
+
+			if (isZipActive || isDeaerateActive) {
+				if (this.isDebugLogActive) {
+					this.log.info(
+						"Zieltemperaturen im Leerlauf erreicht: Stoppe aktives ZIP Makro und Entlüftungsprogramm...",
+					);
+				}
+
+				// 1. Laufenden Timer killen
+				if (this.zipTimer) {
+					clearTimeout(this.zipTimer);
+					this.zipTimer = undefined;
+				}
+
+				// 2. Zeit-Tabelle wiederherstellen (falls überschrieben)
+				await this.restoreOriginalZipConfig();
+
+				// 3. Entlüftungsprogramm in der WP direkt hart beenden (RAW ID 158 und 684)
+				await this.writePumpAsync(158, 0, true);
+				await new Promise(resolve => setTimeout(resolve, 100));
+				await this.writePumpAsync(684, 0, true);
+				await new Promise(resolve => setTimeout(resolve, 100));
+
+				// 4. ioBroker Datenpunkte sauber auf "Aus" (0/false) setzen
+				await this.setOwnStateIfDifferent(getDpPath("runDeaerate"), 0, true);
+				await this.setOwnStateIfDifferent(getDpPath("hotWaterCircPumpDeaerate"), 0, true);
+				await this.setOwnStateIfDifferent(getDpPath("Activate_Zip"), false, true);
+			}
+		} catch (err: any) {
+			this.log.error(`Fehler beim Stoppen von ZIP/Entlüftung: ${err.message}`);
+		}
+	}
+
+	/**
 	 * Prüft, ob der letzte Wechsel des Anlagenstatus länger als 10 Minuten her ist.
 	 */
 	private async istAnlageAelterAls10Min(): Promise<boolean> {
@@ -169,7 +250,6 @@ class Lwd50a extends utils.Adapter {
 			// =========================================================
 			const regelungAktiv = await this.getStateAsync(getDpPath("Regelung_Aktiv"));
 
-			// Wenn der Schalter explizit vom Nutzer ausgeschaltet wurde, brechen wir hier sofort ab!
 			if (regelungAktiv?.val === false) {
 				return;
 			}
@@ -195,11 +275,7 @@ class Lwd50a extends utils.Adapter {
 			// =========================================================
 			// VORGABEWERTE BEI BETRIEBSMODUS-WECHSEL SEAMLESS SETZEN
 			// =========================================================
-			// =========================================================
-			// VORGABEWERTE BEI BETRIEBSMODUS-WECHSEL SEAMLESS SETZEN
-			// =========================================================
 			if (bzVal !== this.lastBzVal) {
-				// NEU: Beim allerersten Start (lastBzVal ist noch leer) nichts überschreiben!
 				if (this.lastBzVal === "") {
 					if (this.isDebugLogActive) {
 						this.log.debug(
@@ -208,7 +284,6 @@ class Lwd50a extends utils.Adapter {
 					}
 					this.lastBzVal = bzVal;
 				} else {
-					// Regulärer Moduswechsel im laufenden Betrieb
 					if (this.isDebugLogActive) {
 						this.log.debug(
 							`Betriebsmodus gewechselt von '${this.lastBzVal}' zu '${bzVal}'. Setze Vorgabewerte...`,
@@ -307,7 +382,7 @@ class Lwd50a extends utils.Adapter {
 			const hupAktiv = (hupAktivState?.val as number) ?? 0;
 			const heizenHysterese = (heizenHystereseState?.val as number) ?? 0;
 			const nachWasser = nachWasserState?.val;
-			const betriebsart = (bzState?.val as number) ?? 0; // Direkt aus bzState recycelt!
+			const betriebsart = (bzState?.val as number) ?? 0;
 
 			// =========================================================
 			// 3. REINE REGEL-LOGIK (FORTLAUFENDES POLLING IM BETRIEB)
@@ -361,6 +436,11 @@ class Lwd50a extends utils.Adapter {
 			}
 
 			if (istLeerlauf) {
+				// ZIP/Entlüftung abschalten, wenn Ziele erreicht sind
+				if (wwIst <= wwSoll - wwHysterese || ruecklauf <= ruecklaufSoll - heizenHysterese) {
+					await this.stopZipAndDeaeration();
+				}
+
 				if (
 					wwSoll - wwIst >= wwHysterese - 1.5 &&
 					ruecklauf <= ruecklaufSoll &&
@@ -401,7 +481,7 @@ class Lwd50a extends utils.Adapter {
 				}
 				isFinished = true;
 				reject(new Error("Timeout (10s): Die Luxtronik-Bibliothek hat keine Antwort geliefert."));
-			}, 15000);
+			}, 10000);
 
 			this.pump.read((err: any, data: any): void => {
 				if (isFinished) {
@@ -430,7 +510,7 @@ class Lwd50a extends utils.Adapter {
 				}
 				isFinished = true;
 				reject(new Error(`Timeout (10s) beim Schreiben von Befehl [${cmd}].`));
-			}, 15000);
+			}, 10000);
 
 			const cb = (err: any): void => {
 				if (isFinished) {
@@ -453,6 +533,7 @@ class Lwd50a extends utils.Adapter {
 			}
 		});
 	}
+
 	private async updateData(): Promise<void> {
 		if (this.updateRunning) {
 			this.log.debug("Polling übersprungen - letzter Zyklus läuft noch.");
@@ -481,16 +562,18 @@ class Lwd50a extends utils.Adapter {
 				this.log.debug(`Raw-Parameter (3003) nicht verfügbar: ${err.message}`);
 			}
 
-			// 250 Millisekunden Atempause für den WP-Prozessor
-			await new Promise(resolve => setTimeout(resolve, 250));
+			// 500 Millisekunden Atempause für den WP-Prozessor
+			await new Promise(resolve => setTimeout(resolve, 500));
+
 			try {
 				rawValues = await readAllRaw(this, 3004);
 			} catch (err: any) {
 				this.log.debug(`Raw-Messwerte (3004) nicht verfügbar: ${err.message}`);
 			}
 
-			// Noch einmal 250 Millisekunden Atempause
-			await new Promise(resolve => setTimeout(resolve, 250));
+			// Noch einmal 500 Millisekunden Atempause
+			await new Promise(resolve => setTimeout(resolve, 500));
+
 			try {
 				coolchipData = await this.readPumpAsync();
 			} catch (err: any) {
@@ -500,6 +583,7 @@ class Lwd50a extends utils.Adapter {
 					this.log.error(`Verbindungsfehler beim Einlesen der Daten: ${err.message}`);
 				}
 			}
+
 			if (!coolchipData) {
 				return; // Abbruch, wenn Hauptabfrage fehlschlägt
 			}
@@ -736,7 +820,7 @@ class Lwd50a extends utils.Adapter {
 				if (this.isDebugLogActive) {
 					this.log.info(`Erweitertes Logging ist nun ${this.isDebugLogActive ? "AKTIV" : "DEAKTIVIERT"}`);
 				}
-				await this.setStateAsync(id, { val: state.val, ack: true });
+				await this.setState(id, { val: state.val, ack: true });
 				return;
 			}
 
@@ -744,7 +828,7 @@ class Lwd50a extends utils.Adapter {
 				if (this.isDebugLogActive) {
 					this.log.info(`Interner Schalter betätigt: Regelung ist nun ${state.val ? "AKTIV" : "PAUSIERT"}`);
 				}
-				await this.setStateAsync(id, { val: state.val, ack: true });
+				await this.setState(id, { val: state.val, ack: true });
 				return;
 			}
 
@@ -752,7 +836,7 @@ class Lwd50a extends utils.Adapter {
 				if (state.val === true) {
 					this.log.info("Manueller Trigger: Setze alle Vorgabewerte auf Leerlauf-Standard zurück...");
 					await this.setIdleDefaults();
-					await this.setStateAsync(id, { val: false, ack: true });
+					await this.setState(id, { val: false, ack: true });
 					this.log.info("Vorgabewerte erfolgreich gesetzt.");
 				}
 				return;
@@ -762,7 +846,7 @@ class Lwd50a extends utils.Adapter {
 				if (this.isDebugLogActive) {
 					this.log.info(`Zip Dauer auf ${state.val} geändert`);
 				}
-				await this.setStateAsync(id, { val: state.val, ack: true });
+				await this.setState(id, { val: state.val, ack: true });
 				return;
 			}
 
@@ -772,74 +856,117 @@ class Lwd50a extends utils.Adapter {
 						this.log.info("Manueller Raw-Dump über Datenpunkt getriggert...");
 					}
 					await dumpAllRawToLog(this);
-					await this.setStateAsync(id, { val: false, ack: true });
+					await this.setState(id, { val: false, ack: true });
 				}
 				return;
 			}
 
 			if (mappingKey === "Activate_Zip") {
 				if (state.val === true) {
-					// 1. Dauer auslesen
+					// 1. Dauer auslesen und auf Minuten aufrunden
 					const durationState = await this.getStateAsync(getDpPath("zip_aktiv"));
 					const durationSeconds =
 						durationState && typeof durationState.val === "number" ? durationState.val : 120;
 
 					if (durationSeconds <= 0) {
 						this.log.warn("ZIP Makro abgebrochen: Die eingestellte Dauer ist 0 oder ungültig.");
-						await this.setStateAsync(id, { val: false, ack: true });
+						await this.setState(id, { val: false, ack: true });
 						return;
 					}
 
-					// 2. Prüfen, ob die ZIP laut Hardware (ZIPout) oder Software (zipTimer) bereits läuft
-					const zipOutState = await this.getStateAsync(getDpPath("ZIPout"));
-					const isAlreadyRunning = zipOutState ? zipOutState.val === 1 || zipOutState.val === true : false;
+					const onTimeMinutes = Math.ceil(durationSeconds / 60);
 
-					if (isAlreadyRunning || this.zipTimer) {
+					// 2. Originale Werte sichern (Nur wenn das Makro nicht schon läuft!)
+					if (!this.originalZipConfig) {
+						const keysToSave = [
+							"hotWaterCircPumpTimerTableSelected",
+							"WW_MoSo_Start1",
+							"WW_MoSo_End1",
+							"WW_MoSo_Start2",
+							"WW_MoSo_End2",
+							"WW_MoSo_Start3",
+							"WW_MoSo_End3",
+							"WW_MoSo_Start4",
+							"WW_MoSo_End4",
+							"WW_MoSo_Start5",
+							"WW_MoSo_End5",
+							"hotWaterCircPumpOnTime",
+							"hotWaterCircPumpOffTime",
+						] as const;
+
+						this.originalZipConfig = {};
+						for (const k of keysToSave) {
+							const s = await this.getStateAsync(getDpPath(k));
+							this.originalZipConfig[k] = s ? s.val : null;
+						}
+
+						if (this.isDebugLogActive) {
+							this.log.info("Originale ZIP-Zirkulationstabelle für spätere Wiederherstellung gesichert.");
+						}
+					}
+
+					// 3. Laufenden Timer killen (Falls Nutzer in der VIS mehrmals klickt)
+					if (this.zipTimer) {
 						if (this.isDebugLogActive) {
 							this.log.info(
-								`ZIP ist bereits aktiv (ZIPout). Setze den Abschalt-Timer neu auf ${durationSeconds} Sekunden.`,
+								`ZIP Makro wird verlängert. Setze Abschalt-Timer neu auf ${durationSeconds} Sekunden.`,
 							);
 						}
-						if (this.zipTimer) {
-							clearTimeout(this.zipTimer);
-							this.zipTimer = undefined;
-						}
+						clearTimeout(this.zipTimer);
+						this.zipTimer = undefined;
 					} else {
 						if (this.isDebugLogActive) {
 							this.log.info(
-								`Makro gestartet: ZIP Entlüftung wird für ${durationSeconds} Sekunden aktiviert...`,
+								`Makro gestartet: ZIP Zirkulationstabelle wird für ${durationSeconds} s (${onTimeMinutes} min) überschrieben...`,
 							);
 						}
-						await this.writePumpAsync("runDeaerate", 1);
-						await new Promise(resolve => setTimeout(resolve, 1000));
-						await this.writePumpAsync("hotWaterCircPumpDeaerate", 1);
 					}
 
-					// Schalter auf true bestätigen und Werte aktualisieren
-					await this.setStateAsync(id, { val: true, ack: true });
-					await this.updateData();
+					// 4. Neue Timer-Tabelle direkt auf die Pumpe schreiben (24h an, OffTime 60)
+					const updatesRaw = [
+						{ key: "hotWaterCircPumpTimerTableSelected", val: 0, raw: 0 },
+						{ key: "WW_MoSo_Start1", val: "00:00", raw: 0 },
+						{ key: "WW_MoSo_End1", val: "23:59", raw: 86340 },
+						{ key: "WW_MoSo_Start2", val: "00:00", raw: 0 },
+						{ key: "WW_MoSo_End2", val: "00:00", raw: 0 },
+						{ key: "WW_MoSo_Start3", val: "00:00", raw: 0 },
+						{ key: "WW_MoSo_End3", val: "00:00", raw: 0 },
+						{ key: "WW_MoSo_Start4", val: "00:00", raw: 0 },
+						{ key: "WW_MoSo_End4", val: "00:00", raw: 0 },
+						{ key: "WW_MoSo_Start5", val: "00:00", raw: 0 },
+						{ key: "WW_MoSo_End5", val: "00:00", raw: 0 },
+						{ key: "hotWaterCircPumpOnTime", val: onTimeMinutes, raw: onTimeMinutes },
+						{ key: "hotWaterCircPumpOffTime", val: 60, raw: 60 },
+					];
 
-					// 3. Den Timer für die automatische Abschaltung (neu) starten
+					for (const u of updatesRaw) {
+						const luxId = parseInt(STATE_MAPPING[u.key].luxWriteId!, 10);
+						await this.writePumpAsync(luxId, u.raw, true);
+						await new Promise(resolve => setTimeout(resolve, 100));
+						await this.setState(getDpPath(u.key as any), { val: u.val, ack: true });
+					}
+
+					await this.setState(id, { val: true, ack: true });
+
+					// 5. Timer für die automatische Wiederherstellung starten
 					this.zipTimer = setTimeout(async () => {
 						if (this.isDebugLogActive) {
-							this.log.info("ZIP Entlüftung: Zeit abgelaufen. Deaktiviere Pumpe...");
+							this.log.info(
+								"ZIP Makro-Zeit abgelaufen. Stelle ursprüngliche Zirkulationstabelle wieder her...",
+							);
 						}
-						try {
-							await this.writePumpAsync("runDeaerate", 0);
-							await new Promise(resolve => setTimeout(resolve, 1000));
-							await this.writePumpAsync("hotWaterCircPumpDeaerate", 0);
 
-							await this.setStateAsync(id, { val: false, ack: true });
-							await this.updateData();
-						} catch (err: any) {
-							this.log.error(`Fehler beim automatischen Deaktivieren der ZIP: ${err.message}`);
-						}
+						await this.restoreOriginalZipConfig();
+						await this.setState(id, { val: false, ack: true });
+						await this.updateData();
 						this.zipTimer = undefined;
 					}, durationSeconds * 1000);
 				} else {
-					// Manueller Abbruch durch den User (Schalter in der VIS auf "false" gesetzt)
+					// Manueller Abbruch durch den User
 					if (this.isDebugLogActive) {
-						this.log.info("Makro manuell abgebrochen: Deaktiviere ZIP Entlüftung sofort...");
+						this.log.info(
+							"Makro manuell abgebrochen: Stelle ursprüngliche Zirkulationstabelle sofort wieder her...",
+						);
 					}
 
 					if (this.zipTimer) {
@@ -847,11 +974,8 @@ class Lwd50a extends utils.Adapter {
 						this.zipTimer = undefined;
 					}
 
-					await this.writePumpAsync("runDeaerate", 0);
-					await new Promise(resolve => setTimeout(resolve, 1000));
-					await this.writePumpAsync("hotWaterCircPumpDeaerate", 0);
-
-					await this.setStateAsync(id, { val: false, ack: true });
+					await this.restoreOriginalZipConfig();
+					await this.setState(id, { val: false, ack: true });
 					await this.updateData();
 				}
 
@@ -939,7 +1063,7 @@ class Lwd50a extends utils.Adapter {
 				this.log.info(`Wert ${state.val} erfolgreich via [${luxWriteId}] an Wärmepumpe übertragen.`);
 			}
 
-			await this.setStateAsync(id, { val: state.val, ack: true });
+			await this.setState(id, { val: state.val, ack: true });
 			await new Promise(resolve => setTimeout(resolve, 500));
 			await this.updateData();
 		} catch (err: any) {
