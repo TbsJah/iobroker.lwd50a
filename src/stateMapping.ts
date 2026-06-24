@@ -728,9 +728,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: "value.power.consumption",
 		type: "number",
 		unit: "kWh",
-		luxWriteId: "154",
-		factor: 10,
-		dataSource: "raw_value",
+		isVirtual: true,
 	},
 
 	// Energie
