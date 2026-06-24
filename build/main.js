@@ -321,7 +321,20 @@ class Lwd50a extends utils.Adapter {
   }
   readPumpAsync() {
     return new Promise((resolve, reject) => {
+      let isFinished = false;
+      const timeout = setTimeout(() => {
+        if (isFinished) {
+          return;
+        }
+        isFinished = true;
+        reject(new Error("Timeout (10s): Die Luxtronik-Bibliothek hat keine Antwort geliefert."));
+      }, 1e4);
       this.pump.read((err, data) => {
+        if (isFinished) {
+          return;
+        }
+        isFinished = true;
+        clearTimeout(timeout);
         if (err) {
           reject(err instanceof Error ? err : new Error(String(err)));
         } else {
@@ -332,7 +345,20 @@ class Lwd50a extends utils.Adapter {
   }
   writePumpAsync(cmd, val, isRaw = false) {
     return new Promise((resolve, reject) => {
+      let isFinished = false;
+      const timeout = setTimeout(() => {
+        if (isFinished) {
+          return;
+        }
+        isFinished = true;
+        reject(new Error(`Timeout (10s) beim Schreiben von Befehl [${cmd}].`));
+      }, 1e4);
       const cb = (err) => {
+        if (isFinished) {
+          return;
+        }
+        isFinished = true;
+        clearTimeout(timeout);
         if (err) {
           reject(err instanceof Error ? err : new Error(String(err)));
         } else {

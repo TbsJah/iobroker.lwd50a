@@ -371,7 +371,24 @@ class Lwd50a extends utils.Adapter {
 
 	private readPumpAsync(): Promise<any> {
 		return new Promise((resolve, reject) => {
+			let isFinished = false;
+
+			// Sicherheits-Timeout nach 10 Sekunden
+			const timeout = setTimeout(() => {
+				if (isFinished) {
+					return;
+				}
+				isFinished = true;
+				reject(new Error("Timeout (10s): Die Luxtronik-Bibliothek hat keine Antwort geliefert."));
+			}, 10000);
+
 			this.pump.read((err: any, data: any): void => {
+				if (isFinished) {
+					return;
+				}
+				isFinished = true;
+				clearTimeout(timeout);
+
 				if (err) {
 					reject(err instanceof Error ? err : new Error(String(err)));
 				} else {
@@ -383,7 +400,24 @@ class Lwd50a extends utils.Adapter {
 
 	private writePumpAsync(cmd: string | number, val: any, isRaw = false): Promise<void> {
 		return new Promise((resolve, reject) => {
+			let isFinished = false;
+
+			// Sicherheits-Timeout nach 10 Sekunden
+			const timeout = setTimeout(() => {
+				if (isFinished) {
+					return;
+				}
+				isFinished = true;
+				reject(new Error(`Timeout (10s) beim Schreiben von Befehl [${cmd}].`));
+			}, 10000);
+
 			const cb = (err: any): void => {
+				if (isFinished) {
+					return;
+				}
+				isFinished = true;
+				clearTimeout(timeout);
+
 				if (err) {
 					reject(err instanceof Error ? err : new Error(String(err)));
 				} else {
@@ -398,7 +432,6 @@ class Lwd50a extends utils.Adapter {
 			}
 		});
 	}
-
 	private async updateData(): Promise<void> {
 		if (this.updateRunning) {
 			this.log.debug("Polling übersprungen - letzter Zyklus läuft noch.");
