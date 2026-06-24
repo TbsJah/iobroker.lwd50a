@@ -1118,8 +1118,8 @@ const STATE_MAPPING = {
   runDeaerate: {
     folder: "Einstellungen.05_ZIP",
     name: "Entl\xFCftungsprogramm starten",
-    role: "indicator",
-    type: "boolean",
+    role: "value",
+    type: "number",
     write: true,
     states: { 0: "Aus", 1: "Ein" },
     luxWriteId: "158",

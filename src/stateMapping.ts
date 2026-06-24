@@ -1147,8 +1147,8 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 	runDeaerate: {
 		folder: "Einstellungen.05_ZIP",
 		name: "Entlüftungsprogramm starten",
-		role: "indicator",
-		type: "boolean",
+		role: "value",
+		type: "number",
 		write: true,
 		states: { 0: "Aus", 1: "Ein" },
 		luxWriteId: "158",
