@@ -522,6 +522,18 @@ class Lwd50a extends utils.Adapter {
           if (definition.unit === "s" && typeof value === "number") {
             value = this.formatSecondsToHMS(value);
             targetType = "string";
+          } else if (definition.role === "value.datetime") {
+            const totalSeconds = typeof value === "number" ? value : parseInt(value, 10);
+            if (!isNaN(totalSeconds) && totalSeconds >= 0) {
+              if (totalSeconds < 86400) {
+                const h = Math.floor(totalSeconds / 3600).toString().padStart(2, "0");
+                const m = Math.floor(totalSeconds % 3600 / 60).toString().padStart(2, "0");
+                value = `${h}:${m}`;
+              } else {
+                value = new Date(totalSeconds * 1e3).toLocaleString("de-DE");
+              }
+              targetType = "string";
+            }
           }
           const stateId = `${definition.folder}.${key}`;
           if (!this.createdStates.has(stateId)) {

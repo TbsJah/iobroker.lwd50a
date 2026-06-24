@@ -596,9 +596,27 @@ class Lwd50a extends utils.Adapter {
 					}
 
 					let targetType: ioBroker.CommonType = definition.type === "json" ? "string" : definition.type;
+
 					if (definition.unit === "s" && typeof value === "number") {
 						value = this.formatSecondsToHMS(value);
 						targetType = "string";
+					} else if (definition.role === "value.datetime") {
+						// NEU: Wandelt die Roh-Sekunden der WP wieder in das "HH:MM" Format um
+						const totalSeconds = typeof value === "number" ? value : parseInt(value, 10);
+						if (!isNaN(totalSeconds) && totalSeconds >= 0) {
+							if (totalSeconds < 86400) {
+								const h = Math.floor(totalSeconds / 3600)
+									.toString()
+									.padStart(2, "0");
+								const m = Math.floor((totalSeconds % 3600) / 60)
+									.toString()
+									.padStart(2, "0");
+								value = `${h}:${m}`;
+							} else {
+								value = new Date(totalSeconds * 1000).toLocaleString("de-DE");
+							}
+							targetType = "string";
+						}
 					}
 
 					const stateId = `${definition.folder}.${key}`;
