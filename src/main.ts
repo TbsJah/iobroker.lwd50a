@@ -414,6 +414,9 @@ class Lwd50a extends utils.Adapter {
 	}
 
 	private readPumpAsync(): Promise<any> {
+		if (this.isDebugLogActive) {
+			this.log.info(`readPumpAsync Comand`);
+		}
 		return new Promise((resolve, reject) => {
 			let isFinished = false;
 			const timeout = setTimeout(() => {
@@ -421,7 +424,7 @@ class Lwd50a extends utils.Adapter {
 					return;
 				}
 				isFinished = true;
-				reject(new Error("Timeout (10s): Luxtronik hat keine Antwort geliefert."));
+				reject(new Error("Timeout (25s): Luxtronik hat keine Antwort geliefert."));
 			}, 25000);
 
 			this.pump.read((err: any, data: any): void => {
@@ -442,6 +445,9 @@ class Lwd50a extends utils.Adapter {
 	}
 
 	private writePumpAsync(cmd: string | number, val: any, isRaw = false): Promise<void> {
+		if (this.isDebugLogActive) {
+			this.log.info(`writePumpAsync Comand: ${cmd}, val: ${val}`);
+		}
 		return new Promise((resolve, reject) => {
 			let isFinished = false;
 			const timeout = setTimeout(() => {
@@ -505,19 +511,23 @@ class Lwd50a extends utils.Adapter {
 			} catch (err: any) {
 				this.log.debug(`Raw 3003 Fehler: ${err.message}`);
 			}
-			await new Promise(r => setTimeout(r, 500));
+			await new Promise(r => setTimeout(r, 1500));
 
 			try {
 				rawValues = await readAllRaw(this, 3004);
 			} catch (err: any) {
 				this.log.debug(`Raw 3004 Fehler: ${err.message}`);
 			}
-			await new Promise(r => setTimeout(r, 500));
+			await new Promise(r => setTimeout(r, 1500));
 
 			try {
 				coolchipData = await this.readPumpAsync();
 			} catch (err: any) {
-				this.log.error(`Verbindungsfehler: ${err.message}`);
+				if (err.message.includes("Timeout")) {
+					this.log.warn("Wärmepumpe ausgelastet (Timeout). Der Abfrage-Zyklus wird übersprungen.");
+				} else {
+					this.log.error(`Verbindungsfehler: ${err.message}`);
+				}
 			}
 
 			if (!coolchipData) {

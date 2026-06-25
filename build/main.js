@@ -365,6 +365,9 @@ class Lwd50a extends utils.Adapter {
     }
   }
   readPumpAsync() {
+    if (this.isDebugLogActive) {
+      this.log.info(`readPumpAsync Comand`);
+    }
     return new Promise((resolve, reject) => {
       let isFinished = false;
       const timeout = setTimeout(() => {
@@ -372,7 +375,7 @@ class Lwd50a extends utils.Adapter {
           return;
         }
         isFinished = true;
-        reject(new Error("Timeout (10s): Luxtronik hat keine Antwort geliefert."));
+        reject(new Error("Timeout (25s): Luxtronik hat keine Antwort geliefert."));
       }, 25e3);
       this.pump.read((err, data) => {
         if (isFinished) {
@@ -389,6 +392,9 @@ class Lwd50a extends utils.Adapter {
     });
   }
   writePumpAsync(cmd, val, isRaw = false) {
+    if (this.isDebugLogActive) {
+      this.log.info(`writePumpAsync Comand: ${cmd}, val: ${val}`);
+    }
     return new Promise((resolve, reject) => {
       let isFinished = false;
       const timeout = setTimeout(() => {
@@ -446,17 +452,21 @@ class Lwd50a extends utils.Adapter {
       } catch (err) {
         this.log.debug(`Raw 3003 Fehler: ${err.message}`);
       }
-      await new Promise((r) => setTimeout(r, 500));
+      await new Promise((r) => setTimeout(r, 1500));
       try {
         rawValues = await (0, import_rawFunctions.readAllRaw)(this, 3004);
       } catch (err) {
         this.log.debug(`Raw 3004 Fehler: ${err.message}`);
       }
-      await new Promise((r) => setTimeout(r, 500));
+      await new Promise((r) => setTimeout(r, 1500));
       try {
         coolchipData = await this.readPumpAsync();
       } catch (err) {
-        this.log.error(`Verbindungsfehler: ${err.message}`);
+        if (err.message.includes("Timeout")) {
+          this.log.warn("W\xE4rmepumpe ausgelastet (Timeout). Der Abfrage-Zyklus wird \xFCbersprungen.");
+        } else {
+          this.log.error(`Verbindungsfehler: ${err.message}`);
+        }
       }
       if (!coolchipData) {
         return;
@@ -716,11 +726,9 @@ class Lwd50a extends utils.Adapter {
           await this.setState(id, { val: true, ack: true });
           this.zipTimer = setTimeout(async () => {
             await this.stopZipAndDeaeration();
-            await this.updateData();
           }, durationSeconds * 1e3);
         } else {
           await this.stopZipAndDeaeration();
-          await this.updateData();
         }
         return;
       }
@@ -747,8 +755,6 @@ class Lwd50a extends utils.Adapter {
         isRawWrite
       );
       await this.setState(id, { val: state.val, ack: true });
-      await new Promise((r) => setTimeout(r, 500));
-      await this.updateData();
     } catch (err) {
       this.log.error(`Fehler bei Befehlsausf\xFChrung: ${err.message}`);
     }
