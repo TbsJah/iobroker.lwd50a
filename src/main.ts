@@ -847,11 +847,11 @@ class Lwd50a extends utils.Adapter {
 					await this.setState(id, { val: true, ack: true });
 					this.zipTimer = setTimeout(async () => {
 						await this.stopZipAndDeaeration();
-						await this.updateData();
+						//await this.updateData();
 					}, durationSeconds * 1000);
 				} else {
 					await this.stopZipAndDeaeration();
-					await this.updateData();
+					//await this.updateData();
 				}
 				return;
 			}
@@ -886,8 +886,8 @@ class Lwd50a extends utils.Adapter {
 				isRawWrite,
 			);
 			await this.setState(id, { val: state.val, ack: true });
-			await new Promise(r => setTimeout(r, 500));
-			await this.updateData();
+			//await new Promise(r => setTimeout(r, 500));
+			//await this.updateData();
 		} catch (err: any) {
 			this.log.error(`Fehler bei Befehlsausführung: ${err.message}`);
 		}
