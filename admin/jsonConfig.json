@@ -35,7 +35,8 @@
 				},
 
 				"abstandRegelung": {
-					"type": "divider"
+					"type": "staticText",
+					"text": " "
 				},
 
 				"regelung_aktiv": {
