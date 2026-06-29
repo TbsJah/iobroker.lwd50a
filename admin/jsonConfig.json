@@ -34,45 +34,21 @@
 					"md": 4
 				},
 
-				"headerDefaults": {
+				"headerHeating": {
 					"type": "header",
-					"text": "Vorgabewerte (Leerlauf)",
+					"text": "Vorgabewerte Heizen",
 					"size": 4,
 					"sm": 12
-				},
-				"endpunkt": {
-					"type": "number",
-					"label": "Endpunkt (°C)",
-					"sm": 12,
-					"md": 3
 				},
 				"fusspunkt": {
 					"type": "number",
 					"label": "Fußpunkt (°C)",
 					"sm": 12,
-					"md": 3
-				},
-				"sync_heating_system_circ_pump_voltage_minimal": {
-					"type": "number",
-					"label": "HUP Min (V)",
-					"sm": 12,
-					"md": 3
-				},
-				"sync_heating_system_circ_pump_voltage_nominal": {
-					"type": "number",
-					"label": "HUP Nom (V)",
-					"sm": 12,
-					"md": 3
-				},
-				"sync_warmwater_target_temperature": {
-					"type": "number",
-					"label": "WW Soll (°C)",
-					"sm": 12,
 					"md": 4
 				},
-				"sync_hotwater_temperature_hysteresis": {
+				"endpunkt": {
 					"type": "number",
-					"label": "WW Hysterese (K)",
+					"label": "Endpunkt (°C)",
 					"sm": 12,
 					"md": 4
 				},
@@ -82,17 +58,77 @@
 					"sm": 12,
 					"md": 4
 				},
-				"zip_aktiv": {
+				"sync_heating_system_circ_pump_voltage_minimal_heating": {
 					"type": "number",
-					"label": "ZIP Dauer Heizen (s)",
+					"label": "HUP Min (V)",
 					"sm": 12,
 					"md": 6
 				},
-				"zip_aktiv_ww": {
+				"sync_heating_system_circ_pump_voltage_nominal_heating": {
 					"type": "number",
-					"label": "ZIP Dauer WW (s)",
+					"label": "HUP Nom (V)",
 					"sm": 12,
 					"md": 6
+				},
+				"Heating_after_warmwater": {
+					"type": "checkbox",
+					"label": "Heizen nach Warmwasser",
+					"sm": 12,
+					"md": 12
+				},
+				"headerWater": {
+					"type": "header",
+					"text": "Vorgabewerte Warmwasser",
+					"size": 4,
+					"sm": 12
+				},
+				"sync_warmwater_target_temperature": {
+					"type": "number",
+					"label": "WW Soll (°C)",
+					"sm": 12,
+					"md": 6
+				},
+				"sync_hotwater_temperature_hysteresis": {
+					"type": "number",
+					"label": "WW Hysterese (K)",
+					"sm": 12,
+					"md": 6
+				},
+				"sync_heating_system_circ_pump_voltage_minimal_water": {
+					"type": "number",
+					"label": "HUP Min (V)",
+					"sm": 12,
+					"md": 6
+				},
+				"sync_heating_system_circ_pump_voltage_nominal_water": {
+					"type": "number",
+					"label": "HUP Nom (V)",
+					"sm": 12,
+					"md": 6
+				},
+				"headerZip": {
+					"type": "header",
+					"text": "Vorgabewerte Zirkulationspumpe",
+					"size": 4,
+					"sm": 12
+				},
+				"zip_aktiv": {
+					"type": "number",
+					"label": "ZIP Dauer an (s)",
+					"sm": 12,
+					"md": 4
+				},
+				"zip_last_run_min": {
+					"type": "number",
+					"label": "ZIP Dauer aus (s)",
+					"sm": 12,
+					"md": 4
+				},
+				"zip_aktiv_ww": {
+					"type": "number",
+					"label": "ZIP Dauer bei Warmwassererzeugung (s)",
+					"sm": 12,
+					"md": 4
 				}
 			}
 		}
