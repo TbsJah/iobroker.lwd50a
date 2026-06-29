@@ -1,6 +1,7 @@
 {
 	"i18n": true,
 	"type": "tabs",
+	"iconPosition": "top",
 	"items": {
 		"mainSettings": {
 			"type": "panel",
