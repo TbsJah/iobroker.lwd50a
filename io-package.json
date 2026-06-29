@@ -170,6 +170,7 @@
 		"sync_heating_system_circ_pump_voltage_nominal_water": 10,
 		"sync_return_temperature_hysteresis": 1.5,
 		"zip_last_run_min": 600,
+		"regelung_aktiv": true,
 		"Heating_after_warmwater": true
 	},
 	"objects": [],
