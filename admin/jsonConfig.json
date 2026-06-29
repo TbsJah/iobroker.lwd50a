@@ -34,9 +34,23 @@
 					"md": 4
 				},
 
-				"abstandRegelung": {
+				"abstandRegelung1": {
 					"type": "staticText",
-					"text": " "
+					"text": " ",
+					"sm": 12,
+					"md": 12
+				},
+				"abstandRegelung2": {
+					"type": "staticText",
+					"text": " ",
+					"sm": 12,
+					"md": 12
+				},
+				"abstandRegelung3": {
+					"type": "staticText",
+					"text": " ",
+					"sm": 12,
+					"md": 12
 				},
 
 				"regelung_aktiv": {
