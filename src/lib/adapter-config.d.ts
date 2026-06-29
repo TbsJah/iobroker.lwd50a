@@ -13,10 +13,13 @@ declare global {
 			zip_aktiv_ww?: number;
 			sync_warmwater_target_temperature?: number;
 			sync_hotwater_temperature_hysteresis?: number;
-			sync_heating_system_circ_pump_voltage_minimal?: number;
-			sync_heating_system_circ_pump_voltage_nominal?: number;
+			sync_heating_system_circ_pump_voltage_minimal_heating?: number;
+			sync_heating_system_circ_pump_voltage_nominal_heating?: number;
+			sync_heating_system_circ_pump_voltage_minimal_water?: number;
+			sync_heating_system_circ_pump_voltage_nominal_water?: number;
 			sync_return_temperature_hysteresis?: number;
 			regelung_aktiv?: boolean;
+			Heating_after_warmwater?: boolean;
 		}
 	}
 }
