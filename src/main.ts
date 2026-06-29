@@ -96,7 +96,7 @@ class Lwd50a extends utils.Adapter {
 			if (!state || state.val !== val) {
 				await this.setState(id, { val: val, ack: ack });
 				if (this.isDebugLogActive) {
-					this.log.info(`Setze Werte für ${id}: ${val}`);
+					this.log.debug(`Setze Werte für ${id}: ${val}`);
 				}
 			}
 		} catch (err: any) {
@@ -415,7 +415,7 @@ class Lwd50a extends utils.Adapter {
 
 	private readPumpAsync(): Promise<any> {
 		if (this.isDebugLogActive) {
-			this.log.info(`readPumpAsync Comand`);
+			this.log.debug(`readPumpAsync Comand`);
 		}
 		return new Promise((resolve, reject) => {
 			let isFinished = false;
@@ -424,8 +424,8 @@ class Lwd50a extends utils.Adapter {
 					return;
 				}
 				isFinished = true;
-				reject(new Error("Timeout (25s): Luxtronik hat keine Antwort geliefert."));
-			}, 25000);
+				reject(new Error("Timeout (35s): Luxtronik hat keine Antwort geliefert."));
+			}, 35000);
 
 			this.pump.read((err: any, data: any): void => {
 				if (isFinished) {
@@ -446,7 +446,7 @@ class Lwd50a extends utils.Adapter {
 
 	private writePumpAsync(cmd: string | number, val: any, isRaw = false): Promise<void> {
 		if (this.isDebugLogActive) {
-			this.log.info(`writePumpAsync Comand: ${cmd}, val: ${val}`);
+			this.log.debug(`writePumpAsync Comand: ${cmd}, val: ${val}`);
 		}
 		return new Promise((resolve, reject) => {
 			let isFinished = false;
@@ -455,8 +455,8 @@ class Lwd50a extends utils.Adapter {
 					return;
 				}
 				isFinished = true;
-				reject(new Error(`Timeout (10s) beim Schreiben von [${cmd}].`));
-			}, 25000);
+				reject(new Error(`Timeout (35s) beim Schreiben von [${cmd}].`));
+			}, 35000);
 
 			const cb = (err: any): void => {
 				if (isFinished) {
@@ -511,20 +511,20 @@ class Lwd50a extends utils.Adapter {
 			} catch (err: any) {
 				this.log.debug(`Raw 3003 Fehler: ${err.message}`);
 			}
-			await new Promise(r => setTimeout(r, 1500));
+			await new Promise(r => setTimeout(r, 3500));
 
 			try {
 				rawValues = await readAllRaw(this, 3004);
 			} catch (err: any) {
 				this.log.debug(`Raw 3004 Fehler: ${err.message}`);
 			}
-			await new Promise(r => setTimeout(r, 1500));
+			await new Promise(r => setTimeout(r, 3500));
 
 			try {
 				coolchipData = await this.readPumpAsync();
 			} catch (err: any) {
 				if (err.message.includes("Timeout")) {
-					this.log.warn("Wärmepumpe ausgelastet (Timeout). Der Abfrage-Zyklus wird übersprungen.");
+					this.log.debug("Wärmepumpe ausgelastet (Timeout). Der Abfrage-Zyklus wird übersprungen.");
 				} else {
 					this.log.error(`Verbindungsfehler: ${err.message}`);
 				}
@@ -711,7 +711,7 @@ class Lwd50a extends utils.Adapter {
 
 				if (now - lastZipChange > configWithDynamicKeys.zip_last_run_min * 1000) {
 					if (this.isDebugLogActive) {
-						this.log.info(
+						this.log.debug(
 							`Bewegung an ${path} erkannt. Letzte ZIP-Aktion (Hardware) ist über 10 Min her. Triggere ZIP Makro.`,
 						);
 					}
