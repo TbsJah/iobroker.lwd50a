@@ -162,19 +162,19 @@
 				"motionSensors": {
 					"type": "table",
 					"sm": 12,
-					"clone": false,
 					"items": [
 						{
 							"type": "text",
 							"attr": "name",
-							"title": "Bezeichnung (z.B. Bad, Küche)",
+							"title": "Bezeichnung",
 							"width": "30%"
 						},
 						{
-							"type": "text",
+							"type": "select",
 							"attr": "oid",
-							"title": "Datenpunkt-ID (z.B. zigbee.0.sensor.occupancy)",
-							"width": "70%"
+							"title": "Sensor auswählen",
+							"width": "70%",
+							"options": [{ "label": "Bitte Objekt wählen...", "value": "" }]
 						}
 					]
 				}
