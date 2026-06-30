@@ -42,13 +42,17 @@ class Lwd50a extends utils.Adapter {
 		this.log.info(`Verbinde mit Wärmepumpe auf ${ip}:${port}...`);
 		this.pump = new luxtronik.createConnection(ip, port);
 
-		// Alle virtuellen Datenpunkte aus dem Mapping vorab generieren
+		// 1. WICHTIG: Vorab alle Objekte erzeugen, damit setState funktioniert!
+		await this.ensureAllObjectsExist();
+
+		// 2. Alle virtuellen Datenpunkte aus dem Mapping vorab generieren
 		await initializeVirtualStates(this);
 
 		// Einmaliges Einlesen des Schalters beim Adapterstart
 		const debugState = await this.getStateAsync(getDpPath("Schreibe_Debug_Log"));
 		this.isDebugLogActive = debugState?.val === true;
 
+		// 3. Konfigurationswerte SOFORT aus der jsonConfig übernehmen
 		if (this.isDebugLogActive) {
 			this.log.info("Synchronisiere Konfigurationswerte mit den ioBroker-Objekten...");
 		}
@@ -85,11 +89,61 @@ class Lwd50a extends utils.Adapter {
 	// =========================================================
 
 	/**
+	 * Erzeugt alle strukturellen Zustände aus dem State-Mapping vorab in der Datenbank.
+	 */
+	private async ensureAllObjectsExist(): Promise<void> {
+		try {
+			for (const [key, definition] of Object.entries(STATE_MAPPING)) {
+				if (definition.isVirtual) {
+					continue;
+				}
+				const stateId = `${definition.folder}.${key}`;
+
+				if (!this.createdStates.has(stateId)) {
+					await this.setObjectNotExistsAsync(definition.folder, {
+						type: "channel",
+						common: { name: definition.folder.split(".").pop() || definition.folder },
+						native: {},
+					});
+
+					let targetType: ioBroker.CommonType = definition.type === "json" ? "string" : definition.type;
+					if (definition.unit === "s" && definition.type === "number") {
+						targetType = "string";
+					}
+
+					await this.setObjectNotExistsAsync(stateId, {
+						type: "state",
+						common: {
+							name: definition.name,
+							type: targetType,
+							role: definition.role,
+							unit: definition.unit,
+							read: true,
+							write: definition.write || false,
+							min: definition.min,
+							max: definition.max,
+							states: definition.states,
+						},
+						native: {},
+					});
+
+					if (definition.write) {
+						this.subscribeStates(stateId);
+					}
+					this.createdStates.add(stateId);
+				}
+			}
+		} catch (err: any) {
+			this.log.error(`Fehler bei der Vorab-Objekterzeugung: ${err.message}`);
+		}
+	}
+
+	/**
 	 * Setzt einen eigenen State synchron via setState, wenn der Wert abweicht.
 	 *
-	 * @param id - Die Objekt-ID des zu setzenden States
-	 * @param val - Der neue Wert, der gesetzt werden soll
-	 * @param ack - Acknowledged-Flag (true, wenn von Gerät bestätigt)
+	 * @param id Die Objekt-ID des zu setzenden States.
+	 * @param val Der Wert, der gesetzt werden soll.
+	 * @param ack True, wenn der Wert als bestätigt gesetzt werden soll.
 	 */
 	private async setOwnStateIfDifferent(id: string, val: any, ack = false): Promise<void> {
 		try {
@@ -152,7 +206,11 @@ class Lwd50a extends utils.Adapter {
 				false,
 			);
 			await this.setOwnStateIfDifferent(getDpPath("zip_aktiv"), configWithDynamicKeys.zip_aktiv, false);
-			await this.setOwnStateIfDifferent(getDpPath("Heizen_nach_Wasser"), false, true);
+			await this.setOwnStateIfDifferent(
+				getDpPath("Heizen_nach_Wasser"),
+				configWithDynamicKeys.Heating_after_warmwater ?? false,
+				true,
+			);
 		} catch (err: any) {
 			this.log.error(`Fehler beim Setzen der Leerlauf-Vorgabewerte: ${err.message}`);
 		}
@@ -212,22 +270,18 @@ class Lwd50a extends utils.Adapter {
 					this.log.info("Bedingungen erfüllt: Stoppe aktives ZIP Makro und Entlüftungsprogramm...");
 				}
 
-				// 1. Laufenden Timer killen
 				if (this.zipTimer) {
 					clearTimeout(this.zipTimer);
 					this.zipTimer = undefined;
 				}
 
-				// 2. Zeit-Tabelle wiederherstellen (falls überschrieben)
 				await this.restoreOriginalZipConfig();
 
-				// 3. Entlüftungsprogramm in der WP direkt hart beenden (RAW ID 158 und 684)
 				await this.writePumpAsync(158, 0, true);
 				await new Promise(resolve => setTimeout(resolve, 100));
 				await this.writePumpAsync(684, 0, true);
 				await new Promise(resolve => setTimeout(resolve, 100));
 
-				// 4. ioBroker Datenpunkte sauber synchron auf "Aus" setzen
 				await this.setOwnStateIfDifferent(getDpPath("runDeaerate"), 0, true);
 				await this.setOwnStateIfDifferent(getDpPath("hotWaterCircPumpDeaerate"), 0, true);
 				await this.setOwnStateIfDifferent(getDpPath("Activate_Zip"), false, true);
@@ -237,9 +291,6 @@ class Lwd50a extends utils.Adapter {
 		}
 	}
 
-	/**
-	 * Prüft, ob der letzte Wechsel des Anlagenstatus länger als 10 Minuten her ist.
-	 */
 	private async istAnlageAelterAls10Min(): Promise<boolean> {
 		try {
 			const state = await this.getStateAsync(getDpPath("WP_BZ_akt"));
@@ -255,13 +306,11 @@ class Lwd50a extends utils.Adapter {
 	 */
 	private async runOptimizationSchedule(): Promise<void> {
 		try {
-			// Hauptschalter Regelung prüfen
 			const regelungAktiv = await this.getStateAsync(getDpPath("Regelung_Aktiv"));
 			if (regelungAktiv?.val === false) {
 				return;
 			}
 
-			// 1. Status abfragen
 			const bzState = await this.getStateAsync(getDpPath("WP_BZ_akt"));
 			const bzVal = bzState && bzState.val !== null ? String(bzState.val).trim() : "";
 
@@ -274,52 +323,52 @@ class Lwd50a extends utils.Adapter {
 				return;
 			}
 
-			// Vorgabewerte bei Moduswechsel setzen
+			// Vorgabewerte bei Moduswechsel SOFORT setzen (Erststart-Sperre entfernt!)
 			if (bzVal !== this.lastBzVal) {
-				if (this.lastBzVal === "") {
-					this.lastBzVal = bzVal;
-				} else {
-					const config = this.config as Record<string, any>;
-					if (istLeerlauf) {
-						await this.setIdleDefaults();
-					} else if (istHeizen) {
-						await this.setOwnStateIfDifferent(getDpPath("zip_aktiv"), config.zip_aktiv, false);
-						await this.setOwnStateIfDifferent(
-							getDpPath("heating_system_circ_pump_voltage_minimal"),
-							config.sync_heating_system_circ_pump_voltage_minimal,
-							false,
-						);
-						await this.setOwnStateIfDifferent(
-							getDpPath("heating_system_circ_pump_voltage_nominal"),
-							config.sync_heating_system_circ_pump_voltage_nominal_heating,
-							false,
-						);
-						await this.setOwnStateIfDifferent(getDpPath("Heizen_nach_Wasser"), true, true);
-					} else if (istWarmwasser) {
-						await this.setOwnStateIfDifferent(
-							getDpPath("hotWaterTemperatureHysteresis"),
-							config.hysterese_ww,
-							false,
-						);
-						await this.setOwnStateIfDifferent(getDpPath("zip_aktiv"), config.zip_aktiv_ww, false);
-						await this.setOwnStateIfDifferent(
-							getDpPath("heating_system_circ_pump_voltage_nominal"),
-							config.sync_heating_system_circ_pump_voltage_nominal_water,
-							false,
-						);
-						await this.setOwnStateIfDifferent(getDpPath("Activate_Zip"), true, false);
-					} else if (istAbtauen) {
-						await this.setOwnStateIfDifferent(
-							getDpPath("heating_system_circ_pump_voltage_nominal"),
-							10,
-							false,
-						);
-					}
-					this.lastBzVal = bzVal;
+				const config = this.config as Record<string, any>;
+				if (istLeerlauf) {
+					await this.setIdleDefaults();
+				} else if (istHeizen) {
+					await this.setOwnStateIfDifferent(getDpPath("zip_aktiv"), config.zip_aktiv, false);
+					await this.setOwnStateIfDifferent(
+						getDpPath("heating_system_circ_pump_voltage_minimal"),
+						config.sync_heating_system_circ_pump_voltage_minimal_heating,
+						false,
+					);
+					await this.setOwnStateIfDifferent(
+						getDpPath("heating_system_circ_pump_voltage_nominal"),
+						config.sync_heating_system_circ_pump_voltage_nominal_heating,
+						false,
+					);
+					await this.setOwnStateIfDifferent(
+						getDpPath("Heizen_nach_Wasser"),
+						config.Heating_after_warmwater ?? true,
+						true,
+					);
+				} else if (istWarmwasser) {
+					await this.setOwnStateIfDifferent(
+						getDpPath("hotWaterTemperatureHysteresis"),
+						config.sync_hotwater_temperature_hysteresis,
+						false,
+					);
+					await this.setOwnStateIfDifferent(getDpPath("zip_aktiv"), config.zip_aktiv_ww, false);
+					await this.setOwnStateIfDifferent(
+						getDpPath("heating_system_circ_pump_voltage_minimal"),
+						config.sync_heating_system_circ_pump_voltage_minimal_water,
+						false,
+					);
+					await this.setOwnStateIfDifferent(
+						getDpPath("heating_system_circ_pump_voltage_nominal"),
+						config.sync_heating_system_circ_pump_voltage_nominal_water,
+						false,
+					);
+					await this.setOwnStateIfDifferent(getDpPath("Activate_Zip"), true, false);
+				} else if (istAbtauen) {
+					await this.setOwnStateIfDifferent(getDpPath("heating_system_circ_pump_voltage_nominal"), 10, false);
 				}
+				this.lastBzVal = bzVal;
 			}
 
-			// 2. Werte parallel abrufen
 			const [
 				wwSollState,
 				wwIstState,
@@ -361,7 +410,6 @@ class Lwd50a extends utils.Adapter {
 			const nachWasser = nachWasserState?.val;
 			const betriebsart = (bzState?.val as number) ?? 0;
 
-			// 3. Regel-Logik
 			if (istHeizen) {
 				if (aelterAls10 && vd1) {
 					const fusspunkt = (await this.getStateAsync(getDpPath("heating_curve_parallel_offset")))?.val;
@@ -399,7 +447,6 @@ class Lwd50a extends utils.Adapter {
 			}
 
 			if (istLeerlauf) {
-				// ZIP/Entlüftung abschalten am unteren Hysterese-Ende
 				if (wwIst <= wwSoll - wwHysterese || ruecklauf <= ruecklaufSoll - heizenHysterese) {
 					await this.stopZipAndDeaeration();
 				}
@@ -438,9 +485,7 @@ class Lwd50a extends utils.Adapter {
 				}
 				isFinished = true;
 				clearTimeout(timeout);
-
 				if (err) {
-					// Linter-Fix: Sicherstellen, dass IMMER ein Error-Objekt übergeben wird
 					reject(err instanceof Error ? err : new Error(String(err)));
 				} else {
 					resolve(data);
@@ -469,9 +514,7 @@ class Lwd50a extends utils.Adapter {
 				}
 				isFinished = true;
 				clearTimeout(timeout);
-
 				if (err) {
-					// Linter-Fix: Sicherstellen, dass IMMER ein Error-Objekt übergeben wird
 					reject(err instanceof Error ? err : new Error(String(err)));
 				} else {
 					resolve();
@@ -485,11 +528,7 @@ class Lwd50a extends utils.Adapter {
 			}
 		});
 	}
-	/**
-	 * Konvertiert reine Sekunden in das Format HH:MM:SS
-	 *
-	 * @param totalSeconds Die Anzahl der Sekunden, die formatiert werden sollen.
-	 */
+
 	private formatSecondsToHMS(totalSeconds: number): string {
 		if (totalSeconds < 0 || isNaN(totalSeconds)) {
 			return "00:00:00";
@@ -539,7 +578,6 @@ class Lwd50a extends utils.Adapter {
 				return;
 			}
 
-			// State-Mapping Schleife
 			for (const [key, definition] of Object.entries(STATE_MAPPING)) {
 				if (definition.isVirtual) {
 					continue;
@@ -590,7 +628,6 @@ class Lwd50a extends utils.Adapter {
 							coolchipData?.additional?.[luxId];
 					}
 				}
-
 				if (value !== undefined) {
 					if (definition.type === "number" && typeof value === "string") {
 						value =
@@ -605,13 +642,12 @@ class Lwd50a extends utils.Adapter {
 						value = JSON.stringify(value);
 					}
 
-					let targetType: ioBroker.CommonType = definition.type === "json" ? "string" : definition.type;
+					// targetType wurde hier entfernt!
 
 					if (definition.unit === "s" && typeof value === "number") {
 						value = this.formatSecondsToHMS(value);
-						targetType = "string";
+						// targetType = "string" wurde hier entfernt!
 					} else if (definition.role === "value.datetime") {
-						// NEU: Wandelt die Roh-Sekunden der WP wieder in das "HH:MM" Format um
 						const totalSeconds = typeof value === "number" ? value : parseInt(value, 10);
 						if (!isNaN(totalSeconds) && totalSeconds >= 0) {
 							if (totalSeconds < 86400) {
@@ -625,39 +661,12 @@ class Lwd50a extends utils.Adapter {
 							} else {
 								value = new Date(totalSeconds * 1000).toLocaleString("de-DE");
 							}
-							targetType = "string";
+							// targetType = "string" wurde hier entfernt!
 						}
 					}
 
 					const stateId = `${definition.folder}.${key}`;
-					if (!this.createdStates.has(stateId)) {
-						await this.setObjectNotExistsAsync(definition.folder, {
-							type: "channel",
-							common: { name: definition.folder.split(".").pop() || definition.folder },
-							native: {},
-						});
-						await this.setObjectNotExistsAsync(stateId, {
-							type: "state",
-							common: {
-								name: definition.name,
-								type: targetType,
-								role: definition.role,
-								unit: definition.unit,
-								read: true,
-								write: definition.write || false,
-								min: definition.min,
-								max: definition.max,
-								states: definition.states,
-							},
-							native: {},
-						});
-						if (definition.write) {
-							this.subscribeStates(stateId);
-						}
-						this.createdStates.add(stateId);
-					}
-
-					// Synchrones Schreiben via setState
+					// Objekt wird jetzt sicher durch ensureAllObjectsExist verwaltet, setState genügt!
 					await this.setState(stateId, { val: value, ack: true });
 				}
 			}
@@ -694,9 +703,6 @@ class Lwd50a extends utils.Adapter {
 			return;
 		}
 
-		// =========================================================
-		// 1. EXTERNE SENSOREN (Kommen von Fremd-Adaptern mit ack: true)
-		// =========================================================
 		const sensorKeys = ["ZIP_Bewegung_Pfad_1", "ZIP_Bewegung_Pfad_2", "ZIP_Bewegung_Pfad_3"] as const;
 		for (const key of sensorKeys) {
 			const pathState = await this.getStateAsync(getDpPath(key));
@@ -704,14 +710,8 @@ class Lwd50a extends utils.Adapter {
 
 			if (path && path.length > 0 && id === path && state.val === true) {
 				const now = Date.now();
-
-				// NEU: Hardware-Status der ZIP abfragen (Single Source of Truth)
 				const zipOutState = await this.getStateAsync(getDpPath("ZIPout"));
-
-				// lc = Last Change (Zeitstempel der letzten Änderung in Millisekunden)
 				const lastZipChange = zipOutState?.lc || 0;
-
-				// Prüfen, ob die Pumpe in den letzten 10 Minuten (600.000 ms) geschaltet hat
 				const configWithDynamicKeys = this.config as Record<string, any>;
 
 				if (now - lastZipChange > configWithDynamicKeys.zip_last_run_min * 1000) {
@@ -720,25 +720,12 @@ class Lwd50a extends utils.Adapter {
 							`Bewegung an ${path} erkannt. Letzte ZIP-Aktion (Hardware) ist über 10 Min her. Triggere ZIP Makro.`,
 						);
 					}
-
-					// Makro als NUTZERBEFEHL (ack: false) triggern
 					await this.setState(getDpPath("Activate_Zip"), { val: true, ack: false });
-				} else {
-					if (this.isDebugLogActive) {
-						this.log.debug(
-							`Bewegung an ${path} erkannt, aber ZIP hat in den letzten 10 Minuten bereits gearbeitet.`,
-						);
-					}
 				}
-
-				// WICHTIG: Nach einem Bewegungsmelder brechen wir hier ab
 				return;
 			}
 		}
 
-		// =========================================================
-		// 2. EIGENE DATENPUNKTE (Nur ack: false = Nutzerbefehle zulassen!)
-		// =========================================================
 		if (state.ack) {
 			return;
 		}
@@ -811,14 +798,12 @@ class Lwd50a extends utils.Adapter {
 					}
 
 					if (useDeaeration) {
-						// Methode A: Hardware-Entlüftungsprogramm
 						await this.writePumpAsync(158, 1, true);
 						await new Promise(r => setTimeout(r, 100));
 						await this.writePumpAsync(684, 1, true);
 						await this.setOwnStateIfDifferent(getDpPath("runDeaerate"), 1, true);
 						await this.setOwnStateIfDifferent(getDpPath("hotWaterCircPumpDeaerate"), 1, true);
 					} else {
-						// Methode B: Tabellen-Override
 						const onTimeMinutes = Math.ceil(durationSeconds / 60);
 						if (!this.originalZipConfig) {
 							const keysToSave = [
@@ -862,16 +847,13 @@ class Lwd50a extends utils.Adapter {
 					await this.setState(id, { val: true, ack: true });
 					this.zipTimer = setTimeout(async () => {
 						await this.stopZipAndDeaeration();
-						//await this.updateData();
 					}, durationSeconds * 1000);
 				} else {
 					await this.stopZipAndDeaeration();
-					//await this.updateData();
 				}
 				return;
 			}
 
-			// Standard Schreiboperationen
 			if (!definition.luxWriteId || definition.write !== true) {
 				return;
 			}
@@ -901,8 +883,6 @@ class Lwd50a extends utils.Adapter {
 				isRawWrite,
 			);
 			await this.setState(id, { val: state.val, ack: true });
-			//await new Promise(r => setTimeout(r, 500));
-			//await this.updateData();
 		} catch (err: any) {
 			this.log.error(`Fehler bei Befehlsausführung: ${err.message}`);
 		}
