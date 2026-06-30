@@ -46,24 +46,22 @@ class Lwd50a extends utils.Adapter {
     this.on("unload", this.onUnload.bind(this));
   }
   /**
-   * NEU: Schreibt einen Fehler ins Log UND sendet (falls aktiviert) eine Telegram-Nachricht
+   * Sendet eine Telegram-Nachricht (wird nur bei echten Hardware-Fehlern der LWP aufgerufen)
    *
-   * @param message Fehlermeldung, die protokolliert und optional per Telegram versendet werden soll
+   * @param message Die Nachricht, die per Telegram versendet werden soll.
    */
-  logAndNotifyError(message) {
-    this.log.error(message);
+  sendTelegramNotification(message) {
     const config = this.config;
     if (config.telegram_aktiv && config.telegram_instance) {
       const sendObj = {
-        text: `\u26A0\uFE0F *W\xE4rmepumpe Fehler*
-${message}`
+        text: message
       };
       if (config.telegram_receiver && config.telegram_receiver.trim() !== "") {
         sendObj.user = config.telegram_receiver.trim();
       }
       this.sendTo(config.telegram_instance, "send", sendObj);
       if (this.isDebugLogActive) {
-        this.log.debug(`Telegram-Fehlermeldung gesendet an ${config.telegram_instance}`);
+        this.log.debug(`Telegram-Warnung gesendet an ${config.telegram_instance}`);
       }
     }
   }
@@ -144,7 +142,7 @@ ${message}`
         }
       }
     } catch (err) {
-      this.logAndNotifyError(`Fehler bei der Vorab-Objekterzeugung: ${err.message}`);
+      this.log.error(`Fehler bei der Vorab-Objekterzeugung: ${err.message}`);
     }
   }
   async syncConfigValue(mappingKey, val) {
@@ -175,7 +173,7 @@ ${message}`
           await this.writePumpAsync(writeId, valueToWrite, isRawWrite);
           await new Promise((r) => setTimeout(r, 200));
         } catch (err) {
-          this.logAndNotifyError(`Fehler beim Schreiben von ${mappingKey} an die Pumpe: ${err.message}`);
+          this.log.error(`Fehler beim Schreiben von ${mappingKey} an die Pumpe: ${err.message}`);
         }
       }
       await this.setState(id, { val, ack: true });
@@ -194,7 +192,7 @@ ${message}`
         }
       }
     } catch (err) {
-      this.logAndNotifyError(`Fehler in setOwnStateIfDifferent f\xFCr ${id}: ${err.message}`);
+      this.log.error(`Fehler in setOwnStateIfDifferent f\xFCr ${id}: ${err.message}`);
     }
   }
   async setIdleDefaults() {
@@ -217,7 +215,7 @@ ${message}`
       await this.syncConfigValue("zip_aktiv", config.zip_aktiv);
       await this.syncConfigValue("Heizen_nach_Wasser", (_a = config.Heating_after_warmwater) != null ? _a : false);
     } catch (err) {
-      this.logAndNotifyError(`Fehler beim Setzen der Leerlauf-Vorgabewerte: ${err.message}`);
+      this.log.error(`Fehler beim Setzen der Leerlauf-Vorgabewerte: ${err.message}`);
     }
   }
   async restoreOriginalZipConfig() {
@@ -245,7 +243,7 @@ ${message}`
         await this.setState((0, import_stateMapping.getDpPath)(key), { val, ack: true });
       }
     } catch (err) {
-      this.logAndNotifyError(`Fehler bei der Wiederherstellung der ZIP Konfiguration: ${err.message}`);
+      this.log.error(`Fehler bei der Wiederherstellung der ZIP Konfiguration: ${err.message}`);
     } finally {
       this.originalZipConfig = null;
     }
@@ -274,7 +272,7 @@ ${message}`
         await this.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("Activate_Zip"), false, true);
       }
     } catch (err) {
-      this.logAndNotifyError(`Fehler beim Stoppen von ZIP/Entl\xFCftung: ${err.message}`);
+      this.log.error(`Fehler beim Stoppen von ZIP/Entl\xFCftung: ${err.message}`);
     }
   }
   async istAnlageAelterAls10Min() {
@@ -412,7 +410,7 @@ ${message}`
         }
       }
     } catch (err) {
-      this.logAndNotifyError(`Fehler im runOptimizationSchedule-Ablauf: ${err.message}`);
+      this.log.error(`Fehler im runOptimizationSchedule-Ablauf: ${err.message}`);
     }
   }
   readPumpAsync() {
@@ -511,7 +509,7 @@ ${message}`
         if (err.message.includes("Timeout")) {
           this.log.debug("W\xE4rmepumpe ausgelastet (Timeout). Der Abfrage-Zyklus wird \xFCbersprungen.");
         } else {
-          this.logAndNotifyError(`Verbindungsfehler zur W\xE4rmepumpe: ${err.message}`);
+          this.log.error(`Verbindungsfehler zur W\xE4rmepumpe: ${err.message}`);
         }
       }
       if (!coolchipData) {
@@ -590,12 +588,39 @@ ${message}`
       }
       await (0, import_virtualStates.calculateTotalThermalEnergy)(this);
       await (0, import_virtualStates.calculateTotalEnergy)(this);
+      const fehlerDp = (0, import_stateMapping.getDpPath)("Fehlerspeicher");
+      const oldFehlerState = await this.getStateAsync(fehlerDp);
+      const oldFehlerVal = oldFehlerState == null ? void 0 : oldFehlerState.val;
       await (0, import_virtualStates.updateErrorHistory)(this, rawValues);
+      const newFehlerState = await this.getStateAsync(fehlerDp);
+      const newFehlerVal = newFehlerState == null ? void 0 : newFehlerState.val;
+      if (newFehlerVal && newFehlerVal !== oldFehlerVal) {
+        try {
+          const oldList = oldFehlerVal ? JSON.parse(oldFehlerVal) : [];
+          const newList = JSON.parse(newFehlerVal);
+          if (newList.length > 0) {
+            const newestError = newList[0];
+            const oldNewestError = oldList.length > 0 ? oldList[0] : null;
+            if (!oldNewestError || newestError.timestamp !== oldNewestError.timestamp) {
+              const msg = `\u{1F6A8} *St\xF6rung W\xE4rmepumpe!*
+Ein Fehler an der W\xE4rmepumpe wurde registriert:
+
+*Code:* ${newestError.code}
+*Fehler:* ${newestError.beschreibung}
+*Datum:* ${newestError.datum}`;
+              this.sendTelegramNotification(msg);
+              this.log.warn(`Neuer W\xE4rmepumpen-Fehler gemeldet: ${newestError.beschreibung}`);
+            }
+          }
+        } catch {
+          this.log.debug("Konnte Fehlerhistorie f\xFCr Telegram nicht parsen.");
+        }
+      }
       await (0, import_virtualStates.updateOutageHistory)(this, rawValues);
       await (0, import_virtualStates.calculateTemperatureSpread)(this);
       await this.runOptimizationSchedule();
     } catch (err) {
-      this.logAndNotifyError(`Fehler im updateData-Ablauf: ${err.message}`);
+      this.log.error(`Fehler im updateData-Ablauf: ${err.message}`);
     } finally {
       this.updateRunning = false;
     }
@@ -771,7 +796,7 @@ ${message}`
       );
       await this.setState(id, { val: state.val, ack: true });
     } catch (err) {
-      this.logAndNotifyError(`Fehler bei Befehlsausf\xFChrung: ${err.message}`);
+      this.log.error(`Fehler bei Befehlsausf\xFChrung: ${err.message}`);
     }
   }
 }

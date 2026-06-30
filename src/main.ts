@@ -36,31 +36,25 @@ class Lwd50a extends utils.Adapter {
 	}
 
 	/**
-	 * NEU: Schreibt einen Fehler ins Log UND sendet (falls aktiviert) eine Telegram-Nachricht
+	 * Sendet eine Telegram-Nachricht (wird nur bei echten Hardware-Fehlern der LWP aufgerufen)
 	 *
-	 * @param message Fehlermeldung, die protokolliert und optional per Telegram versendet werden soll
+	 * @param message Die Nachricht, die per Telegram versendet werden soll.
 	 */
-	private logAndNotifyError(message: string): void {
-		// 1. Immer ins normale ioBroker-Log schreiben
-		this.log.error(message);
-
-		// 2. Prüfen, ob Telegram aktiviert ist
+	private sendTelegramNotification(message: string): void {
 		const config = this.config as Record<string, any>;
 		if (config.telegram_aktiv && config.telegram_instance) {
 			const sendObj: Record<string, any> = {
-				text: `⚠️ *Wärmepumpe Fehler*\n${message}`,
+				text: message,
 			};
 
-			// Falls ein spezifischer Empfänger eingetragen wurde
 			if (config.telegram_receiver && config.telegram_receiver.trim() !== "") {
 				sendObj.user = config.telegram_receiver.trim();
 			}
 
-			// Nachricht an die gewählte Telegram-Instanz übergeben
 			this.sendTo(config.telegram_instance, "send", sendObj);
 
 			if (this.isDebugLogActive) {
-				this.log.debug(`Telegram-Fehlermeldung gesendet an ${config.telegram_instance}`);
+				this.log.debug(`Telegram-Warnung gesendet an ${config.telegram_instance}`);
 			}
 		}
 	}
@@ -165,7 +159,7 @@ class Lwd50a extends utils.Adapter {
 				}
 			}
 		} catch (err: any) {
-			this.logAndNotifyError(`Fehler bei der Vorab-Objekterzeugung: ${err.message}`);
+			this.log.error(`Fehler bei der Vorab-Objekterzeugung: ${err.message}`);
 		}
 	}
 
@@ -207,7 +201,7 @@ class Lwd50a extends utils.Adapter {
 					await this.writePumpAsync(writeId, valueToWrite, isRawWrite);
 					await new Promise(r => setTimeout(r, 200));
 				} catch (err: any) {
-					this.logAndNotifyError(`Fehler beim Schreiben von ${mappingKey} an die Pumpe: ${err.message}`);
+					this.log.error(`Fehler beim Schreiben von ${mappingKey} an die Pumpe: ${err.message}`);
 				}
 			}
 
@@ -228,7 +222,7 @@ class Lwd50a extends utils.Adapter {
 				}
 			}
 		} catch (err: any) {
-			this.logAndNotifyError(`Fehler in setOwnStateIfDifferent für ${id}: ${err.message}`);
+			this.log.error(`Fehler in setOwnStateIfDifferent für ${id}: ${err.message}`);
 		}
 	}
 
@@ -251,7 +245,7 @@ class Lwd50a extends utils.Adapter {
 			await this.syncConfigValue("zip_aktiv", config.zip_aktiv);
 			await this.syncConfigValue("Heizen_nach_Wasser", config.Heating_after_warmwater ?? false);
 		} catch (err: any) {
-			this.logAndNotifyError(`Fehler beim Setzen der Leerlauf-Vorgabewerte: ${err.message}`);
+			this.log.error(`Fehler beim Setzen der Leerlauf-Vorgabewerte: ${err.message}`);
 		}
 	}
 
@@ -281,10 +275,10 @@ class Lwd50a extends utils.Adapter {
 				const luxId = parseInt(def.luxWriteId!, 10);
 				await this.writePumpAsync(luxId, rawVal, true);
 				await new Promise(resolve => setTimeout(resolve, 100));
-				await this.setState(getDpPath(key), { val: val, ack: true });
+				await this.setState(getDpPath(key as any), { val: val, ack: true });
 			}
 		} catch (err: any) {
-			this.logAndNotifyError(`Fehler bei der Wiederherstellung der ZIP Konfiguration: ${err.message}`);
+			this.log.error(`Fehler bei der Wiederherstellung der ZIP Konfiguration: ${err.message}`);
 		} finally {
 			this.originalZipConfig = null;
 		}
@@ -320,7 +314,7 @@ class Lwd50a extends utils.Adapter {
 				await this.setOwnStateIfDifferent(getDpPath("Activate_Zip"), false, true);
 			}
 		} catch (err: any) {
-			this.logAndNotifyError(`Fehler beim Stoppen von ZIP/Entlüftung: ${err.message}`);
+			this.log.error(`Fehler beim Stoppen von ZIP/Entlüftung: ${err.message}`);
 		}
 	}
 
@@ -477,7 +471,7 @@ class Lwd50a extends utils.Adapter {
 				}
 			}
 		} catch (err: any) {
-			this.logAndNotifyError(`Fehler im runOptimizationSchedule-Ablauf: ${err.message}`);
+			this.log.error(`Fehler im runOptimizationSchedule-Ablauf: ${err.message}`);
 		}
 	}
 
@@ -583,12 +577,11 @@ class Lwd50a extends utils.Adapter {
 			try {
 				coolchipData = await this.readPumpAsync();
 			} catch (err: any) {
-				// Timeouts sind völlig normal, hier feuern wir absichtlich keine Telegram-Meldung!
+				// Timeouts sind völlig normal und lösen absichtlich KEIN Telegram aus!
 				if (err.message.includes("Timeout")) {
 					this.log.debug("Wärmepumpe ausgelastet (Timeout). Der Abfrage-Zyklus wird übersprungen.");
 				} else {
-					// Bei "echten" Verbindungsfehlern senden wir eine Meldung
-					this.logAndNotifyError(`Verbindungsfehler zur Wärmepumpe: ${err.message}`);
+					this.log.error(`Verbindungsfehler zur Wärmepumpe: ${err.message}`);
 				}
 			}
 
@@ -687,13 +680,48 @@ class Lwd50a extends utils.Adapter {
 
 			await calculateTotalThermalEnergy(this);
 			await calculateTotalEnergy(this);
+
+			// =========================================================
+			// TELEGRAM: Nur bei echten LWP-Fehlern alarmieren
+			// =========================================================
+			const fehlerDp = getDpPath("Fehlerspeicher");
+			const oldFehlerState = await this.getStateAsync(fehlerDp);
+			const oldFehlerVal = oldFehlerState?.val as string | undefined;
+
 			await updateErrorHistory(this, rawValues);
+
+			const newFehlerState = await this.getStateAsync(fehlerDp);
+			const newFehlerVal = newFehlerState?.val as string | undefined;
+
+			// Hat sich der JSON-String verändert?
+			if (newFehlerVal && newFehlerVal !== oldFehlerVal) {
+				try {
+					const oldList = oldFehlerVal ? JSON.parse(oldFehlerVal) : [];
+					const newList = JSON.parse(newFehlerVal);
+
+					if (newList.length > 0) {
+						const newestError = newList[0];
+						const oldNewestError = oldList.length > 0 ? oldList[0] : null;
+
+						// Prüfen, ob wirklich ein NEUER Fehler ganz oben steht (neuer Zeitstempel)
+						if (!oldNewestError || newestError.timestamp !== oldNewestError.timestamp) {
+							const msg = `🚨 *Störung Wärmepumpe!*\nEin Fehler an der Wärmepumpe wurde registriert:\n\n*Code:* ${newestError.code}\n*Fehler:* ${newestError.beschreibung}\n*Datum:* ${newestError.datum}`;
+							this.sendTelegramNotification(msg);
+							this.log.warn(`Neuer Wärmepumpen-Fehler gemeldet: ${newestError.beschreibung}`);
+						}
+					}
+				} catch {
+					this.log.debug("Konnte Fehlerhistorie für Telegram nicht parsen.");
+				}
+			}
+			// =========================================================
+
 			await updateOutageHistory(this, rawValues);
 			await calculateTemperatureSpread(this);
 
 			await this.runOptimizationSchedule();
 		} catch (err: any) {
-			this.logAndNotifyError(`Fehler im updateData-Ablauf: ${err.message}`);
+			this.log.error(`Fehler im updateData-Ablauf: ${err.message}`);
 		} finally {
 			this.updateRunning = false;
 		}
@@ -723,7 +751,6 @@ class Lwd50a extends utils.Adapter {
 		// 1. EXTERNE SENSOREN (Dynamisch aus der Konfigurations-Tabelle)
 		// =========================================================
 		if (config.motionSensors && Array.isArray(config.motionSensors)) {
-			// Prüfen, ob die geänderte ID in unserer Sensor-Tabelle steht
 			const matchedSensor = config.motionSensors.find((s: any) => s.oid && s.oid.trim() === id);
 
 			if (matchedSensor && state.val === true) {
@@ -737,7 +764,6 @@ class Lwd50a extends utils.Adapter {
 							`Bewegung an '${matchedSensor.name || id}' erkannt. Letzte ZIP-Aktion ist alt genug. Triggere ZIP Makro.`,
 						);
 					}
-					// Makro als NUTZERBEFEHL (ack: false) triggern
 					await this.setState(getDpPath("Activate_Zip"), { val: true, ack: false });
 				} else {
 					if (this.isDebugLogActive) {
@@ -746,11 +772,13 @@ class Lwd50a extends utils.Adapter {
 						);
 					}
 				}
-				// Nach einem erkannten Bewegungsmelder zwingend abbrechen!
 				return;
 			}
 		}
 
+		// =========================================================
+		// 2. EIGENE DATENPUNKTE (Nur ack: false = Nutzerbefehle zulassen!)
+		// =========================================================
 		if (state.ack) {
 			return;
 		}
@@ -909,7 +937,7 @@ class Lwd50a extends utils.Adapter {
 			);
 			await this.setState(id, { val: state.val, ack: true });
 		} catch (err: any) {
-			this.logAndNotifyError(`Fehler bei Befehlsausführung: ${err.message}`);
+			this.log.error(`Fehler bei Befehlsausführung: ${err.message}`);
 		}
 	}
 }
