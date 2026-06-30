@@ -190,7 +190,7 @@ class Lwd50a extends utils.Adapter {
 			}
 
 			// 2. Zustand im ioBroker auf "bestätigt" (grün) setzen
-			await this.setStateAsync(id, { val: val, ack: true });
+			await this.setState(id, { val: val, ack: true });
 		}
 	}
 
@@ -208,7 +208,7 @@ class Lwd50a extends utils.Adapter {
 			}
 			const state = await this.getStateAsync(id);
 			if (!state || state.val !== val) {
-				await this.setStateAsync(id, { val: val, ack: ack });
+				await this.setState(id, { val: val, ack: ack });
 				if (this.isDebugLogActive) {
 					this.log.debug(`Setze Werte für ${id}: ${val}`);
 				}
@@ -273,7 +273,7 @@ class Lwd50a extends utils.Adapter {
 				const luxId = parseInt(def.luxWriteId!, 10);
 				await this.writePumpAsync(luxId, rawVal, true);
 				await new Promise(resolve => setTimeout(resolve, 100)); // Kurze Pause für die WP
-				await this.setStateAsync(getDpPath(key), { val: val, ack: true });
+				await this.setState(getDpPath(key), { val: val, ack: true });
 			}
 		} catch (err: any) {
 			this.log.error(`Fehler bei der Wiederherstellung der ZIP Konfiguration: ${err.message}`);
@@ -681,7 +681,7 @@ class Lwd50a extends utils.Adapter {
 					}
 
 					const stateId = `${definition.folder}.${key}`;
-					await this.setStateAsync(stateId, { val: value, ack: true });
+					await this.setState(stateId, { val: value, ack: true });
 				}
 			}
 
@@ -734,7 +734,7 @@ class Lwd50a extends utils.Adapter {
 							`Bewegung an ${path} erkannt. Letzte ZIP-Aktion (Hardware) ist über 10 Min her. Triggere ZIP Makro.`,
 						);
 					}
-					await this.setStateAsync(getDpPath("Activate_Zip"), { val: true, ack: false });
+					await this.setState(getDpPath("Activate_Zip"), { val: true, ack: false });
 				}
 				return;
 			}
@@ -757,7 +757,7 @@ class Lwd50a extends utils.Adapter {
 		try {
 			if (mappingKey === "Schreibe_Debug_Log") {
 				this.isDebugLogActive = state.val === true;
-				await this.setStateAsync(id, { val: state.val, ack: true });
+				await this.setState(id, { val: state.val, ack: true });
 				return;
 			}
 			if (
@@ -765,17 +765,17 @@ class Lwd50a extends utils.Adapter {
 				mappingKey === "zip_aktiv" ||
 				mappingKey.startsWith("ZIP_Bewegung_Pfad_")
 			) {
-				await this.setStateAsync(id, { val: state.val, ack: true });
+				await this.setState(id, { val: state.val, ack: true });
 				return;
 			}
 			if (mappingKey === "Setze_Vorgabewerte" && state.val === true) {
 				await this.setIdleDefaults();
-				await this.setStateAsync(id, { val: false, ack: true });
+				await this.setState(id, { val: false, ack: true });
 				return;
 			}
 			if (mappingKey === "Dump_Raw_To_Log" && state.val === true) {
 				await dumpAllRawToLog(this);
-				await this.setStateAsync(id, { val: false, ack: true });
+				await this.setState(id, { val: false, ack: true });
 				return;
 			}
 
@@ -786,7 +786,7 @@ class Lwd50a extends utils.Adapter {
 						durationState && typeof durationState.val === "number" ? durationState.val : 120;
 
 					if (durationSeconds <= 0) {
-						await this.setStateAsync(id, { val: false, ack: true });
+						await this.setState(id, { val: false, ack: true });
 						return;
 					}
 
@@ -859,7 +859,7 @@ class Lwd50a extends utils.Adapter {
 						}
 					}
 
-					await this.setStateAsync(id, { val: true, ack: true });
+					await this.setState(id, { val: true, ack: true });
 					this.zipTimer = setTimeout(async () => {
 						await this.stopZipAndDeaeration();
 					}, durationSeconds * 1000);
@@ -897,7 +897,7 @@ class Lwd50a extends utils.Adapter {
 				valueToWrite,
 				isRawWrite,
 			);
-			await this.setStateAsync(id, { val: state.val, ack: true });
+			await this.setState(id, { val: state.val, ack: true });
 		} catch (err: any) {
 			this.log.error(`Fehler bei Befehlsausführung: ${err.message}`);
 		}
