@@ -131,7 +131,7 @@
 		"platform": "Javascript/Node.js",
 		"icon": "lwd50a.png",
 		"enabled": true,
-		"extIcon": "https://raw.githubusercontent.com/Tbs/ioBroker.lwd50a/main/admin/lwd50a.png",
+		"extIcon": "https://raw.githubusercontent.com/Tbs/ioBroker.lwd50a/main/admin/LWP.png",
 		"readme": "https://github.com/Tbs/ioBroker.lwd50a/blob/main/README.md",
 		"loglevel": "info",
 		"tier": 3,
