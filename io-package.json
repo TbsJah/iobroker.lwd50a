@@ -129,7 +129,7 @@
 			"license": "MIT"
 		},
 		"platform": "Javascript/Node.js",
-		"icon": "lwd50a.png",
+		"icon": "LWP.png",
 		"enabled": true,
 		"extIcon": "https://raw.githubusercontent.com/Tbs/ioBroker.lwd50a/main/admin/LWP.png",
 		"readme": "https://github.com/Tbs/ioBroker.lwd50a/blob/main/README.md",
