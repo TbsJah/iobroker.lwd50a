@@ -6,53 +6,13 @@
 		"mainSettings": {
 			"type": "panel",
 			"label": "Haupteinstellungen",
-			"icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPjxwYXRoIGQ9Ik0wIDBoMjR2MjRIMHoiIGZpbGw9Im5vbmUiLz48cGF0aCBmaWxsPSJjdXJyZW50Q29sb3IiIGQ9Ik0xMC44MjUgMjJxLS42NzUgMC0xLjE2Mi0uNDV0LS41ODgtMS4xTDguODUgMTguOHEtLjMyNS0uMTI1LS42MTItLjN0LS41NjMtLjM3NWwtMS41NS42NXEtLjYyNS4yNzUtMS4yNS4wNXQtLjk3NS0uOGwtMS4xNzUtMi4wNXEtLjM1LS41NzUtLjItMS4yMjV0LjY3NS0xLjA3NWwxLjMyNS0xUTQuNSAxMi41IDQuNSAxMi4zMzd2LS42NzVxMC0uMTYyLjAyNS0uMzM3bC0xLjMyNS0xUTIuNjc1IDkuOSAyLjUyNSA5LjI1dC4yLTEuMjI1TDMuOSA1Ljk3NXEuMzUtLjU3NS45NzUtLjh0MS4yNS4wNWwxLjU1LjY1cS4yNzUtLjIuNTc1LS4zNzV0LjYtLjNsLjIyNS0xLjY1cS4xLS42NS41ODgtMS4xVDEwLjgyNSAyaDIuMzVxLjY3NSAwIDEuMTYzLjQ1dC41ODcgMS4xbC4yMjUgMS42NXEuMzI1LjEyNS42MTMuM3QuNTYyLjM3NWwxLjU1LS42NXEuNjI1LS4yNzUgMS4yNS0uMDV0Ljk3NS44bDEuMTc1IDIuMDVxLjM1LjU3NS4yIDEuMjI1dC0uNjc1IDEuMDc1bC0xLjMyNSAxcS4wMjUuMTc1LjAyNS4zMzh2LjY3NHEwIC4xNjMtLjA1LjMzOGwxLjMyNSAxcS41MjUuNDI1LjY3NSAxLjA3NXQtLjIgMS4yMjVsLTEuMiAyLjA1cS0uMzUuNTc1LS45NzUuOHQtMS4yNS0uMDVsLTEuNS0uNjVxLS4yNzUuMi0uNTc1LjM3NXQtLjYuM2wtLjIyNSAxLjY1cS0uMS42NS0uNTg3IDEuMXQtMS4xNjMuNDV6bTEuMjI1LTYuNXExLjQ1IDAgMi40NzUtMS4wMjVUMTUuNTUgMTJ0LTEuMDI1LTIuNDc1VDEyLjA1IDguNXEtMS40NzUgMC0yLjQ4OCAxLjAyNVQ4LjU1IDEydDEuMDEzIDIuNDc1VDEyLjA1IDE1LjUiLz48L3N2Zz4=",
+			"icon": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='currentColor' d='m9.25 22l-.4-3.2q-.325-.125-.612-.3t-.563-.375L4.7 19.375l-2.75-4.75l2.575-1.95Q4.5 12.5 4.5 12t0-.5l-2.575-1.95l2.75-4.75l2.975 1.25q.275-.2.563-.375t.612-.3l.4-3.2h5.5l.4 3.2q.325.125.612.3t.563.375l2.975-1.25l2.75 4.75l-2.575 1.95q.025.25.025.5t0 .5l2.575 1.95l-2.75 4.75l-2.975-1.25q-.275.2-.563.375t-.612.3l-.4 3.2zm1.1-2h3.3l.35-2.65q.775-.2 1.438-.587t1.212-.938l2.475 1.025l1.65-2.85l-2.125-1.625q.125-.35.175-.737T17.5 12t-.05-.787t-.175-.738l2.125-1.625l-1.65-2.85l-2.475 1.025q-.55-.55-1.212-.937T12.65 5.5L12.3 2.85H9.7l-.35 2.65q-.775.2-1.438.588t-1.212.937L4.225 6l-1.65 2.85l2.125 1.625q-.125.35-.175.738T4.5 12t.05.788t.175.737L2.575 15.15l1.65 2.85l2.475-1.025q.55.55 1.212.938t1.438.587zM12 15.5q1.45 0 2.475-1.025T15.5 12t-1.025-2.475T12 8.5t-2.475 1.025T8.5 12t1.025 2.475T12 15.5'/%3E%3C/svg%3E",
 			"items": {
-				"headerConnection": {
-					"type": "header",
-					"text": "Verbindungseinstellungen",
-					"size": 4,
-					"sm": 12
-				},
-				"host": {
-					"type": "text",
-					"label": "IP-Adresse (Host)",
-					"sm": 12,
-					"md": 4
-				},
-				"port": {
-					"type": "number",
-					"label": "Port",
-					"sm": 12,
-					"md": 4
-				},
-				"interval": {
-					"type": "number",
-					"label": "Abfrageintervall (Sekunden)",
-					"min": 10,
-					"sm": 12,
-					"md": 4
-				},
-
-				"abstandRegelung1": {
-					"type": "staticText",
-					"text": " ",
-					"sm": 12,
-					"md": 12
-				},
-				"abstandRegelung2": {
-					"type": "staticText",
-					"text": " ",
-					"sm": 12,
-					"md": 12
-				},
-				"abstandRegelung3": {
-					"type": "staticText",
-					"text": " ",
-					"sm": 12,
-					"md": 12
-				},
-
+				"headerConnection": { "type": "header", "text": "Verbindungseinstellungen", "size": 4, "sm": 12 },
+				"host": { "type": "text", "label": "IP-Adresse (Host)", "sm": 12, "md": 4 },
+				"port": { "type": "number", "label": "Port", "sm": 12, "md": 4 },
+				"interval": { "type": "number", "label": "Abfrageintervall (Sekunden)", "min": 10, "sm": 12, "md": 4 },
+				"abstandRegelung": { "type": "divider" },
 				"regelung_aktiv": {
 					"type": "select",
 					"label": "Status der automatischen Regelung",
@@ -63,13 +23,7 @@
 					"sm": 12,
 					"md": 12
 				},
-
-				"headerHeating": {
-					"type": "header",
-					"text": "Vorgabewerte Heizen",
-					"size": 4,
-					"sm": 12
-				},
+				"headerHeating": { "type": "header", "text": "Vorgabewerte Heizen", "size": 4, "sm": 12 },
 				"fusspunkt": {
 					"type": "number",
 					"label": "Fußpunkt (°C)",
@@ -112,13 +66,7 @@
 					"md": 12,
 					"disabled": "data.regelung_aktiv === false"
 				},
-
-				"headerWater": {
-					"type": "header",
-					"text": "Vorgabewerte Warmwasser",
-					"size": 4,
-					"sm": 12
-				},
+				"headerWater": { "type": "header", "text": "Vorgabewerte Warmwasser", "size": 4, "sm": 12 },
 				"sync_warmwater_target_temperature": {
 					"type": "number",
 					"label": "WW Soll (°C)",
@@ -147,13 +95,7 @@
 					"md": 6,
 					"disabled": "data.regelung_aktiv === false"
 				},
-
-				"headerZip": {
-					"type": "header",
-					"text": "Vorgabewerte Zirkulationspumpe",
-					"size": 4,
-					"sm": 12
-				},
+				"headerZip": { "type": "header", "text": "Vorgabewerte Zirkulationspumpe", "size": 4, "sm": 12 },
 				"zip_aktiv": {
 					"type": "number",
 					"label": "ZIP Dauer an (s)",
@@ -174,6 +116,67 @@
 					"sm": 12,
 					"md": 4,
 					"disabled": "data.regelung_aktiv === false"
+				}
+			}
+		},
+		"notifications": {
+			"type": "panel",
+			"label": "Benachrichtigungen",
+			"icon": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='currentColor' d='M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z'/%3E%3C/svg%3E",
+			"items": {
+				"telegram_aktiv": {
+					"type": "checkbox",
+					"label": "Fehlermeldungen per Telegram senden",
+					"sm": 12,
+					"md": 12
+				},
+				"telegram_instance": {
+					"type": "instance",
+					"adapter": "telegram",
+					"label": "Telegram-Instanz",
+					"sm": 12,
+					"md": 6,
+					"hidden": "data.telegram_aktiv === false"
+				},
+				"telegram_receiver": {
+					"type": "text",
+					"label": "Empfänger (Name / Chat-ID - Optional)",
+					"help": "Leer lassen, um die Nachricht an alle bekannten Telegram-Benutzer zu senden.",
+					"sm": 12,
+					"md": 6,
+					"hidden": "data.telegram_aktiv === false"
+				}
+			}
+		},
+		"motionSensorsTab": {
+			"type": "panel",
+			"label": "Bewegungssensoren",
+			"icon": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='currentColor' d='M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2s-2 .9-2 2s.9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8l2.1 2v6h2v-7.5l-2.1-2l.6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1c-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7z'/%3E%3C/svg%3E",
+			"items": {
+				"headerSensors": {
+					"type": "header",
+					"text": "Bewegungssensoren für Zirkulationspumpe (ZIP)",
+					"size": 4,
+					"sm": 12
+				},
+				"motionSensors": {
+					"type": "table",
+					"sm": 12,
+					"clone": false,
+					"items": [
+						{
+							"type": "text",
+							"attr": "name",
+							"title": "Bezeichnung (z.B. Bad, Küche)",
+							"width": "30%"
+						},
+						{
+							"type": "text",
+							"attr": "oid",
+							"title": "Datenpunkt-ID (z.B. zigbee.0.sensor.occupancy)",
+							"width": "70%"
+						}
+					]
 				}
 			}
 		}

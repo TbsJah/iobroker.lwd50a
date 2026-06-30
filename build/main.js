@@ -45,6 +45,28 @@ class Lwd50a extends utils.Adapter {
     this.on("stateChange", this.onStateChange.bind(this));
     this.on("unload", this.onUnload.bind(this));
   }
+  /**
+   * NEU: Schreibt einen Fehler ins Log UND sendet (falls aktiviert) eine Telegram-Nachricht
+   *
+   * @param message Fehlermeldung, die protokolliert und optional per Telegram versendet werden soll
+   */
+  logAndNotifyError(message) {
+    this.log.error(message);
+    const config = this.config;
+    if (config.telegram_aktiv && config.telegram_instance) {
+      const sendObj = {
+        text: `\u26A0\uFE0F *W\xE4rmepumpe Fehler*
+${message}`
+      };
+      if (config.telegram_receiver && config.telegram_receiver.trim() !== "") {
+        sendObj.user = config.telegram_receiver.trim();
+      }
+      this.sendTo(config.telegram_instance, "send", sendObj);
+      if (this.isDebugLogActive) {
+        this.log.debug(`Telegram-Fehlermeldung gesendet an ${config.telegram_instance}`);
+      }
+    }
+  }
   async onReady() {
     const ip = this.config.host;
     const port = this.config.port || 8889;
@@ -58,11 +80,15 @@ class Lwd50a extends utils.Adapter {
       this.log.info("Synchronisiere Konfigurationswerte mit der W\xE4rmepumpe...");
     }
     await this.setIdleDefaults();
-    const sensorKeys = ["ZIP_Bewegung_Pfad_1", "ZIP_Bewegung_Pfad_2", "ZIP_Bewegung_Pfad_3"];
-    for (const key of sensorKeys) {
-      const s = await this.getStateAsync((0, import_stateMapping.getDpPath)(key));
-      if (s && s.val && typeof s.val === "string" && s.val.length > 0) {
-        this.subscribeForeignStates(s.val);
+    const config = this.config;
+    if (config.motionSensors && Array.isArray(config.motionSensors)) {
+      for (const sensor of config.motionSensors) {
+        if (sensor.oid && typeof sensor.oid === "string" && sensor.oid.trim() !== "") {
+          this.subscribeForeignStates(sensor.oid.trim());
+          if (this.isDebugLogActive) {
+            this.log.info(`Bewegungssensor abonniert: ${sensor.name} (${sensor.oid})`);
+          }
+        }
       }
     }
     await this.updateData();
@@ -79,9 +105,6 @@ class Lwd50a extends utils.Adapter {
   // =========================================================
   // SKRIPT-OPTIMIERUNG: HILFSFUNKTIONEN & SCHEDULE
   // =========================================================
-  /**
-   * Erzeugt alle strukturellen Zustände aus dem State-Mapping vorab in der Datenbank.
-   */
   async ensureAllObjectsExist() {
     try {
       for (const [key, definition] of Object.entries(import_stateMapping.STATE_MAPPING)) {
@@ -121,16 +144,9 @@ class Lwd50a extends utils.Adapter {
         }
       }
     } catch (err) {
-      this.log.error(`Fehler bei der Vorab-Objekterzeugung: ${err.message}`);
+      this.logAndNotifyError(`Fehler bei der Vorab-Objekterzeugung: ${err.message}`);
     }
   }
-  /**
-   * NEU: Schreibt Werte PROAKTIV in die Wärmepumpe und setzt danach erst den Status im ioBroker.
-   * Dies löst das Problem, dass beim Booten onStateChange-Events verschluckt werden.
-   *
-   * @param mappingKey Der Schlüssel der Mapping-Definition.
-   * @param val Der zu synchronisierende Wert.
-   */
   async syncConfigValue(mappingKey, val) {
     if (val === void 0 || val === null) {
       return;
@@ -159,19 +175,12 @@ class Lwd50a extends utils.Adapter {
           await this.writePumpAsync(writeId, valueToWrite, isRawWrite);
           await new Promise((r) => setTimeout(r, 200));
         } catch (err) {
-          this.log.error(`Fehler beim Schreiben von ${mappingKey} an die Pumpe: ${err.message}`);
+          this.logAndNotifyError(`Fehler beim Schreiben von ${mappingKey} an die Pumpe: ${err.message}`);
         }
       }
       await this.setState(id, { val, ack: true });
     }
   }
-  /**
-   * Setzt einen eigenen State als Benutzerbefehl (Wird z.B. genutzt, um Makros wie Activate_Zip anzustoßen).
-   *
-   * @param id - Objekt-ID des zu setzenden States
-   * @param val - neuer Wert für den State
-   * @param ack - Acknowledge-Flag, ob der Wert bestätigt gesetzt wird
-   */
   async setOwnStateIfDifferent(id, val, ack = false) {
     try {
       if (val === void 0) {
@@ -185,12 +194,9 @@ class Lwd50a extends utils.Adapter {
         }
       }
     } catch (err) {
-      this.log.error(`Fehler in setOwnStateIfDifferent f\xFCr ${id}: ${err.message}`);
+      this.logAndNotifyError(`Fehler in setOwnStateIfDifferent f\xFCr ${id}: ${err.message}`);
     }
   }
-  /**
-   * Setzt alle Anlageparameter auf die Standardwerte (Leerlauf) aus der Instanzkonfiguration zurück.
-   */
   async setIdleDefaults() {
     var _a;
     try {
@@ -211,12 +217,9 @@ class Lwd50a extends utils.Adapter {
       await this.syncConfigValue("zip_aktiv", config.zip_aktiv);
       await this.syncConfigValue("Heizen_nach_Wasser", (_a = config.Heating_after_warmwater) != null ? _a : false);
     } catch (err) {
-      this.log.error(`Fehler beim Setzen der Leerlauf-Vorgabewerte: ${err.message}`);
+      this.logAndNotifyError(`Fehler beim Setzen der Leerlauf-Vorgabewerte: ${err.message}`);
     }
   }
-  /**
-   * Stellt die gesicherte ZIP Zirkulationstabelle wieder her.
-   */
   async restoreOriginalZipConfig() {
     if (!this.originalZipConfig) {
       return;
@@ -242,14 +245,11 @@ class Lwd50a extends utils.Adapter {
         await this.setState((0, import_stateMapping.getDpPath)(key), { val, ack: true });
       }
     } catch (err) {
-      this.log.error(`Fehler bei der Wiederherstellung der ZIP Konfiguration: ${err.message}`);
+      this.logAndNotifyError(`Fehler bei der Wiederherstellung der ZIP Konfiguration: ${err.message}`);
     } finally {
       this.originalZipConfig = null;
     }
   }
-  /**
-   * Prüft, ob das ZIP-Makro oder das Entlüftungsprogramm noch läuft und beendet es sicher.
-   */
   async stopZipAndDeaeration() {
     try {
       const activateZipState = await this.getStateAsync((0, import_stateMapping.getDpPath)("Activate_Zip"));
@@ -274,7 +274,7 @@ class Lwd50a extends utils.Adapter {
         await this.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("Activate_Zip"), false, true);
       }
     } catch (err) {
-      this.log.error(`Fehler beim Stoppen von ZIP/Entl\xFCftung: ${err.message}`);
+      this.logAndNotifyError(`Fehler beim Stoppen von ZIP/Entl\xFCftung: ${err.message}`);
     }
   }
   async istAnlageAelterAls10Min() {
@@ -287,11 +287,8 @@ class Lwd50a extends utils.Adapter {
       return false;
     }
   }
-  /**
-   * Führt die Überwachung und dynamische Anpassung der Heizkurve/HUP aus.
-   */
   async runOptimizationSchedule() {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j;
     try {
       const regelungAktiv = await this.getStateAsync((0, import_stateMapping.getDpPath)("Regelung_Aktiv"));
       if ((regelungAktiv == null ? void 0 : regelungAktiv.val) === false) {
@@ -306,8 +303,8 @@ class Lwd50a extends utils.Adapter {
       if (!istHeizen && !istWarmwasser && !istLeerlauf && !istAbtauen) {
         return;
       }
+      const config = this.config;
       if (bzVal !== this.lastBzVal) {
-        const config = this.config;
         if (istLeerlauf) {
           await this.setIdleDefaults();
         } else if (istHeizen) {
@@ -320,7 +317,7 @@ class Lwd50a extends utils.Adapter {
             "heating_system_circ_pump_voltage_nominal",
             config.sync_heating_system_circ_pump_voltage_nominal_heating
           );
-          await this.syncConfigValue("Heizen_nach_Wasser", (_a = config.Heating_after_warmwater) != null ? _a : true);
+          await this.syncConfigValue("Heizen_nach_Wasser", config.Heating_after_warmwater === true);
         } else if (istWarmwasser) {
           await this.syncConfigValue(
             "hotWaterTemperatureHysteresis",
@@ -368,23 +365,22 @@ class Lwd50a extends utils.Adapter {
         this.getStateAsync((0, import_stateMapping.getDpPath)("Heizen_nach_Wasser")),
         this.istAnlageAelterAls10Min()
       ]);
-      const wwSoll = (_b = wwSollState == null ? void 0 : wwSollState.val) != null ? _b : 0;
-      const wwIst = (_c = wwIstState == null ? void 0 : wwIstState.val) != null ? _c : 0;
-      const ruecklauf = (_d = ruecklaufState == null ? void 0 : ruecklaufState.val) != null ? _d : 0;
-      const spreizung = (_e = spreizungState == null ? void 0 : spreizungState.val) != null ? _e : 0;
+      const wwSoll = (_a = wwSollState == null ? void 0 : wwSollState.val) != null ? _a : 0;
+      const wwIst = (_b = wwIstState == null ? void 0 : wwIstState.val) != null ? _b : 0;
+      const ruecklauf = (_c = ruecklaufState == null ? void 0 : ruecklaufState.val) != null ? _c : 0;
+      const spreizung = (_d = spreizungState == null ? void 0 : spreizungState.val) != null ? _d : 0;
       const heatingStateStr = String((heatingStateStrState == null ? void 0 : heatingStateStrState.val) || "").trim();
       const vd1 = (vd1State == null ? void 0 : vd1State.val) === 1;
-      const wwHysterese = (_f = wwHystereseState == null ? void 0 : wwHystereseState.val) != null ? _f : 0;
-      const ruecklaufSoll = (_g = ruecklaufSollState == null ? void 0 : ruecklaufSollState.val) != null ? _g : 0;
-      const hupAktiv = (_h = hupAktivState == null ? void 0 : hupAktivState.val) != null ? _h : 0;
-      const heizenHysterese = (_i = heizenHystereseState == null ? void 0 : heizenHystereseState.val) != null ? _i : 0;
+      const wwHysterese = (_e = wwHystereseState == null ? void 0 : wwHystereseState.val) != null ? _e : 0;
+      const ruecklaufSoll = (_f = ruecklaufSollState == null ? void 0 : ruecklaufSollState.val) != null ? _f : 0;
+      const hupAktiv = (_g = hupAktivState == null ? void 0 : hupAktivState.val) != null ? _g : 0;
+      const heizenHysterese = (_h = heizenHystereseState == null ? void 0 : heizenHystereseState.val) != null ? _h : 0;
       const nachWasser = nachWasserState == null ? void 0 : nachWasserState.val;
-      const betriebsart = (_j = bzState == null ? void 0 : bzState.val) != null ? _j : 0;
+      const betriebsart = (_i = bzState == null ? void 0 : bzState.val) != null ? _i : 0;
       if (istHeizen) {
         if (aelterAls10 && vd1) {
-          const fusspunkt = (_k = await this.getStateAsync((0, import_stateMapping.getDpPath)("heating_curve_parallel_offset"))) == null ? void 0 : _k.val;
+          const fusspunkt = (_j = await this.getStateAsync((0, import_stateMapping.getDpPath)("heating_curve_parallel_offset"))) == null ? void 0 : _j.val;
           if (fusspunkt === 35) {
-            const config = this.config;
             await this.syncConfigValue("heating_curve_parallel_offset", config.fusspunkt);
           }
         }
@@ -397,7 +393,7 @@ class Lwd50a extends utils.Adapter {
           if (aelterAls10) {
             await this.syncConfigValue("Heizen_nach_Wasser", false);
           }
-        } else if (!nachWasser) {
+        } else if (!nachWasser && config.Heating_after_warmwater === true) {
           await this.syncConfigValue("Heizen_nach_Wasser", true);
         }
         if (wwSoll - wwIst > 2 && ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1) {
@@ -416,7 +412,7 @@ class Lwd50a extends utils.Adapter {
         }
       }
     } catch (err) {
-      this.log.error(`Fehler im runOptimizationSchedule-Ablauf: ${err.message}`);
+      this.logAndNotifyError(`Fehler im runOptimizationSchedule-Ablauf: ${err.message}`);
     }
   }
   readPumpAsync() {
@@ -515,7 +511,7 @@ class Lwd50a extends utils.Adapter {
         if (err.message.includes("Timeout")) {
           this.log.debug("W\xE4rmepumpe ausgelastet (Timeout). Der Abfrage-Zyklus wird \xFCbersprungen.");
         } else {
-          this.log.error(`Verbindungsfehler: ${err.message}`);
+          this.logAndNotifyError(`Verbindungsfehler zur W\xE4rmepumpe: ${err.message}`);
         }
       }
       if (!coolchipData) {
@@ -599,7 +595,7 @@ class Lwd50a extends utils.Adapter {
       await (0, import_virtualStates.calculateTemperatureSpread)(this);
       await this.runOptimizationSchedule();
     } catch (err) {
-      this.log.error(`Fehler im updateData-Ablauf: ${err.message}`);
+      this.logAndNotifyError(`Fehler im updateData-Ablauf: ${err.message}`);
     } finally {
       this.updateRunning = false;
     }
@@ -620,22 +616,26 @@ class Lwd50a extends utils.Adapter {
     if (!state) {
       return;
     }
-    const sensorKeys = ["ZIP_Bewegung_Pfad_1", "ZIP_Bewegung_Pfad_2", "ZIP_Bewegung_Pfad_3"];
-    for (const key of sensorKeys) {
-      const pathState = await this.getStateAsync((0, import_stateMapping.getDpPath)(key));
-      const path = pathState == null ? void 0 : pathState.val;
-      if (path && path.length > 0 && id === path && state.val === true) {
+    const config = this.config;
+    if (config.motionSensors && Array.isArray(config.motionSensors)) {
+      const matchedSensor = config.motionSensors.find((s) => s.oid && s.oid.trim() === id);
+      if (matchedSensor && state.val === true) {
         const now = Date.now();
         const zipOutState = await this.getStateAsync((0, import_stateMapping.getDpPath)("ZIPout"));
         const lastZipChange = (zipOutState == null ? void 0 : zipOutState.lc) || 0;
-        const configWithDynamicKeys = this.config;
-        if (now - lastZipChange > configWithDynamicKeys.zip_last_run_min * 1e3) {
+        if (now - lastZipChange > (config.zip_last_run_min || 600) * 1e3) {
           if (this.isDebugLogActive) {
             this.log.debug(
-              `Bewegung an ${path} erkannt. Letzte ZIP-Aktion (Hardware) ist \xFCber 10 Min her. Triggere ZIP Makro.`
+              `Bewegung an '${matchedSensor.name || id}' erkannt. Letzte ZIP-Aktion ist alt genug. Triggere ZIP Makro.`
             );
           }
           await this.setState((0, import_stateMapping.getDpPath)("Activate_Zip"), { val: true, ack: false });
+        } else {
+          if (this.isDebugLogActive) {
+            this.log.debug(
+              `Bewegung an '${matchedSensor.name || id}' erkannt, aber ZIP hat k\xFCrzlich gearbeitet.`
+            );
+          }
         }
         return;
       }
@@ -771,7 +771,7 @@ class Lwd50a extends utils.Adapter {
       );
       await this.setState(id, { val: state.val, ack: true });
     } catch (err) {
-      this.log.error(`Fehler bei Befehlsausf\xFChrung: ${err.message}`);
+      this.logAndNotifyError(`Fehler bei Befehlsausf\xFChrung: ${err.message}`);
     }
   }
 }

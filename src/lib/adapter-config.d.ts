@@ -20,6 +20,7 @@ declare global {
 			sync_return_temperature_hysteresis?: number;
 			regelung_aktiv?: boolean;
 			Heating_after_warmwater?: boolean;
+			motionSensors?: Array<{ name: string; oid: string }>;
 		}
 	}
 }

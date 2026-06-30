@@ -171,7 +171,11 @@
 		"sync_return_temperature_hysteresis": 1.5,
 		"zip_last_run_min": 600,
 		"regelung_aktiv": true,
-		"Heating_after_warmwater": true
+		"Heating_after_warmwater": true,
+		"telegram_aktiv": false,
+		"telegram_instance": "telegram.0",
+		"telegram_receiver": "",
+		"motionSensors": []
 	},
 	"objects": [],
 	"instanceObjects": []

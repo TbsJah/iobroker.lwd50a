@@ -35,6 +35,36 @@ class Lwd50a extends utils.Adapter {
 		this.on("unload", this.onUnload.bind(this));
 	}
 
+	/**
+	 * NEU: Schreibt einen Fehler ins Log UND sendet (falls aktiviert) eine Telegram-Nachricht
+	 *
+	 * @param message Fehlermeldung, die protokolliert und optional per Telegram versendet werden soll
+	 */
+	private logAndNotifyError(message: string): void {
+		// 1. Immer ins normale ioBroker-Log schreiben
+		this.log.error(message);
+
+		// 2. Prüfen, ob Telegram aktiviert ist
+		const config = this.config as Record<string, any>;
+		if (config.telegram_aktiv && config.telegram_instance) {
+			const sendObj: Record<string, any> = {
+				text: `⚠️ *Wärmepumpe Fehler*\n${message}`,
+			};
+
+			// Falls ein spezifischer Empfänger eingetragen wurde
+			if (config.telegram_receiver && config.telegram_receiver.trim() !== "") {
+				sendObj.user = config.telegram_receiver.trim();
+			}
+
+			// Nachricht an die gewählte Telegram-Instanz übergeben
+			this.sendTo(config.telegram_instance, "send", sendObj);
+
+			if (this.isDebugLogActive) {
+				this.log.debug(`Telegram-Fehlermeldung gesendet an ${config.telegram_instance}`);
+			}
+		}
+	}
+
 	private async onReady(): Promise<void> {
 		const ip = this.config.host;
 		const port = this.config.port || 8889;
@@ -58,12 +88,16 @@ class Lwd50a extends utils.Adapter {
 		}
 		await this.setIdleDefaults();
 
-		// Fremde States für Bewegungsmelder abonnieren
-		const sensorKeys = ["ZIP_Bewegung_Pfad_1", "ZIP_Bewegung_Pfad_2", "ZIP_Bewegung_Pfad_3"] as const;
-		for (const key of sensorKeys) {
-			const s = await this.getStateAsync(getDpPath(key));
-			if (s && s.val && typeof s.val === "string" && s.val.length > 0) {
-				this.subscribeForeignStates(s.val);
+		// Dynamische Bewegungssensoren aus der Tabelle abonnieren
+		const config = this.config as Record<string, any>;
+		if (config.motionSensors && Array.isArray(config.motionSensors)) {
+			for (const sensor of config.motionSensors) {
+				if (sensor.oid && typeof sensor.oid === "string" && sensor.oid.trim() !== "") {
+					this.subscribeForeignStates(sensor.oid.trim());
+					if (this.isDebugLogActive) {
+						this.log.info(`Bewegungssensor abonniert: ${sensor.name} (${sensor.oid})`);
+					}
+				}
 			}
 		}
 
@@ -88,9 +122,6 @@ class Lwd50a extends utils.Adapter {
 	// SKRIPT-OPTIMIERUNG: HILFSFUNKTIONEN & SCHEDULE
 	// =========================================================
 
-	/**
-	 * Erzeugt alle strukturellen Zustände aus dem State-Mapping vorab in der Datenbank.
-	 */
 	private async ensureAllObjectsExist(): Promise<void> {
 		try {
 			for (const [key, definition] of Object.entries(STATE_MAPPING)) {
@@ -134,17 +165,10 @@ class Lwd50a extends utils.Adapter {
 				}
 			}
 		} catch (err: any) {
-			this.log.error(`Fehler bei der Vorab-Objekterzeugung: ${err.message}`);
+			this.logAndNotifyError(`Fehler bei der Vorab-Objekterzeugung: ${err.message}`);
 		}
 	}
 
-	/**
-	 * NEU: Schreibt Werte PROAKTIV in die Wärmepumpe und setzt danach erst den Status im ioBroker.
-	 * Dies löst das Problem, dass beim Booten onStateChange-Events verschluckt werden.
-	 *
-	 * @param mappingKey Der Schlüssel der Mapping-Definition.
-	 * @param val Der zu synchronisierende Wert.
-	 */
 	private async syncConfigValue(mappingKey: keyof typeof STATE_MAPPING, val: any): Promise<void> {
 		if (val === undefined || val === null) {
 			return;
@@ -153,7 +177,6 @@ class Lwd50a extends utils.Adapter {
 		const id = getDpPath(mappingKey);
 		const state = await this.getStateAsync(id);
 
-		// Nur wenn der Wert sich ändert (oder beim allerersten Start fehlt)
 		if (!state || state.val !== val) {
 			const definition = STATE_MAPPING[mappingKey];
 			if (!definition) {
@@ -164,7 +187,6 @@ class Lwd50a extends utils.Adapter {
 				this.log.info(`Schreibe Wert direkt in Wärmepumpe: ${mappingKey} = ${val}`);
 			}
 
-			// 1. Physischer Write an die Wärmepumpe (außer bei virtuellen Werten)
 			if (definition.write === true && !definition.isVirtual && definition.luxWriteId) {
 				let valueToWrite: any = val;
 
@@ -183,24 +205,16 @@ class Lwd50a extends utils.Adapter {
 				try {
 					const writeId = isRawWrite ? parseInt(definition.luxWriteId, 10) : definition.luxWriteId;
 					await this.writePumpAsync(writeId, valueToWrite, isRawWrite);
-					await new Promise(r => setTimeout(r, 200)); // Kurze Atempause für die WP
+					await new Promise(r => setTimeout(r, 200));
 				} catch (err: any) {
-					this.log.error(`Fehler beim Schreiben von ${mappingKey} an die Pumpe: ${err.message}`);
+					this.logAndNotifyError(`Fehler beim Schreiben von ${mappingKey} an die Pumpe: ${err.message}`);
 				}
 			}
 
-			// 2. Zustand im ioBroker auf "bestätigt" (grün) setzen
 			await this.setState(id, { val: val, ack: true });
 		}
 	}
 
-	/**
-	 * Setzt einen eigenen State als Benutzerbefehl (Wird z.B. genutzt, um Makros wie Activate_Zip anzustoßen).
-	 *
-	 * @param id - Objekt-ID des zu setzenden States
-	 * @param val - neuer Wert für den State
-	 * @param ack - Acknowledge-Flag, ob der Wert bestätigt gesetzt wird
-	 */
 	private async setOwnStateIfDifferent(id: string, val: any, ack = false): Promise<void> {
 		try {
 			if (val === undefined) {
@@ -214,13 +228,10 @@ class Lwd50a extends utils.Adapter {
 				}
 			}
 		} catch (err: any) {
-			this.log.error(`Fehler in setOwnStateIfDifferent für ${id}: ${err.message}`);
+			this.logAndNotifyError(`Fehler in setOwnStateIfDifferent für ${id}: ${err.message}`);
 		}
 	}
 
-	/**
-	 * Setzt alle Anlageparameter auf die Standardwerte (Leerlauf) aus der Instanzkonfiguration zurück.
-	 */
 	private async setIdleDefaults(): Promise<void> {
 		try {
 			const config = this.config as Record<string, any>;
@@ -240,13 +251,10 @@ class Lwd50a extends utils.Adapter {
 			await this.syncConfigValue("zip_aktiv", config.zip_aktiv);
 			await this.syncConfigValue("Heizen_nach_Wasser", config.Heating_after_warmwater ?? false);
 		} catch (err: any) {
-			this.log.error(`Fehler beim Setzen der Leerlauf-Vorgabewerte: ${err.message}`);
+			this.logAndNotifyError(`Fehler beim Setzen der Leerlauf-Vorgabewerte: ${err.message}`);
 		}
 	}
 
-	/**
-	 * Stellt die gesicherte ZIP Zirkulationstabelle wieder her.
-	 */
 	private async restoreOriginalZipConfig(): Promise<void> {
 		if (!this.originalZipConfig) {
 			return;
@@ -272,19 +280,16 @@ class Lwd50a extends utils.Adapter {
 
 				const luxId = parseInt(def.luxWriteId!, 10);
 				await this.writePumpAsync(luxId, rawVal, true);
-				await new Promise(resolve => setTimeout(resolve, 100)); // Kurze Pause für die WP
+				await new Promise(resolve => setTimeout(resolve, 100));
 				await this.setState(getDpPath(key), { val: val, ack: true });
 			}
 		} catch (err: any) {
-			this.log.error(`Fehler bei der Wiederherstellung der ZIP Konfiguration: ${err.message}`);
+			this.logAndNotifyError(`Fehler bei der Wiederherstellung der ZIP Konfiguration: ${err.message}`);
 		} finally {
-			this.originalZipConfig = null; // Backup löschen
+			this.originalZipConfig = null;
 		}
 	}
 
-	/**
-	 * Prüft, ob das ZIP-Makro oder das Entlüftungsprogramm noch läuft und beendet es sicher.
-	 */
 	private async stopZipAndDeaeration(): Promise<void> {
 		try {
 			const activateZipState = await this.getStateAsync(getDpPath("Activate_Zip"));
@@ -315,7 +320,7 @@ class Lwd50a extends utils.Adapter {
 				await this.setOwnStateIfDifferent(getDpPath("Activate_Zip"), false, true);
 			}
 		} catch (err: any) {
-			this.log.error(`Fehler beim Stoppen von ZIP/Entlüftung: ${err.message}`);
+			this.logAndNotifyError(`Fehler beim Stoppen von ZIP/Entlüftung: ${err.message}`);
 		}
 	}
 
@@ -329,9 +334,6 @@ class Lwd50a extends utils.Adapter {
 		}
 	}
 
-	/**
-	 * Führt die Überwachung und dynamische Anpassung der Heizkurve/HUP aus.
-	 */
 	private async runOptimizationSchedule(): Promise<void> {
 		try {
 			const regelungAktiv = await this.getStateAsync(getDpPath("Regelung_Aktiv"));
@@ -351,9 +353,9 @@ class Lwd50a extends utils.Adapter {
 				return;
 			}
 
-			// Vorgabewerte bei Moduswechsel SOFORT setzen
+			const config = this.config as Record<string, any>;
+
 			if (bzVal !== this.lastBzVal) {
-				const config = this.config as Record<string, any>;
 				if (istLeerlauf) {
 					await this.setIdleDefaults();
 				} else if (istHeizen) {
@@ -366,7 +368,7 @@ class Lwd50a extends utils.Adapter {
 						"heating_system_circ_pump_voltage_nominal",
 						config.sync_heating_system_circ_pump_voltage_nominal_heating,
 					);
-					await this.syncConfigValue("Heizen_nach_Wasser", config.Heating_after_warmwater ?? true);
+					await this.syncConfigValue("Heizen_nach_Wasser", config.Heating_after_warmwater === true);
 				} else if (istWarmwasser) {
 					await this.syncConfigValue(
 						"hotWaterTemperatureHysteresis",
@@ -381,8 +383,6 @@ class Lwd50a extends utils.Adapter {
 						"heating_system_circ_pump_voltage_nominal",
 						config.sync_heating_system_circ_pump_voltage_nominal_water,
 					);
-
-					// Makro als Befehl an den Adapter schicken (daher hier setOwnStateIfDifferent)
 					await this.setOwnStateIfDifferent(getDpPath("Activate_Zip"), true, false);
 				} else if (istAbtauen) {
 					await this.syncConfigValue("heating_system_circ_pump_voltage_nominal", 10);
@@ -435,13 +435,11 @@ class Lwd50a extends utils.Adapter {
 				if (aelterAls10 && vd1) {
 					const fusspunkt = (await this.getStateAsync(getDpPath("heating_curve_parallel_offset")))?.val;
 					if (fusspunkt === 35) {
-						const config = this.config as Record<string, any>;
 						await this.syncConfigValue("heating_curve_parallel_offset", config.fusspunkt);
 					}
 				}
 
 				if (spreizung < 6.5 && hupAktiv > 5.5) {
-					// FIXED: HUPout ist read-only! Spannung wird über den Parameter gesetzt.
 					await this.syncConfigValue("heating_system_circ_pump_voltage_nominal", hupAktiv - 0.25);
 				} else if (spreizung > 7.5) {
 					await this.syncConfigValue("heating_system_circ_pump_voltage_nominal", hupAktiv + 0.25);
@@ -451,7 +449,7 @@ class Lwd50a extends utils.Adapter {
 					if (aelterAls10) {
 						await this.syncConfigValue("Heizen_nach_Wasser", false);
 					}
-				} else if (!nachWasser) {
+				} else if (!nachWasser && config.Heating_after_warmwater === true) {
 					await this.syncConfigValue("Heizen_nach_Wasser", true);
 				}
 
@@ -479,7 +477,7 @@ class Lwd50a extends utils.Adapter {
 				}
 			}
 		} catch (err: any) {
-			this.log.error(`Fehler im runOptimizationSchedule-Ablauf: ${err.message}`);
+			this.logAndNotifyError(`Fehler im runOptimizationSchedule-Ablauf: ${err.message}`);
 		}
 	}
 
@@ -585,10 +583,12 @@ class Lwd50a extends utils.Adapter {
 			try {
 				coolchipData = await this.readPumpAsync();
 			} catch (err: any) {
+				// Timeouts sind völlig normal, hier feuern wir absichtlich keine Telegram-Meldung!
 				if (err.message.includes("Timeout")) {
 					this.log.debug("Wärmepumpe ausgelastet (Timeout). Der Abfrage-Zyklus wird übersprungen.");
 				} else {
-					this.log.error(`Verbindungsfehler: ${err.message}`);
+					// Bei "echten" Verbindungsfehlern senden wir eine Meldung
+					this.logAndNotifyError(`Verbindungsfehler zur Wärmepumpe: ${err.message}`);
 				}
 			}
 
@@ -693,7 +693,7 @@ class Lwd50a extends utils.Adapter {
 
 			await this.runOptimizationSchedule();
 		} catch (err: any) {
-			this.log.error(`Fehler im updateData-Ablauf: ${err.message}`);
+			this.logAndNotifyError(`Fehler im updateData-Ablauf: ${err.message}`);
 		} finally {
 			this.updateRunning = false;
 		}
@@ -717,30 +717,40 @@ class Lwd50a extends utils.Adapter {
 			return;
 		}
 
-		const sensorKeys = ["ZIP_Bewegung_Pfad_1", "ZIP_Bewegung_Pfad_2", "ZIP_Bewegung_Pfad_3"] as const;
-		for (const key of sensorKeys) {
-			const pathState = await this.getStateAsync(getDpPath(key));
-			const path = pathState?.val as string;
+		const config = this.config as Record<string, any>;
 
-			if (path && path.length > 0 && id === path && state.val === true) {
+		// =========================================================
+		// 1. EXTERNE SENSOREN (Dynamisch aus der Konfigurations-Tabelle)
+		// =========================================================
+		if (config.motionSensors && Array.isArray(config.motionSensors)) {
+			// Prüfen, ob die geänderte ID in unserer Sensor-Tabelle steht
+			const matchedSensor = config.motionSensors.find((s: any) => s.oid && s.oid.trim() === id);
+
+			if (matchedSensor && state.val === true) {
 				const now = Date.now();
 				const zipOutState = await this.getStateAsync(getDpPath("ZIPout"));
 				const lastZipChange = zipOutState?.lc || 0;
-				const configWithDynamicKeys = this.config as Record<string, any>;
 
-				if (now - lastZipChange > configWithDynamicKeys.zip_last_run_min * 1000) {
+				if (now - lastZipChange > (config.zip_last_run_min || 600) * 1000) {
 					if (this.isDebugLogActive) {
 						this.log.debug(
-							`Bewegung an ${path} erkannt. Letzte ZIP-Aktion (Hardware) ist über 10 Min her. Triggere ZIP Makro.`,
+							`Bewegung an '${matchedSensor.name || id}' erkannt. Letzte ZIP-Aktion ist alt genug. Triggere ZIP Makro.`,
 						);
 					}
+					// Makro als NUTZERBEFEHL (ack: false) triggern
 					await this.setState(getDpPath("Activate_Zip"), { val: true, ack: false });
+				} else {
+					if (this.isDebugLogActive) {
+						this.log.debug(
+							`Bewegung an '${matchedSensor.name || id}' erkannt, aber ZIP hat kürzlich gearbeitet.`,
+						);
+					}
 				}
+				// Nach einem erkannten Bewegungsmelder zwingend abbrechen!
 				return;
 			}
 		}
 
-		// Nur Benutzerbefehle (ack: false) zulassen
 		if (state.ack) {
 			return;
 		}
@@ -899,7 +909,7 @@ class Lwd50a extends utils.Adapter {
 			);
 			await this.setState(id, { val: state.val, ack: true });
 		} catch (err: any) {
-			this.log.error(`Fehler bei Befehlsausführung: ${err.message}`);
+			this.logAndNotifyError(`Fehler bei Befehlsausführung: ${err.message}`);
 		}
 	}
 }
