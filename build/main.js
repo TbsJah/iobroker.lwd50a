@@ -53,6 +53,10 @@ class Lwd50a extends utils.Adapter {
     await (0, import_virtualStates.initializeVirtualStates)(this);
     const debugState = await this.getStateAsync((0, import_stateMapping.getDpPath)("Schreibe_Debug_Log"));
     this.isDebugLogActive = (debugState == null ? void 0 : debugState.val) === true;
+    if (this.isDebugLogActive) {
+      this.log.info("Synchronisiere Konfigurationswerte mit den ioBroker-Objekten...");
+    }
+    await this.setIdleDefaults();
     const sensorKeys = ["ZIP_Bewegung_Pfad_1", "ZIP_Bewegung_Pfad_2", "ZIP_Bewegung_Pfad_3"];
     for (const key of sensorKeys) {
       const s = await this.getStateAsync((0, import_stateMapping.getDpPath)(key));
@@ -115,12 +119,12 @@ class Lwd50a extends utils.Adapter {
       );
       await this.setOwnStateIfDifferent(
         (0, import_stateMapping.getDpPath)("heating_system_circ_pump_voltage_minimal"),
-        configWithDynamicKeys.sync_heating_system_circ_pump_voltage_minimal,
+        configWithDynamicKeys.sync_heating_system_circ_pump_voltage_minimal_heating,
         false
       );
       await this.setOwnStateIfDifferent(
         (0, import_stateMapping.getDpPath)("heating_system_circ_pump_voltage_nominal"),
-        configWithDynamicKeys.sync_heating_system_circ_pump_voltage_nominal,
+        configWithDynamicKeys.sync_heating_system_circ_pump_voltage_nominal_heating,
         false
       );
       await this.setOwnStateIfDifferent(
@@ -255,7 +259,7 @@ class Lwd50a extends utils.Adapter {
             );
             await this.setOwnStateIfDifferent(
               (0, import_stateMapping.getDpPath)("heating_system_circ_pump_voltage_nominal"),
-              config.sync_heating_system_circ_pump_voltage_nominal,
+              config.sync_heating_system_circ_pump_voltage_nominal_heating,
               false
             );
             await this.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("Heizen_nach_Wasser"), true, true);
@@ -268,7 +272,7 @@ class Lwd50a extends utils.Adapter {
             await this.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("zip_aktiv"), config.zip_aktiv_ww, false);
             await this.setOwnStateIfDifferent(
               (0, import_stateMapping.getDpPath)("heating_system_circ_pump_voltage_nominal"),
-              10,
+              config.sync_heating_system_circ_pump_voltage_nominal_water,
               false
             );
             await this.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("Activate_Zip"), true, false);
