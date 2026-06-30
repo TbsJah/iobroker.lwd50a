@@ -49,6 +49,11 @@ class Lwd50a extends utils.Adapter {
 		const debugState = await this.getStateAsync(getDpPath("Schreibe_Debug_Log"));
 		this.isDebugLogActive = debugState?.val === true;
 
+		if (this.isDebugLogActive) {
+			this.log.info("Synchronisiere Konfigurationswerte mit den ioBroker-Objekten...");
+		}
+		await this.setIdleDefaults();
+
 		// Fremde States für Bewegungsmelder abonnieren
 		const sensorKeys = ["ZIP_Bewegung_Pfad_1", "ZIP_Bewegung_Pfad_2", "ZIP_Bewegung_Pfad_3"] as const;
 		for (const key of sensorKeys) {
