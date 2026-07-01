@@ -59,8 +59,10 @@ class Lwd50a extends utils.Adapter {
 			}
 		}
 	}
+
 	private async onMessage(obj: ioBroker.Message): Promise<void> {
 		if (obj.command === "sendTestError") {
+			this.log.info("Test-Button empfangen!");
 			const lastErrorState = await this.getStateAsync(getDpPath("Fehlerspeicher"));
 			if (lastErrorState?.val) {
 				this.sendTelegramNotification(`Test-Alarm: ${lastErrorState.val}`);

@@ -68,6 +68,7 @@ class Lwd50a extends utils.Adapter {
   }
   async onMessage(obj) {
     if (obj.command === "sendTestError") {
+      this.log.info("Test-Button empfangen!");
       const lastErrorState = await this.getStateAsync((0, import_stateMapping.getDpPath)("Fehlerspeicher"));
       if (lastErrorState == null ? void 0 : lastErrorState.val) {
         this.sendTelegramNotification(`Test-Alarm: ${lastErrorState.val}`);
