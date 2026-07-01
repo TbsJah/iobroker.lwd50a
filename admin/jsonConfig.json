@@ -170,11 +170,10 @@
 							"width": "30%"
 						},
 						{
-							"type": "pattern",
+							"type": "objectId",
 							"attr": "oid",
 							"title": "Objekt-ID auswählen",
-							"width": "70%",
-							"pattern": "*"
+							"width": "70%"
 						}
 					]
 				}
