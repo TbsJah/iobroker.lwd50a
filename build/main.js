@@ -68,14 +68,47 @@ class Lwd50a extends utils.Adapter {
   }
   async onMessage(obj) {
     if (obj.command === "sendTestError") {
-      this.log.info("Test-Button empfangen!");
-      const lastErrorState = await this.getStateAsync((0, import_stateMapping.getDpPath)("Fehlerspeicher"));
-      if (lastErrorState == null ? void 0 : lastErrorState.val) {
-        this.sendTelegramNotification(`Test-Alarm: ${lastErrorState.val}`);
-        this.log.info("Test-Fehlermeldung via Telegram versendet.");
-      }
-      if (obj.callback) {
-        this.sendTo(obj.from, obj.command, "OK", obj.callback);
+      try {
+        this.log.info("Test-Button empfangen!");
+        const config = this.config;
+        if (!config.telegram_aktiv || !config.telegram_instance) {
+          if (obj.callback) {
+            this.sendTo(
+              obj.from,
+              obj.command,
+              { error: "Fehler: Bitte Konfiguration zuerst speichern!" },
+              obj.callback
+            );
+          }
+          return;
+        }
+        const lastErrorState = await this.getStateAsync((0, import_stateMapping.getDpPath)("Fehlerspeicher"));
+        if (lastErrorState && lastErrorState.val) {
+          this.sendTelegramNotification(`Test-Alarm: ${lastErrorState.val}`);
+          this.log.info("Test-Fehlermeldung via Telegram versendet.");
+          if (obj.callback) {
+            this.sendTo(
+              obj.from,
+              obj.command,
+              { result: "Nachricht erfolgreich an Telegram gesendet!" },
+              obj.callback
+            );
+          }
+        } else {
+          if (obj.callback) {
+            this.sendTo(
+              obj.from,
+              obj.command,
+              { result: "Kein Fehler im Speicher gefunden. Es wurde nichts gesendet." },
+              obj.callback
+            );
+          }
+        }
+      } catch (err) {
+        this.log.error(`Fehler beim Test-Button: ${err.message}`);
+        if (obj.callback) {
+          this.sendTo(obj.from, obj.command, { error: `Skriptfehler: ${err.message}` }, obj.callback);
+        }
       }
     }
   }
