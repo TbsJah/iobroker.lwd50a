@@ -858,7 +858,7 @@ class Lwd50a extends utils.Adapter {
 
 						// Prüfen, ob wirklich ein NEUER Fehler ganz oben steht (neuer Zeitstempel)
 						if (!oldNewestError || newestError.timestamp !== oldNewestError.timestamp) {
-							const msg = `🚨 *Störung Wärmepumpe!*\nEin Fehler an der Wärmepumpe wurde registriert:\n\n*Code:* ${newestError.code}\n*Fehler:* ${newestError.beschreibung}\n*Datum:* ${newestError.datum}`;
+							const msg = `🚨 Störung Wärmepumpe!\nEin Fehler an der Wärmepumpe wurde registriert:\n\nCode: ${newestError.code}\nFehler: ${newestError.beschreibung}\nDatum: ${newestError.datum}`;
 							this.sendTelegramNotification(msg);
 							this.log.warn(`Neuer Wärmepumpen-Fehler gemeldet: ${newestError.beschreibung}`);
 						}

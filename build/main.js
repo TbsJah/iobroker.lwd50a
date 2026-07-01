@@ -732,12 +732,12 @@ class Lwd50a extends utils.Adapter {
             const newestError = newList[0];
             const oldNewestError = oldList.length > 0 ? oldList[0] : null;
             if (!oldNewestError || newestError.timestamp !== oldNewestError.timestamp) {
-              const msg = `\u{1F6A8} *St\xF6rung W\xE4rmepumpe!*
+              const msg = `\u{1F6A8} St\xF6rung W\xE4rmepumpe!
 Ein Fehler an der W\xE4rmepumpe wurde registriert:
 
-*Code:* ${newestError.code}
-*Fehler:* ${newestError.beschreibung}
-*Datum:* ${newestError.datum}`;
+Code: ${newestError.code}
+Fehler: ${newestError.beschreibung}
+Datum: ${newestError.datum}`;
               this.sendTelegramNotification(msg);
               this.log.warn(`Neuer W\xE4rmepumpen-Fehler gemeldet: ${newestError.beschreibung}`);
             }
