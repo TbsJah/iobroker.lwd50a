@@ -561,6 +561,9 @@ class Lwd50a extends utils.Adapter {
       if (!coolchipData) {
         return;
       }
+      this.errorCount = 0;
+      await this.setState("Info.connection", true, true);
+      const statePromises = [];
       for (const [key, definition] of Object.entries(import_stateMapping.STATE_MAPPING)) {
         if (definition.isVirtual) {
           continue;
@@ -629,9 +632,10 @@ class Lwd50a extends utils.Adapter {
             }
           }
           const stateId = `${definition.folder}.${key}`;
-          await this.setState(stateId, { val: value, ack: true });
+          statePromises.push(this.setStateChangedAsync(stateId, { val: value, ack: true }));
         }
       }
+      await Promise.all(statePromises);
       await (0, import_virtualStates.calculateTotalThermalEnergy)(this);
       await (0, import_virtualStates.calculateTotalEnergy)(this);
       const fehlerDp = (0, import_stateMapping.getDpPath)("Fehlerspeicher");
@@ -665,13 +669,11 @@ Ein Fehler an der W\xE4rmepumpe wurde registriert:
       await (0, import_virtualStates.updateOutageHistory)(this, rawValues);
       await (0, import_virtualStates.calculateTemperatureSpread)(this);
       await this.runOptimizationSchedule();
-      this.errorCount = 0;
-      await this.setState("info.connection", true, true);
     } catch (err) {
       this.errorCount++;
       this.log.error(`Abfragefehler (${this.errorCount}/${this.MAX_ERRORS}): ${err.message}`);
       if (this.errorCount >= this.MAX_ERRORS) {
-        await this.setState("info.connection", false, true);
+        await this.setState("Info.connection", false, true);
         this.log.warn("W\xE4rmepumpe nicht erreichbar. Verbindung wurde als unterbrochen markiert.");
         this.sendTelegramNotification(
           "W\xE4rmepumpe nicht erreichbar. Verbindung wurde als unterbrochen markiert."

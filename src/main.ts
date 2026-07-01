@@ -640,6 +640,12 @@ class Lwd50a extends utils.Adapter {
 			if (!coolchipData) {
 				return;
 			}
+			// Fehler-Reset bei Erfolg
+			this.errorCount = 0;
+			await this.setState("Info.connection", true, true);
+
+			// Array zum Sammeln aller Schreib-Promises
+			const statePromises: Promise<any>[] = [];
 
 			for (const [key, definition] of Object.entries(STATE_MAPPING)) {
 				if (definition.isVirtual) {
@@ -726,9 +732,13 @@ class Lwd50a extends utils.Adapter {
 					}
 
 					const stateId = `${definition.folder}.${key}`;
-					await this.setState(stateId, { val: value, ack: true });
+					// Wert nicht mit await blockieren, sondern dem Promise-Array hinzufügen
+					statePromises.push(this.setStateChangedAsync(stateId, { val: value, ack: true }));
 				}
 			}
+
+			// Alle Datenpunkte am Ende der Schleife parallel in ioBroker schreiben
+			await Promise.all(statePromises);
 
 			await calculateTotalThermalEnergy(this);
 			await calculateTotalEnergy(this);
@@ -772,16 +782,12 @@ class Lwd50a extends utils.Adapter {
 			await calculateTemperatureSpread(this);
 
 			await this.runOptimizationSchedule();
-
-			// Fehler-Reset bei Erfolg
-			this.errorCount = 0;
-			await this.setState("info.connection", true, true);
 		} catch (err: any) {
 			this.errorCount++;
 			this.log.error(`Abfragefehler (${this.errorCount}/${this.MAX_ERRORS}): ${err.message}`);
 
 			if (this.errorCount >= this.MAX_ERRORS) {
-				await this.setState("info.connection", false, true);
+				await this.setState("Info.connection", false, true);
 				this.log.warn("Wärmepumpe nicht erreichbar. Verbindung wurde als unterbrochen markiert.");
 				this.sendTelegramNotification(
 					"Wärmepumpe nicht erreichbar. Verbindung wurde als unterbrochen markiert.",
