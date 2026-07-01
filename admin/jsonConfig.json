@@ -166,15 +166,14 @@
 						{
 							"type": "text",
 							"attr": "name",
-							"title": "Bezeichnung",
+							"title": "Bezeichnung (z.B. Bad)",
 							"width": "30%"
 						},
 						{
-							"type": "select",
+							"type": "pattern",
 							"attr": "oid",
-							"title": "Sensor auswählen",
-							"width": "70%",
-							"options": "getObjectIDs"
+							"title": "Objekt-ID auswählen",
+							"width": "70%"
 						}
 					]
 				}
