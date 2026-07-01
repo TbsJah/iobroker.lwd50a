@@ -742,7 +742,7 @@ Ein Fehler an der W\xE4rmepumpe wurde registriert:
         await this.setState(id, { val: state.val, ack: true });
         return;
       }
-      if (mappingKey === "Regelung_Aktiv" || mappingKey === "zip_aktiv" || mappingKey.startsWith("ZIP_Bewegung_Pfad_")) {
+      if (mappingKey === "Regelung_Aktiv" || mappingKey === "zip_aktiv") {
         await this.setState(id, { val: state.val, ack: true });
         return;
       }

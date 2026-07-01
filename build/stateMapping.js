@@ -2725,32 +2725,14 @@ const STATE_MAPPING = {
     write: true,
     def: false
   },
-  ZIP_Bewegung_Pfad_1: {
-    folder: "Extern.Bewegung",
-    name: "Pfad Bewegungsmelder 1",
-    role: "text",
-    type: "string",
+  connection: {
+    folder: "Info",
+    name: "Verbindungsstatus",
+    role: "indicator.connected",
+    type: "boolean",
     isVirtual: true,
-    write: true,
-    def: ""
-  },
-  ZIP_Bewegung_Pfad_2: {
-    folder: "Extern.Bewegung",
-    name: "Pfad Bewegungsmelder 2",
-    role: "text",
-    type: "string",
-    isVirtual: true,
-    write: true,
-    def: ""
-  },
-  ZIP_Bewegung_Pfad_3: {
-    folder: "Extern.Bewegung",
-    name: "Pfad Bewegungsmelder 3",
-    role: "text",
-    type: "string",
-    isVirtual: true,
-    write: true,
-    def: ""
+    write: false,
+    def: false
   }
 };
 for (const key of Object.keys(STATE_MAPPING)) {
