@@ -49,13 +49,21 @@ class Lwd50a extends utils.Adapter {
 			};
 
 			if (config.telegram_receiver && config.telegram_receiver.trim() !== "") {
-				sendObj.user = config.telegram_receiver.trim();
+				const receiver = config.telegram_receiver.trim();
+
+				// Prüfen, ob die Eingabe eine Chat-ID ist (Zahlen, optional mit führendem Minus für Gruppen)
+				if (/^-?\d+$/.test(receiver)) {
+					sendObj.chatId = receiver;
+				} else {
+					// Andernfalls als Benutzername behandeln
+					sendObj.user = receiver;
+				}
 			}
 
 			this.sendTo(config.telegram_instance, "send", sendObj);
 
 			if (this.isDebugLogActive) {
-				this.log.debug(`Telegram-Warnung gesendet an ${config.telegram_instance}`);
+				this.log.debug(`Telegram-Nachricht gesendet an ${config.telegram_instance}`);
 			}
 		}
 	}
@@ -66,7 +74,7 @@ class Lwd50a extends utils.Adapter {
 				this.log.info("Test-Button empfangen!");
 				const config = this.config as Record<string, any>;
 
-				// Wichtig: Prüfen ob Telegram konfiguriert UND GESPEICHERT ist
+				// Prüfen ob Telegram konfiguriert und gespeichert ist
 				if (!config.telegram_aktiv || !config.telegram_instance) {
 					if (obj.callback) {
 						this.sendTo(
@@ -81,29 +89,71 @@ class Lwd50a extends utils.Adapter {
 
 				const lastErrorState = await this.getStateAsync(getDpPath("Fehlerspeicher"));
 
-				if (lastErrorState && lastErrorState.val) {
-					// Telegram absenden
-					this.sendTelegramNotification(`Test-Alarm: ${lastErrorState.val}`);
-					this.log.info("Test-Fehlermeldung via Telegram versendet.");
+				if (lastErrorState && typeof lastErrorState.val === "string") {
+					try {
+						const errorList = JSON.parse(lastErrorState.val);
 
-					// Erfolgsmeldung an die Admin-UI zurücksenden
-					if (obj.callback) {
-						this.sendTo(
-							obj.from,
-							obj.command,
-							{ result: "Nachricht erfolgreich an Telegram gesendet!" },
-							obj.callback,
-						);
+						if (Array.isArray(errorList) && errorList.length > 0) {
+							// Nachricht schön formatieren (Markdown für Telegram)
+							let msg = "🚨 *Test-Alarm: Fehlerspeicher*\n\n";
+
+							// Aktuellsten Fehler (Index 0) hervorheben
+							const newestError = errorList[0];
+							msg += `*Aktuellster Fehler:*\n`;
+							msg += `*Code:* ${newestError.code}\n`;
+							msg += `*Fehler:* ${newestError.beschreibung}\n`;
+							msg += `*Datum:* ${newestError.datum}\n\n`;
+
+							// Ältere Fehler aus der Historie (Index 1 bis 4) anhängen
+							if (errorList.length > 1) {
+								msg += `*Historie:*\n`;
+								for (let i = 1; i < errorList.length; i++) {
+									msg += `${errorList[i].datum} | Code ${errorList[i].code}\n↳ ${errorList[i].beschreibung}\n`;
+								}
+							}
+
+							// Telegram absenden
+							this.sendTelegramNotification(msg);
+							this.log.info("Formatierte Test-Fehlermeldung via Telegram versendet.");
+
+							if (obj.callback) {
+								this.sendTo(
+									obj.from,
+									obj.command,
+									{ result: "Nachricht erfolgreich an Telegram gesendet!" },
+									obj.callback,
+								);
+							}
+						} else {
+							// Rückmeldung, falls das Array leer ist "[]"
+							if (obj.callback) {
+								this.sendTo(
+									obj.from,
+									obj.command,
+									{ result: "Keine Fehler im Speicher gefunden. Es wurde nichts gesendet." },
+									obj.callback,
+								);
+							}
+						}
+					} catch (parseErr: any) {
+						// Fehler im Log ausgeben, damit parseErr verwendet wird
+						this.log.debug(`JSON Parse-Fehler beim Test-Button: ${parseErr.message}`);
+
+						// Fallback, falls JSON ungültig ist
+						this.sendTelegramNotification(`Test-Alarm (Rohdaten): ${lastErrorState.val}`);
+						if (obj.callback) {
+							this.sendTo(
+								obj.from,
+								obj.command,
+								{ result: "Nachricht als Rohdaten gesendet (JSON Parse Fehler)." },
+								obj.callback,
+							);
+						}
 					}
 				} else {
-					// Rückmeldung, falls kein Fehler existiert
+					// Rückmeldung, falls gar kein Status existiert
 					if (obj.callback) {
-						this.sendTo(
-							obj.from,
-							obj.command,
-							{ result: "Kein Fehler im Speicher gefunden. Es wurde nichts gesendet." },
-							obj.callback,
-						);
+						this.sendTo(obj.from, obj.command, { result: "Kein Fehler-Status gefunden." }, obj.callback);
 					}
 				}
 			} catch (err: any) {

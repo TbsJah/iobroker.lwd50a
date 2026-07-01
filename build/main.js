@@ -58,11 +58,16 @@ class Lwd50a extends utils.Adapter {
         text: message
       };
       if (config.telegram_receiver && config.telegram_receiver.trim() !== "") {
-        sendObj.user = config.telegram_receiver.trim();
+        const receiver = config.telegram_receiver.trim();
+        if (/^-?\d+$/.test(receiver)) {
+          sendObj.chatId = receiver;
+        } else {
+          sendObj.user = receiver;
+        }
       }
       this.sendTo(config.telegram_instance, "send", sendObj);
       if (this.isDebugLogActive) {
-        this.log.debug(`Telegram-Warnung gesendet an ${config.telegram_instance}`);
+        this.log.debug(`Telegram-Nachricht gesendet an ${config.telegram_instance}`);
       }
     }
   }
@@ -83,25 +88,65 @@ class Lwd50a extends utils.Adapter {
           return;
         }
         const lastErrorState = await this.getStateAsync((0, import_stateMapping.getDpPath)("Fehlerspeicher"));
-        if (lastErrorState && lastErrorState.val) {
-          this.sendTelegramNotification(`Test-Alarm: ${lastErrorState.val}`);
-          this.log.info("Test-Fehlermeldung via Telegram versendet.");
-          if (obj.callback) {
-            this.sendTo(
-              obj.from,
-              obj.command,
-              { result: "Nachricht erfolgreich an Telegram gesendet!" },
-              obj.callback
-            );
+        if (lastErrorState && typeof lastErrorState.val === "string") {
+          try {
+            const errorList = JSON.parse(lastErrorState.val);
+            if (Array.isArray(errorList) && errorList.length > 0) {
+              let msg = "\u{1F6A8} *Test-Alarm: Fehlerspeicher*\n\n";
+              const newestError = errorList[0];
+              msg += `*Aktuellster Fehler:*
+`;
+              msg += `*Code:* ${newestError.code}
+`;
+              msg += `*Fehler:* ${newestError.beschreibung}
+`;
+              msg += `*Datum:* ${newestError.datum}
+
+`;
+              if (errorList.length > 1) {
+                msg += `*Historie:*
+`;
+                for (let i = 1; i < errorList.length; i++) {
+                  msg += `${errorList[i].datum} | Code ${errorList[i].code}
+\u21B3 ${errorList[i].beschreibung}
+`;
+                }
+              }
+              this.sendTelegramNotification(msg);
+              this.log.info("Formatierte Test-Fehlermeldung via Telegram versendet.");
+              if (obj.callback) {
+                this.sendTo(
+                  obj.from,
+                  obj.command,
+                  { result: "Nachricht erfolgreich an Telegram gesendet!" },
+                  obj.callback
+                );
+              }
+            } else {
+              if (obj.callback) {
+                this.sendTo(
+                  obj.from,
+                  obj.command,
+                  { result: "Keine Fehler im Speicher gefunden. Es wurde nichts gesendet." },
+                  obj.callback
+                );
+              }
+            }
+          } catch (parseErr) {
+            this.log.debug(`JSON Parse-Fehler beim Test-Button: ${parseErr.message}`);
+            this.sendTelegramNotification(`Test-Alarm (Rohdaten): ${lastErrorState.val}`);
+            if (obj.callback) {
+              this.sendTo(
+                obj.from,
+                obj.command,
+                { result: "Nachricht als Rohdaten gesendet (JSON Parse Fehler)." },
+                obj.callback
+              );
+            }
           }
         } else {
           if (obj.callback) {
-            this.sendTo(
-              obj.from,
-              obj.command,
-              { result: "Kein Fehler im Speicher gefunden. Es wurde nichts gesendet." },
-              obj.callback
-            );
+            this.sendTo(obj.from, obj.command, { result: "Kein Fehler-Status gefunden." }, obj.callback);
           }
         }
       } catch (err) {
