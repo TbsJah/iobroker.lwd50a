@@ -94,21 +94,23 @@ class Lwd50a extends utils.Adapter {
             if (Array.isArray(errorList) && errorList.length > 0) {
               let msg = "\u{1F6A8} *Test-Alarm: Fehlerspeicher*\n\n";
               const newestError = errorList[0];
-              msg += `*Aktuellster Fehler:*
+              msg += `Aktuellster Fehler:
 `;
-              msg += `*Code:* ${newestError.code}
+              msg += `Code: ${newestError.code}
 `;
-              msg += `*Fehler:* ${newestError.beschreibung}
+              msg += `Fehler: ${newestError.beschreibung}
 `;
-              msg += `*Datum:* ${newestError.datum}
+              msg += `Datum: ${newestError.datum}
 
 `;
               if (errorList.length > 1) {
-                msg += `*Historie:*
+                msg += `Historie:
 `;
                 for (let i = 1; i < errorList.length; i++) {
-                  msg += `${errorList[i].datum} | Code ${errorList[i].code}
-\u21B3 ${errorList[i].beschreibung}
+                  msg += `Datum: ${errorList[i].datum} 
+ Code: ${errorList[i].code}
+ Fehler: ${errorList[i].beschreibung}
+
 `;
                 }
               }

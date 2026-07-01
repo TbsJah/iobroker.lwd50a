@@ -99,16 +99,16 @@ class Lwd50a extends utils.Adapter {
 
 							// Aktuellsten Fehler (Index 0) hervorheben
 							const newestError = errorList[0];
-							msg += `*Aktuellster Fehler:*\n`;
-							msg += `*Code:* ${newestError.code}\n`;
-							msg += `*Fehler:* ${newestError.beschreibung}\n`;
-							msg += `*Datum:* ${newestError.datum}\n\n`;
+							msg += `Aktuellster Fehler:\n`;
+							msg += `Code: ${newestError.code}\n`;
+							msg += `Fehler: ${newestError.beschreibung}\n`;
+							msg += `Datum: ${newestError.datum}\n\n`;
 
 							// Ältere Fehler aus der Historie (Index 1 bis 4) anhängen
 							if (errorList.length > 1) {
-								msg += `*Historie:*\n`;
+								msg += `Historie:\n`;
 								for (let i = 1; i < errorList.length; i++) {
-									msg += `${errorList[i].datum} | Code ${errorList[i].code}\n↳ ${errorList[i].beschreibung}\n`;
+									msg += `Datum: ${errorList[i].datum} \n Code: ${errorList[i].code}\n Fehler: ${errorList[i].beschreibung}\n\n`;
 								}
 							}
 
