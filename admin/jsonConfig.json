@@ -174,7 +174,7 @@
 							"attr": "oid",
 							"title": "Sensor auswählen",
 							"width": "70%",
-							"options": [{ "label": "Lade Sensoren...", "value": "getObjectIDs:role=sensor.motion" }]
+							"options": "getObjectIDs"
 						}
 					]
 				}
