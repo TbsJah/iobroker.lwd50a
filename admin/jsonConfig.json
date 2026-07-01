@@ -173,7 +173,8 @@
 							"type": "pattern",
 							"attr": "oid",
 							"title": "Objekt-ID auswählen",
-							"width": "70%"
+							"width": "70%",
+							"pattern": "*"
 						}
 					]
 				}
