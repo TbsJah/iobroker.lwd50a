@@ -170,12 +170,13 @@
 		"sync_heating_system_circ_pump_voltage_nominal_water": 10,
 		"sync_return_temperature_hysteresis": 1.5,
 		"zip_last_run_min": 600,
-		"regelung_aktiv": true,
+		"regelung_aktiv": false,
 		"Heating_after_warmwater": true,
 		"telegram_aktiv": false,
 		"telegram_instance": "telegram.0",
 		"telegram_receiver": "",
-		"motionSensors": []
+		"motionSensors": [],
+		"motion_sensors_aktiv": false
 	},
 	"objects": [],
 	"instanceObjects": []

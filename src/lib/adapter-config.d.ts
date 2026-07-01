@@ -21,6 +21,7 @@ declare global {
 			regelung_aktiv?: boolean;
 			Heating_after_warmwater?: boolean;
 			motionSensors?: Array<{ name: string; oid: string }>;
+			motion_sensors_aktiv?: boolean;
 		}
 	}
 }

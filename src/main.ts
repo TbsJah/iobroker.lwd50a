@@ -33,6 +33,7 @@ class Lwd50a extends utils.Adapter {
 		this.on("ready", this.onReady.bind(this));
 		this.on("stateChange", this.onStateChange.bind(this));
 		this.on("unload", this.onUnload.bind(this));
+		this.on("message", this.onMessage.bind(this));
 	}
 
 	/**
@@ -55,6 +56,18 @@ class Lwd50a extends utils.Adapter {
 
 			if (this.isDebugLogActive) {
 				this.log.debug(`Telegram-Warnung gesendet an ${config.telegram_instance}`);
+			}
+		}
+	}
+	private async onMessage(obj: ioBroker.Message): Promise<void> {
+		if (obj.command === "sendTestError") {
+			const lastErrorState = await this.getStateAsync(getDpPath("Fehlerspeicher"));
+			if (lastErrorState?.val) {
+				this.sendTelegramNotification(`Test-Alarm: ${lastErrorState.val}`);
+				this.log.info("Test-Fehlermeldung via Telegram versendet.");
+			}
+			if (obj.callback) {
+				this.sendTo(obj.from, obj.command, "OK", obj.callback);
 			}
 		}
 	}
@@ -198,7 +211,7 @@ class Lwd50a extends utils.Adapter {
 
 				try {
 					const writeId = isRawWrite ? parseInt(definition.luxWriteId, 10) : definition.luxWriteId;
-					await this.writePumpAsync(writeId, valueToWrite, isRawWrite);
+					await this.queueWrite(writeId, valueToWrite, isRawWrite);
 					await new Promise(r => setTimeout(r, 200));
 				} catch (err: any) {
 					this.log.error(`Fehler beim Schreiben von ${mappingKey} an die Pumpe: ${err.message}`);
@@ -273,7 +286,7 @@ class Lwd50a extends utils.Adapter {
 				}
 
 				const luxId = parseInt(def.luxWriteId!, 10);
-				await this.writePumpAsync(luxId, rawVal, true);
+				await this.queueWrite(luxId, rawVal, true);
 				await new Promise(resolve => setTimeout(resolve, 100));
 				await this.setState(getDpPath(key as any), { val: val, ack: true });
 			}
@@ -304,9 +317,9 @@ class Lwd50a extends utils.Adapter {
 
 				await this.restoreOriginalZipConfig();
 
-				await this.writePumpAsync(158, 0, true);
+				await this.queueWrite(158, 0, true);
 				await new Promise(resolve => setTimeout(resolve, 100));
-				await this.writePumpAsync(684, 0, true);
+				await this.queueWrite(684, 0, true);
 				await new Promise(resolve => setTimeout(resolve, 100));
 
 				await this.syncConfigValue("runDeaerate", 0);
@@ -538,6 +551,41 @@ class Lwd50a extends utils.Adapter {
 			}
 		});
 	}
+	// Neue Hilfsvariable in der Klasse
+	private writeQueue: (() => Promise<void>)[] = [];
+	private isWriting = false;
+
+	private async queueWrite(cmd: string | number, val: any, isRaw: boolean): Promise<void> {
+		return new Promise((resolve, reject) => {
+			this.writeQueue.push(async () => {
+				try {
+					await this.writePumpAsync(cmd, val, isRaw);
+					resolve();
+				} catch (err) {
+					reject(err instanceof Error ? err : new Error(String(err)));
+				}
+			});
+			void this.processQueue();
+		});
+	}
+
+	private async processQueue(): Promise<void> {
+		if (this.isWriting || this.writeQueue.length === 0) {
+			return;
+		}
+		this.isWriting = true;
+
+		const task = this.writeQueue.shift();
+		if (task) {
+			await task();
+		}
+
+		this.isWriting = false;
+		void this.processQueue(); // Nächstes Element
+	}
+
+	// In onStateChange oder setIdleDefaults dann queueWrite statt writePumpAsync nutzen:
+	// await this.queueWrite(cmd, valueToWrite, isRawWrite);
 
 	private formatSecondsToHMS(totalSeconds: number): string {
 		if (totalSeconds < 0 || isNaN(totalSeconds)) {
@@ -550,6 +598,8 @@ class Lwd50a extends utils.Adapter {
 		return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 	}
 
+	private errorCount = 0;
+	private readonly MAX_ERRORS = 3;
 	private async updateData(): Promise<void> {
 		if (this.updateRunning) {
 			return;
@@ -720,8 +770,21 @@ class Lwd50a extends utils.Adapter {
 			await calculateTemperatureSpread(this);
 
 			await this.runOptimizationSchedule();
+
+			// Fehler-Reset bei Erfolg
+			this.errorCount = 0;
+			await this.setState("info.connection", true, true);
 		} catch (err: any) {
-			this.log.error(`Fehler im updateData-Ablauf: ${err.message}`);
+			this.errorCount++;
+			this.log.error(`Abfragefehler (${this.errorCount}/${this.MAX_ERRORS}): ${err.message}`);
+
+			if (this.errorCount >= this.MAX_ERRORS) {
+				await this.setState("info.connection", false, true);
+				this.log.warn("Wärmepumpe nicht erreichbar. Verbindung wurde als unterbrochen markiert.");
+				this.sendTelegramNotification(
+					"Wärmepumpe nicht erreichbar. Verbindung wurde als unterbrochen markiert.",
+				);
+			}
 		} finally {
 			this.updateRunning = false;
 		}
@@ -750,7 +813,7 @@ class Lwd50a extends utils.Adapter {
 		// =========================================================
 		// 1. EXTERNE SENSOREN (Dynamisch aus der Konfigurations-Tabelle)
 		// =========================================================
-		if (config.motionSensors && Array.isArray(config.motionSensors)) {
+		if (config.motion_sensors_aktiv && config.motionSensors && Array.isArray(config.motionSensors)) {
 			const matchedSensor = config.motionSensors.find((s: any) => s.oid && s.oid.trim() === id);
 
 			if (matchedSensor && state.val === true) {
@@ -773,6 +836,10 @@ class Lwd50a extends utils.Adapter {
 					}
 				}
 				return;
+			}
+		} else {
+			if (this.isDebugLogActive && config.motion_sensors_aktiv === false) {
+				this.log.debug(`Bewegungssensoren sind in der Konfiguration deaktiviert.`);
 			}
 		}
 
@@ -851,9 +918,10 @@ class Lwd50a extends utils.Adapter {
 					}
 
 					if (useDeaeration) {
-						await this.writePumpAsync(158, 1, true);
+						await this.queueWrite(158, 1, true);
+						//await this.writePumpAsync(158, 1, true);
 						await new Promise(r => setTimeout(r, 100));
-						await this.writePumpAsync(684, 1, true);
+						await this.queueWrite(684, 1, true);
 						await this.syncConfigValue("runDeaerate", 1);
 						await this.syncConfigValue("hotWaterCircPumpDeaerate", 1);
 					} else {
@@ -892,7 +960,7 @@ class Lwd50a extends utils.Adapter {
 						];
 
 						for (const u of updates) {
-							await this.writePumpAsync(parseInt(STATE_MAPPING[u.key].luxWriteId!, 10), u.raw, true);
+							await this.queueWrite(parseInt(STATE_MAPPING[u.key].luxWriteId!, 10), u.raw, true);
 							await new Promise(r => setTimeout(r, 100));
 						}
 					}
@@ -930,7 +998,7 @@ class Lwd50a extends utils.Adapter {
 				valueToWrite = state.val * 10;
 			}
 
-			await this.writePumpAsync(
+			await this.queueWrite(
 				isRawWrite ? parseInt(definition.luxWriteId, 10) : definition.luxWriteId,
 				valueToWrite,
 				isRawWrite,
